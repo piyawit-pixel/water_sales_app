@@ -292,10 +292,13 @@ function setupEventListeners() {
         renderOrders();
     });
 
-    // Grab logs search
-    document.getElementById('search-grab-rider').addEventListener('input', () => {
-        renderGrabLogs();
-    });
+    // Grab logs search (safeguarded - element removed with grab tab)
+    const searchGrabRiderInput = document.getElementById('search-grab-rider');
+    if (searchGrabRiderInput) {
+        searchGrabRiderInput.addEventListener('input', () => {
+            renderGrabLogs();
+        });
+    }
 
     // Backup & Restore buttons
     document.getElementById('btn-backup').addEventListener('click', () => {
