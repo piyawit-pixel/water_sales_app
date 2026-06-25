@@ -127,9 +127,22 @@ function setupClock() {
 }
 
 // PRICING ALGORITHM - CHEAPEST PROMOTION COMBINATION
-function calculateBestPrice(quantity) {
+function calculateBestPrice(quantity, isGrab = false) {
     if (quantity <= 0) {
         return { total: 0, num7: 0, num4: 0, num1: 0, discount: 0 };
+    }
+    
+    if (isGrab) {
+        const grabPrice = 67.90;
+        const total = quantity * grabPrice;
+        const totalRounded = Math.round(total * 100) / 100;
+        return {
+            total: totalRounded,
+            num7: 0,
+            num4: 0,
+            num1: quantity,
+            discount: 0
+        };
     }
     
     let minCost = Infinity;
@@ -165,13 +178,8 @@ function calculateBestPrice(quantity) {
 function setupEventListeners() {
     // Delivery channel switch
     const deliveryTypeSelect = document.getElementById('delivery-type');
-    const grabDriverGroup = document.getElementById('grab-driver-group');
     deliveryTypeSelect.addEventListener('change', (e) => {
-        if (e.target.value === 'grab') {
-            grabDriverGroup.style.display = 'block';
-        } else {
-            grabDriverGroup.style.display = 'none';
-        }
+        renderCart();
     });
 
     // Drink search input
@@ -200,15 +208,15 @@ function setupEventListeners() {
     customerInput.addEventListener('change', (e) => {
         const val = e.target.value;
         const deliveryTypeSelect = document.getElementById('delivery-type');
-        const grabDriverGroup = document.getElementById('grab-driver-group');
         
         if (val === 'Grab') {
             deliveryTypeSelect.value = 'grab';
-            grabDriverGroup.style.display = 'block';
         } else {
             deliveryTypeSelect.value = 'walkin';
-            grabDriverGroup.style.display = 'none';
         }
+        
+        // Re-render cart to update prices instantly
+        renderCart();
         
         // Suggest incremental order merge if table has an active order today
         if (val && val !== 'กลับบ้าน' && val !== 'Grab') {
@@ -442,6 +450,9 @@ function renderCart() {
         return;
     }
     
+    const isGrab = document.getElementById('delivery-type').value === 'grab';
+    const currentPricePerBottle = isGrab ? 67.90 : 80;
+
     cartKeys.forEach(drinkId => {
         const drink = DRINKS.find(d => d.id === drinkId);
         const qty = state.cart[drinkId];
@@ -463,7 +474,7 @@ function renderCart() {
                     <span style="font-weight: 600; font-size: 0.9rem;">${qty}</span>
                     <button class="cart-qty-btn" onclick="changeCartQty('${drinkId}', 1)"><i class="fa-solid fa-plus"></i></button>
                 </div>
-                <span class="cart-item-price">${qty * PRICE_PER_BOTTLE}.-</span>
+                <span class="cart-item-price">${(qty * currentPricePerBottle).toFixed(2)}.-</span>
                 <button class="cart-item-delete" onclick="changeCartQty('${drinkId}', -${qty})" title="ลบรายการ"><i class="fa-solid fa-trash-can"></i></button>
             </div>
         `;
@@ -471,11 +482,11 @@ function renderCart() {
     });
     
     // Live Calculation
-    const pricing = calculateBestPrice(totalQty);
+    const pricing = calculateBestPrice(totalQty, isGrab);
     
     totalQtyEl.textContent = `${totalQty} ขวด`;
     calcContainer.style.display = 'flex';
-    document.getElementById('calc-subtotal').textContent = `${totalQty * PRICE_PER_BOTTLE} บาท`;
+    document.getElementById('calc-subtotal').textContent = `${(totalQty * currentPricePerBottle).toFixed(2)} บาท`;
     
     const discountRow = document.getElementById('calc-discount-row');
     if (pricing.discount > 0) {
@@ -498,7 +509,7 @@ function saveOrder() {
     const customerName = document.getElementById('customer-name').value.trim();
     const orderDate = document.getElementById('order-date').value;
     const deliveryType = document.getElementById('delivery-type').value;
-    const grabDriverName = document.getElementById('grab-driver-name').value.trim();
+    const grabDriverName = '';
     const staffName = document.getElementById('staff-name').value.trim();
     const orderRemark = document.getElementById('order-remark').value.trim();
     
@@ -514,19 +525,14 @@ function saveOrder() {
         return;
     }
     
-    if (deliveryType === 'grab' && !grabDriverName) {
-        alert("กรุณากรอกชื่อคนขับ Grab");
-        document.getElementById('grab-driver-name').focus();
-        return;
-    }
-    
     // Save last used staff name to remember it
     if (staffName) {
         localStorage.setItem('juice_bar_last_staff', staffName);
     }
     
     const totalQty = Object.values(state.cart).reduce((a, b) => a + b, 0);
-    const priceDetails = calculateBestPrice(totalQty);
+    // Grab pricing is 67.90 per bottle, normal is 80 per bottle
+    const pricing = calculateBestPrice(totalQty, deliveryType === 'grab');
     
     const now = new Date();
     const currentTimeStr = now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', hour12: false });
@@ -559,7 +565,7 @@ function saveOrder() {
                 deliveryType: deliveryType,
                 grabDriverName: deliveryType === 'grab' ? grabDriverName : '',
                 items: { ...state.cart },
-                priceDetails: priceDetails,
+                priceDetails: pricing,
                 staffName: staffName,
                 remark: orderRemark,
                 updatedTime: now.toISOString()
@@ -587,7 +593,7 @@ function saveOrder() {
             deliveryType: deliveryType,
             grabDriverName: deliveryType === 'grab' ? grabDriverName : '',
             items: { ...state.cart },
-            priceDetails: priceDetails,
+            priceDetails: pricing,
             status: 'paid', // defaults to paid
             staffName: staffName,
             remark: orderRemark,
@@ -664,17 +670,6 @@ function loadOrderForEditing(orderId) {
     document.getElementById('staff-name').value = order.staffName || '';
     document.getElementById('order-remark').value = order.remark || '';
     
-    const grabDriverInput = document.getElementById('grab-driver-name');
-    const grabGroup = document.getElementById('grab-driver-group');
-    
-    if (order.deliveryType === 'grab') {
-        grabGroup.style.display = 'block';
-        grabDriverInput.value = order.grabDriverName;
-    } else {
-        grabGroup.style.display = 'none';
-        grabDriverInput.value = '';
-    }
-    
     // UI update
     document.getElementById('pos-title').innerHTML = `<i class="fa-solid fa-pen-to-square text-secondary"></i> แก้ไขออเดอร์ของ ${order.customerName}`;
     document.getElementById('edit-indicator').style.display = 'inline-block';
@@ -696,8 +691,6 @@ function clearPOSForm() {
     document.getElementById('customer-name').value = 'กลับบ้าน';
     document.getElementById('order-date').value = getLocalDateString(new Date());
     document.getElementById('delivery-type').value = 'walkin';
-    document.getElementById('grab-driver-name').value = '';
-    document.getElementById('grab-driver-group').style.display = 'none';
     document.getElementById('staff-name').value = localStorage.getItem('juice_bar_last_staff') || '';
     document.getElementById('order-remark').value = '';
     
@@ -776,9 +769,7 @@ function renderOrders() {
         // Channel Badge
         let channelBadge = '';
         if (order.deliveryType === 'grab') {
-            channelBadge = `<span class="badge badge-warning"><i class="fa-solid fa-helmet-safety"></i> Grab: ${order.grabDriverName}</span>`;
-        } else if (order.deliveryType === 'lineman') {
-            channelBadge = `<span class="badge badge-primary"><i class="fa-solid fa-motorcycle"></i> Lineman</span>`;
+            channelBadge = `<span class="badge badge-warning"><i class="fa-solid fa-helmet-safety"></i> Grab Delivery</span>`;
         } else if (order.deliveryType === 'walkin') {
             channelBadge = `<span class="badge badge-success"><i class="fa-solid fa-user-check"></i> รับเอง/หน้าร้าน</span>`;
         } else {
@@ -1154,7 +1145,7 @@ function renderAnalytics() {
     DRINKS.forEach(d => popTracker[d.id] = 0);
     
     // Delivery stats
-    let deliveryStats = { walkin: 0, grab: 0, lineman: 0, other: 0 };
+    let deliveryStats = { walkin: 0, grab: 0, other: 0 };
     
     state.orders.forEach(order => {
         const orderQty = Object.values(order.items).reduce((a, b) => a + b, 0);
@@ -1207,7 +1198,6 @@ function renderAnalytics() {
     
     document.getElementById('stat-delivery-walkin').textContent = `${deliveryStats.walkin} บิล`;
     document.getElementById('stat-delivery-grab').textContent = `${deliveryStats.grab} บิล`;
-    document.getElementById('stat-delivery-lineman').textContent = `${deliveryStats.lineman} บิล`;
     document.getElementById('stat-delivery-other').textContent = `${deliveryStats.other} บิล`;
     
     // 2. RENDER POPULAR DRINKS (Top 5)
