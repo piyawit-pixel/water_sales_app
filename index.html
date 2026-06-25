@@ -157,7 +157,6 @@
                 <!-- Navigation Tabs -->
                 <nav class="tab-navigation">
                     <button class="tab-btn active" data-tab="orders-tab"><i class="fa-solid fa-receipt"></i> บันทึกออเดอร์</button>
-                    <button class="tab-btn" data-tab="grab-tab"><i class="fa-solid fa-helmet-safety"></i> รับของ Grab</button>
                     <button class="tab-btn" data-tab="stock-tab"><i class="fa-solid fa-boxes-stacked"></i> สต็อกน้ำ</button>
                     <button class="tab-btn" data-tab="summary-tab"><i class="fa-solid fa-chart-line"></i> สรุปยอดขาย</button>
                 </nav>
@@ -201,47 +200,7 @@
                         </div>
                     </div>
 
-                    <!-- 2. GRAB PICKUP TAB -->
-                    <div class="tab-pane" id="grab-tab">
-                        <div class="grab-manager-header">
-                            <div class="grab-title-desc">
-                                <h3>บันทึก Grab มารับน้ำ</h3>
-                                <p>จัดการข้อมูลไรเดอร์ Grab ที่เข้ามารับน้ำแต่ละคน</p>
-                            </div>
-                            <button class="btn btn-primary btn-sm" id="btn-add-grab-manual">
-                                <i class="fa-solid fa-plus"></i> บันทึก Grab แบบเร่งด่วน
-                            </button>
-                        </div>
 
-                        <!-- Grab Filter -->
-                        <div class="filter-bar">
-                            <div class="filter-group search-group flex-1">
-                                <label for="search-grab-rider"><i class="fa-solid fa-magnifying-glass"></i> ค้นหาชื่อคนขับ/ออเดอร์</label>
-                                <input type="text" id="search-grab-rider" placeholder="ระบุชื่อคนขับ หรือ ชื่อลูกค้า...">
-                            </div>
-                        </div>
-
-                        <!-- Grab Log Table -->
-                        <div class="table-responsive">
-                            <table class="data-table">
-                                <thead>
-                                    <tr>
-                                        <th>วัน-เวลา</th>
-                                        <th>ชื่อคนขับ Grab</th>
-                                        <th>ของที่รับไป</th>
-                                        <th>ออเดอร์ของลูกค้า</th>
-                                        <th>การจัดการ</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="grab-log-list">
-                                    <!-- Grab pickups load dynamically -->
-                                    <tr>
-                                        <td colspan="5" class="text-center text-muted">ไม่มีบันทึกการรับของจาก Grab</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
 
                     <!-- 3. STOCK TAB -->
                     <div class="tab-pane" id="stock-tab">
@@ -275,11 +234,28 @@
 
                     <!-- 4. SUMMARY & ANALYTICS TAB -->
                     <div class="tab-pane" id="summary-tab">
+                        <!-- Date Filter for History Sales -->
+                        <div class="filter-bar" style="margin-bottom: 1.5rem;">
+                            <div class="filter-group">
+                                <label for="summary-filter-date"><i class="fa-solid fa-calendar"></i> ตัวกรองวันที่ย้อนหลัง</label>
+                                <select id="summary-filter-date">
+                                    <option value="today" selected>วันนี้</option>
+                                    <option value="yesterday">เมื่อวาน</option>
+                                    <option value="all">ทั้งหมด</option>
+                                    <option value="custom">ระบุเอง</option>
+                                </select>
+                            </div>
+                            <div class="filter-group" id="summary-custom-date-group" style="display: none;">
+                                <label for="summary-filter-custom-date">เลือกวันที่</label>
+                                <input type="date" id="summary-filter-custom-date">
+                            </div>
+                        </div>
+
                         <div class="analytics-grid">
                             <!-- Summary Cards -->
                             <div class="analytics-card card glass-card glow-teal">
                                 <div class="analytics-card-header">
-                                    <span>ยอดขายวันนี้</span>
+                                    <span id="analytics-date-title">ยอดขายวันนี้</span>
                                     <i class="fa-solid fa-calendar-day text-teal"></i>
                                 </div>
                                 <div class="analytics-card-value text-teal" id="analytics-today-revenue">0 บาท</div>
@@ -348,41 +324,7 @@
         </main>
     </div>
 
-    <!-- MODAL: MANUAL GRAB RECORD -->
-    <div class="modal" id="grab-manual-modal">
-        <div class="modal-content glass-card">
-            <div class="modal-header">
-                <h2><i class="fa-solid fa-helmet-safety text-warning"></i> บันทึกใบรับงาน Grab เร่งด่วน</h2>
-                <button class="modal-close" id="btn-close-grab-modal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <form id="grab-manual-form">
-                    <div class="form-group">
-                        <label for="grab-modal-driver"><i class="fa-solid fa-user"></i> ชื่อคนขับ Grab *</label>
-                        <input type="text" id="grab-modal-driver" placeholder="ระบุชื่อคนขับ เช่น นายศักดิ์ชัย" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="grab-modal-customer"><i class="fa-solid fa-user-tag"></i> ออเดอร์ของลูกค้า (พิมพ์ระบุ หรือเว้นว่างได้)</label>
-                        <input type="text" id="grab-modal-customer" placeholder="ระบุชื่อลูกค้า เช่น คุณแดง">
-                    </div>
-                    <div class="form-group">
-                        <label><i class="fa-solid fa-glass-water"></i> รายการน้ำที่รับไป *</label>
-                        <div class="grab-drinks-select-list" id="grab-modal-drinks-list">
-                            <!-- Dynamically list all drinks with +/- buttons -->
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="grab-modal-time"><i class="fa-solid fa-clock"></i> วันที่และเวลามารับ</label>
-                        <input type="datetime-local" id="grab-modal-time">
-                    </div>
-                    <div class="modal-footer-actions">
-                        <button type="button" class="btn btn-outline" id="btn-cancel-grab-modal">ยกเลิก</button>
-                        <button type="submit" class="btn btn-primary">บันทึกคนขับ</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
+
 
     <!-- MODAL: BACKUP & RESTORE -->
     <div class="modal" id="backup-modal">

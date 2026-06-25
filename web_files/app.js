@@ -72,6 +72,10 @@ function init() {
     const todayStr = getLocalDateString(new Date());
     document.getElementById('order-date').value = todayStr;
     document.getElementById('filter-custom-date').value = todayStr;
+    const summaryCustomDate = document.getElementById('summary-filter-custom-date');
+    if (summaryCustomDate) {
+        summaryCustomDate.value = todayStr;
+    }
     
     // Bind UI elements & Listeners
     setupClock();
@@ -326,11 +330,35 @@ function setupEventListeners() {
     document.getElementById('btn-pull-sheet').addEventListener('click', () => pullFromSheets(false));
     document.getElementById('btn-push-sheet').addEventListener('click', () => pushToSheets(false));
 
-    // Grab Manual Log Modal
-    document.getElementById('btn-add-grab-manual').addEventListener('click', openGrabManualModal);
-    document.getElementById('btn-close-grab-modal').addEventListener('click', closeGrabManualModal);
-    document.getElementById('btn-cancel-grab-modal').addEventListener('click', closeGrabManualModal);
-    document.getElementById('grab-manual-form').addEventListener('submit', handleGrabManualSubmit);
+    // Summary/Analytics Date Filters
+    const summaryFilterDate = document.getElementById('summary-filter-date');
+    if (summaryFilterDate) {
+        summaryFilterDate.addEventListener('change', (e) => {
+            const val = e.target.value;
+            const customGroup = document.getElementById('summary-custom-date-group');
+            if (customGroup) {
+                customGroup.style.display = val === 'custom' ? 'block' : 'none';
+            }
+            renderAnalytics();
+        });
+    }
+
+    const summaryFilterCustomDate = document.getElementById('summary-filter-custom-date');
+    if (summaryFilterCustomDate) {
+        summaryFilterCustomDate.addEventListener('change', () => {
+            renderAnalytics();
+        });
+    }
+
+    // Grab Manual Log Modal (safeguarded/disabled since tab is removed)
+    const btnAddGrab = document.getElementById('btn-add-grab-manual');
+    if (btnAddGrab) btnAddGrab.addEventListener('click', openGrabManualModal);
+    const btnCloseGrab = document.getElementById('btn-close-grab-modal');
+    if (btnCloseGrab) btnCloseGrab.addEventListener('click', closeGrabManualModal);
+    const btnCancelGrab = document.getElementById('btn-cancel-grab-modal');
+    if (btnCancelGrab) btnCancelGrab.addEventListener('click', closeGrabManualModal);
+    const grabManualForm = document.getElementById('grab-manual-form');
+    if (grabManualForm) grabManualForm.addEventListener('submit', handleGrabManualSubmit);
 }
 
 // CHECK IF CUSTOMER HAS EXISTING ORDERS TO SUGGEST APPENDING (Incremental ordering)
@@ -874,9 +902,11 @@ function deleteOrder(orderId) {
 // RENDER GRAB DRIVER LOGS
 function renderGrabLogs() {
     const tableBody = document.getElementById('grab-log-list');
+    if (!tableBody) return;
     tableBody.innerHTML = '';
     
-    const searchVal = document.getElementById('search-grab-rider').value.trim().toLowerCase();
+    const searchGrabRider = document.getElementById('search-grab-rider');
+    const searchVal = searchGrabRider ? searchGrabRider.value.trim().toLowerCase() : '';
     
     // Filter Grab records
     let filteredGrab = state.grabPickups.filter(grab => {
@@ -1140,9 +1170,37 @@ function handleGrabManualSubmit(e) {
 function renderAnalytics() {
     const todayStr = getLocalDateString(new Date());
     
+    let yesterdayDate = new Date();
+    yesterdayDate.setDate(yesterdayDate.getDate() - 1);
+    const yesterdayStr = getLocalDateString(yesterdayDate);
+    
+    // Get filter settings
+    const summaryFilterDate = document.getElementById('summary-filter-date');
+    const filterVal = summaryFilterDate ? summaryFilterDate.value : 'today';
+    const summaryFilterCustomDate = document.getElementById('summary-filter-custom-date');
+    const customDateVal = summaryFilterCustomDate ? summaryFilterCustomDate.value : todayStr;
+    
+    let targetDateText = 'ยอดขายวันนี้';
+    if (filterVal === 'yesterday') {
+        targetDateText = 'ยอดขายเมื่อวาน';
+    } else if (filterVal === 'custom') {
+        const dObj = new Date(customDateVal);
+        const formatThai = isNaN(dObj.getTime()) ? customDateVal : dObj.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' });
+        targetDateText = `ยอดขายวันที่ ${formatThai}`;
+    } else if (filterVal === 'all') {
+        targetDateText = 'ยอดขายทั้งหมด (ทุกวัน)';
+    }
+    
+    const titleEl = document.getElementById('analytics-date-title');
+    if (titleEl) {
+        titleEl.textContent = targetDateText;
+    }
+    
     // 1. CALCULATE REVENUE/BOTTLES
-    let todayRevenue = 0;
-    let todayBottles = 0;
+    let filteredRevenue = 0;
+    let filteredBottles = 0;
+    let filteredDiscount = 0;
+    
     let totalRevenue = 0;
     let totalBottles = 0;
     let totalDiscount = 0;
@@ -1157,51 +1215,66 @@ function renderAnalytics() {
     state.orders.forEach(order => {
         const orderQty = Object.values(order.items).reduce((a, b) => a + b, 0);
         
-        // Sum totals
+        // Sum grand totals (always all-time)
         totalBottles += orderQty;
         totalRevenue += order.priceDetails.total;
         totalDiscount += order.priceDetails.discount;
         
-        // Channel stats
-        const type = order.deliveryType;
-        if (deliveryStats.hasOwnProperty(type)) {
-            deliveryStats[type]++;
-        } else {
-            deliveryStats.other++;
-        }
+        // Check if order matches date filter
+        let matchesFilter = false;
+        if (filterVal === 'today' && order.date === todayStr) matchesFilter = true;
+        else if (filterVal === 'yesterday' && order.date === yesterdayStr) matchesFilter = true;
+        else if (filterVal === 'custom' && order.date === customDateVal) matchesFilter = true;
+        else if (filterVal === 'all') matchesFilter = true;
         
-        // Today stats
-        if (order.date === todayStr) {
-            todayBottles += orderQty;
-            todayRevenue += order.priceDetails.total;
-        }
-        
-        // Accumulate popularity
-        Object.keys(order.items).forEach(drinkId => {
-            if (popTracker.hasOwnProperty(drinkId)) {
-                popTracker[drinkId] += order.items[drinkId];
+        if (matchesFilter) {
+            filteredBottles += orderQty;
+            filteredRevenue += order.priceDetails.total;
+            filteredDiscount += order.priceDetails.discount;
+            
+            // Channel stats (only for filtered dates)
+            const type = order.deliveryType;
+            if (deliveryStats.hasOwnProperty(type)) {
+                deliveryStats[type]++;
+            } else {
+                deliveryStats.other++;
             }
-        });
-    });
-    
-    // Add manual grab logs items to popularity as well, if they are not linked to any order
-    // to keep records accurate. Let's check manual logs:
-    state.grabPickups.forEach(grab => {
-        if (!grab.orderId) { // only count manual ones, order-linked are already counted in order loop
-            Object.keys(grab.items).forEach(drinkId => {
+            
+            // Accumulate popularity (only for filtered dates)
+            Object.keys(order.items).forEach(drinkId => {
                 if (popTracker.hasOwnProperty(drinkId)) {
-                    popTracker[drinkId] += grab.items[drinkId];
+                    popTracker[drinkId] += order.items[drinkId];
                 }
             });
         }
     });
     
+    // Add manual grab logs items to popularity as well, if they are not linked to any order
+    state.grabPickups.forEach(grab => {
+        if (!grab.orderId) { // only count manual ones
+            const grabDate = getLocalDateString(new Date(grab.timestamp));
+            let matchesFilter = false;
+            if (filterVal === 'today' && grabDate === todayStr) matchesFilter = true;
+            else if (filterVal === 'yesterday' && grabDate === yesterdayStr) matchesFilter = true;
+            else if (filterVal === 'custom' && grabDate === customDateVal) matchesFilter = true;
+            else if (filterVal === 'all') matchesFilter = true;
+            
+            if (matchesFilter) {
+                Object.keys(grab.items).forEach(drinkId => {
+                    if (popTracker.hasOwnProperty(drinkId)) {
+                        popTracker[drinkId] += grab.items[drinkId];
+                    }
+                });
+            }
+        }
+    });
+    
     // Update counters in DOM
-    document.getElementById('analytics-today-revenue').textContent = `${todayRevenue.toLocaleString()} บาท`;
-    document.getElementById('analytics-today-bottles').textContent = `${todayBottles} ขวด`;
+    document.getElementById('analytics-today-revenue').textContent = `${filteredRevenue.toLocaleString()} บาท`;
+    document.getElementById('analytics-today-bottles').textContent = `${filteredBottles} ขวด`;
     document.getElementById('analytics-total-revenue-all').textContent = `${totalRevenue.toLocaleString()} บาท`;
     document.getElementById('analytics-total-bottles-all').textContent = `${totalBottles} ขวด`;
-    document.getElementById('analytics-total-discount').textContent = `${totalDiscount.toLocaleString()} บาท`;
+    document.getElementById('analytics-total-discount').textContent = `${filteredDiscount.toLocaleString()} บาท`;
     
     document.getElementById('stat-delivery-walkin').textContent = `${deliveryStats.walkin} บิล`;
     document.getElementById('stat-delivery-grab').textContent = `${deliveryStats.grab} บิล`;
@@ -1223,7 +1296,7 @@ function renderAnalytics() {
     const popularContainer = document.getElementById('popular-drinks-list');
     
     if (sortedPopular.length === 0) {
-        popularContainer.innerHTML = `<div class="text-muted text-center py-4">ยังไม่มีข้อมูลยอดขายสะสม</div>`;
+        popularContainer.innerHTML = `<div class="text-muted text-center py-4">ยังไม่มีข้อมูลยอดขายช่วงนี้</div>`;
         return;
     }
     
