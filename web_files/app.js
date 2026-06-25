@@ -194,46 +194,24 @@ function setupEventListeners() {
         clearSearchBtn.style.display = 'none';
     });
 
-    // Customer Name autocomplete
+    // Customer Name / Table dropdown change handler
     const customerInput = document.getElementById('customer-name');
-    const suggestionsContainer = document.getElementById('name-suggestions');
-    
-    customerInput.addEventListener('input', (e) => {
-        const text = e.target.value.trim().toLowerCase();
-        if (!text) {
-            suggestionsContainer.innerHTML = '';
-            return;
-        }
+    customerInput.addEventListener('change', (e) => {
+        const val = e.target.value;
+        const deliveryTypeSelect = document.getElementById('delivery-type');
+        const grabDriverGroup = document.getElementById('grab-driver-group');
         
-        // Find unique customer names from existing orders
-        const uniqueNames = [...new Set(state.orders.map(o => o.customerName))];
-        const matched = uniqueNames.filter(name => name.toLowerCase().includes(text));
-        
-        if (matched.length > 0) {
-            suggestionsContainer.innerHTML = matched.map(name => `
-                <div class="suggestion-item">${name}</div>
-            `).join('');
-            
-            // Suggestion click
-            const items = suggestionsContainer.querySelectorAll('.suggestion-item');
-            items.forEach(item => {
-                item.addEventListener('click', () => {
-                    customerInput.value = item.textContent;
-                    suggestionsContainer.innerHTML = '';
-                    
-                    // Suggest upgrading if there is an active order for this customer today or yesterday
-                    checkCustomerPreviousOrders(item.textContent);
-                });
-            });
+        if (val === 'Grab') {
+            deliveryTypeSelect.value = 'grab';
+            grabDriverGroup.style.display = 'block';
         } else {
-            suggestionsContainer.innerHTML = '';
+            deliveryTypeSelect.value = 'walkin';
+            grabDriverGroup.style.display = 'none';
         }
-    });
-    
-    // Close suggestions on outside click
-    document.addEventListener('click', (e) => {
-        if (!customerInput.contains(e.target) && !suggestionsContainer.contains(e.target)) {
-            suggestionsContainer.innerHTML = '';
+        
+        // Suggest incremental order merge if table has an active order today
+        if (val && val !== 'กลับบ้าน' && val !== 'Grab') {
+            checkCustomerPreviousOrders(val);
         }
     });
 
@@ -341,10 +319,10 @@ function setupEventListeners() {
 
 // CHECK IF CUSTOMER HAS EXISTING ORDERS TO SUGGEST APPENDING (Incremental ordering)
 function checkCustomerPreviousOrders(custName) {
-    const todayStr = getLocalDateString(new Date());
+    const selectedDate = document.getElementById('order-date').value;
     
-    // Find active orders for this customer
-    const userOrders = state.orders.filter(o => o.customerName === custName);
+    // Find active orders for this customer on the selected date
+    const userOrders = state.orders.filter(o => o.customerName === custName && o.date === selectedDate);
     if (userOrders.length === 0) return;
     
     // Sort by date/time (newest first)
