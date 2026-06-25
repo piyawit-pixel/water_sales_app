@@ -358,10 +358,11 @@ function setupEventListeners() {
 
 // CHECK IF CUSTOMER HAS EXISTING ORDERS TO SUGGEST APPENDING (Incremental ordering)
 function checkCustomerPreviousOrders(custName) {
-    const todayStr = getLocalDateString(new Date());
+    // Only check for orders matching the currently selected bill date
+    const orderDate = document.getElementById('order-date').value;
     
-    // Find active orders for this customer
-    const userOrders = state.orders.filter(o => o.customerName === custName);
+    // Find active orders for this customer on the selected date
+    const userOrders = state.orders.filter(o => o.customerName === custName && o.date === orderDate);
     if (userOrders.length === 0) return;
     
     // Sort by date/time (newest first)
@@ -369,11 +370,10 @@ function checkCustomerPreviousOrders(custName) {
     const latestOrder = userOrders[0];
     
     // Prompt the user if they want to append to the latest order
-    const orderDateFormatted = new Date(latestOrder.createdTime).toLocaleDateString('th-TH');
     const itemsCount = Object.values(latestOrder.items).reduce((a, b) => a + b, 0);
     
     const confirmAppend = confirm(
-        `พบออเดอร์เดิมของลูกค้า "${custName}" เมื่อวันที่ ${orderDateFormatted} (${itemsCount} ขวด, ${latestOrder.priceDetails.total} บาท)\n\nคุณต้องการ "เพิ่มสินค้าในบิลเดิม" เพื่อสะสมโปรโมชั่นใช่หรือไม่?`
+        `พบออเดอร์เดิมของ "${custName}" ในบิลวันที่เลือก (${itemsCount} ขวด, ${latestOrder.priceDetails.total} บาท)\n\nคุณต้องการ "เพิ่มสินค้าในบิลเดิม" เพื่อสะสมโปรโมชั่นใช่หรือไม่?`
     );
     
     if (confirmAppend) {
