@@ -52,9 +52,16 @@ function init() {
         }
     });
     
-    // Load Google Sheets configurations
-    state.sheetUrl = localStorage.getItem('juice_bar_sheet_url') || '';
-    state.autoSync = localStorage.getItem('juice_bar_auto_sync') === 'true';
+    // Load Google Sheets configurations (default URL and auto-sync enabled by default)
+    const defaultUrl = 'https://script.google.com/macros/s/AKfycbz84s4EmEOUcmxKbxnR9Pfbf3evnqldYgAQ2qmsuEjo9TdJ30K8Bb1nGQvfKoO2b76u/exec';
+    state.sheetUrl = localStorage.getItem('juice_bar_sheet_url') || defaultUrl;
+    
+    const savedAutoSync = localStorage.getItem('juice_bar_auto_sync');
+    state.autoSync = savedAutoSync !== null ? savedAutoSync === 'true' : true;
+    
+    // Ensure default config is stored in localStorage
+    localStorage.setItem('juice_bar_sheet_url', state.sheetUrl);
+    localStorage.setItem('juice_bar_auto_sync', state.autoSync ? 'true' : 'false');
     
     // Populate Google Sheets UI inputs & staff name
     document.getElementById('sheet-url-input').value = state.sheetUrl;
