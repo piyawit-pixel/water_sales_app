@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juice Bar Tracker - ระบบบันทึกยอดขายน้ำและ Grab</title>
+    <!-- Google Fonts: Prompt & Sarabun -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome for beautiful icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Main Style Sheet -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- TOP NAVBAR -->
+        <header class="app-header">
+            <div class="header-logo">
+                <div class="neon-icon"><i class="fa-solid fa-glass-water"></i></div>
+                <div class="brand-info">
+                    <h1>Juice Bar Tracker</h1>
+                    <p>ระบบบันทึกยอดขาย & การจัดการโปรโมชั่นอัจฉริยะ</p>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="live-clock">
+                    <i class="fa-regular fa-clock"></i>
+                    <span id="current-time">กำลังโหลด...</span>
+                </div>
+                <button class="btn btn-secondary btn-sm" id="btn-backup" title="สำรองและกู้คืนข้อมูล">
+                    <i class="fa-solid fa-database"></i> สำรองข้อมูล
+                </button>
+            </div>
+        </header>
+
+        <!-- BANNER DECORATION -->
+        <div class="app-banner" style="background-image: linear-gradient(180deg, rgba(15, 23, 42, 0.4) 0%, rgba(15, 23, 42, 0.95) 100%), url('assets/juice_bar_banner.jpg');">
+            <div class="banner-content">
+                <h2>น้ำขวดละ 80 บาท</h2>
+                <p class="promo-badge"><i class="fa-solid fa-star-half-stroke"></i> ซื้อ 4 ขวด 300 บาท | ซื้อ 7 ขวด 500 บาท</p>
+            </div>
+        </div>
+
+        <!-- MAIN LAYOUT -->
+        <main class="main-content">
+            <!-- LEFT PANEL: POS (Order Creation & Edit) -->
+            <section class="pos-panel">
+                <div class="card glass-card">
+                    <div class="card-header">
+                        <h2 id="pos-title"><i class="fa-solid fa-cart-plus text-primary"></i> สั่งน้ำขวด / บันทึกการขาย</h2>
+                        <span class="badge badge-outline" id="edit-indicator" style="display: none;">โหมดแก้ไขออเดอร์</span>
+                    </div>
+                    <div class="card-body">
+                        <!-- Customer Info Form -->
+                        <div class="form-row">
+                            <div class="form-group flex-2">
+                                <label for="customer-name"><i class="fa-solid fa-user-tag"></i> แหล่งออเดอร์ / โต๊ะ</label>
+                                <select id="customer-name" required>
+                                    <option value="กลับบ้าน">กลับบ้าน</option>
+                                    <option value="Grab">Grab</option>
+                                    <option value="โต๊ะ 1">โต๊ะ 1</option>
+                                    <option value="โต๊ะ 2">โต๊ะ 2</option>
+                                    <option value="โต๊ะ 3">โต๊ะ 3</option>
+                                    <option value="โต๊ะ 4">โต๊ะ 4</option>
+                                    <option value="โต๊ะ 5">โต๊ะ 5</option>
+                                    <option value="โต๊ะ 6">โต๊ะ 6</option>
+                                    <option value="โต๊ะ 7">โต๊ะ 7</option>
+                                    <option value="โต๊ะ 8">โต๊ะ 8</option>
+                                </select>
+                            </div>
+                            <div class="form-group flex-1">
+                                <label for="order-date"><i class="fa-regular fa-calendar-days"></i> วันที่บิล</label>
+                                <input type="date" id="order-date">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group flex-1">
+                                <label for="delivery-type"><i class="fa-solid fa-truck"></i> ช่องทางจำหน่าย</label>
+                                <select id="delivery-type">
+                                    <option value="walkin">หน้าร้าน / รับเอง</option>
+                                    <option value="grab">Grab Delivery</option>
+                                    <option value="lineman">Lineman</option>
+                                    <option value="other">ช่องทางอื่น</option>
+                                </select>
+                            </div>
+                            <div class="form-group flex-1" id="grab-driver-group" style="display: none !important;">
+                                <label for="grab-driver-name"><i class="fa-solid fa-helmet-safety text-warning"></i> ชื่อคนขับ Grab</label>
+                                <input type="text" id="grab-driver-name" value="Grab" placeholder="ชื่อคนขับ / ทะเบียนรถ">
+                            </div>
+                        </div>
+
+                        <!-- Search Bar for Drinks -->
+                        <div class="search-drinks-container">
+                            <div class="search-input-wrapper">
+                                <i class="fa-solid fa-magnifying-glass"></i>
+                                <input type="text" id="drink-search" placeholder="ค้นหาเครื่องดื่ม...">
+                                <button type="button" id="btn-clear-search" class="clear-search-btn" style="display: none;"><i class="fa-solid fa-xmark"></i></button>
+                            </div>
+                        </div>
+
+                        <!-- Beverages Grid -->
+                        <div class="beverage-section">
+                            <label><i class="fa-solid fa-bottle-water"></i> เลือกเครื่องดื่ม (ขวดละ 80.-)</label>
+                            <div class="beverages-grid" id="beverages-container">
+                                <!-- Beverage Cards dynamically loaded here -->
+                            </div>
+                        </div>
+
+                        <!-- Current Order Summary / Cart -->
+                        <div class="cart-container">
+                            <div class="cart-header">
+                                <h3>รายการน้ำที่เลือก</h3>
+                                <span class="cart-count" id="cart-total-qty">0 ขวด</span>
+                            </div>
+                            <div class="cart-items" id="cart-items-list">
+                                <div class="empty-cart-msg">ยังไม่ได้เลือกน้ำ</div>
+                            </div>
+                            
+                            <!-- Promo & Totals -->
+                            <div class="cart-calculation" id="cart-calc" style="display: none;">
+                                <div class="calc-row">
+                                    <span>ราคารวมปกติ (ขวดละ 80.-)</span>
+                                    <span id="calc-subtotal">0 บาท</span>
+                                </div>
+                                <div class="calc-row promo-discount text-success" id="calc-discount-row" style="display: none;">
+                                    <span><i class="fa-solid fa-tags"></i> ส่วนลดโปรโมชั่น <span class="promo-breakdown" id="calc-promo-text"></span></span>
+                                    <span id="calc-discount">-0 บาท</span>
+                                </div>
+                                <hr class="divider">
+                                <div class="calc-row total-row">
+                                    <span>ยอดชำระสุทธิ</span>
+                                    <span class="text-primary" id="calc-total">0 บาท</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="pos-actions">
+                            <button class="btn btn-outline" id="btn-clear-form"><i class="fa-solid fa-eraser"></i> ล้างฟอร์ม</button>
+                            <button class="btn btn-primary" id="btn-save-order"><i class="fa-solid fa-check"></i> บันทึกออเดอร์</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- RIGHT PANEL: Dashboard Logs, Grab Drivers, and Analytics -->
+            <section class="logs-panel">
+                <!-- Navigation Tabs -->
+                <nav class="tab-navigation">
+                    <button class="tab-btn active" data-tab="orders-tab"><i class="fa-solid fa-receipt"></i> บันทึกออเดอร์</button>
+                    <button class="tab-btn" data-tab="grab-tab"><i class="fa-solid fa-helmet-safety"></i> รับของ Grab</button>
+                    <button class="tab-btn" data-tab="summary-tab"><i class="fa-solid fa-chart-line"></i> สรุปยอดขาย</button>
+                </nav>
+
+                <!-- TAB CONTENTS -->
+                <div class="tab-content-container">
+                    
+                    <!-- 1. ORDERS TAB -->
+                    <div class="tab-pane active" id="orders-tab">
+                        <div class="filter-bar">
+                            <div class="filter-group">
+                                <label for="filter-date"><i class="fa-solid fa-calendar"></i> ตัวกรองวันที่</label>
+                                <select id="filter-date">
+                                    <option value="today">วันนี้</option>
+                                    <option value="yesterday">เมื่อวาน</option>
+                                    <option value="all" selected>ทั้งหมด</option>
+                                    <option value="custom">ระบุเอง</option>
+                                </select>
+                            </div>
+                            <div class="filter-group" id="custom-date-group" style="display: none;">
+                                <label for="filter-custom-date">เลือกวันที่</label>
+                                <input type="date" id="filter-custom-date">
+                            </div>
+                            <div class="filter-group search-group">
+                                <label for="search-order-customer"><i class="fa-solid fa-user-tag"></i> ค้นหาโต๊ะ/แหล่งออเดอร์</label>
+                                <input type="text" id="search-order-customer" placeholder="ค้นหาตามโต๊ะหรือแหล่งออเดอร์...">
+                            </div>
+                        </div>
+
+                        <div class="orders-list-wrapper">
+                            <div class="orders-header-bar">
+                                <h3>รายการออเดอร์ขาย</h3>
+                                <div class="quick-stats">
+                                    <span>ขายแล้วทั้งหมด: <strong class="text-secondary" id="stats-total-bottles">0</strong> ขวด</span>
+                                    <span>เป็นเงิน: <strong class="text-primary" id="stats-total-revenue">0</strong> บาท</span>
+                                </div>
+                            </div>
+                            <div class="orders-cards-grid" id="orders-list">
+                                <!-- Order cards load dynamically -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. GRAB PICKUP TAB -->
+                    <div class="tab-pane" id="grab-tab">
+                        <div class="grab-manager-header">
+                            <div class="grab-title-desc">
+                                <h3>บันทึก Grab มารับน้ำ</h3>
+                                <p>จัดการข้อมูลไรเดอร์ Grab ที่เข้ามารับน้ำแต่ละคน</p>
+                            </div>
+                            <button class="btn btn-primary btn-sm" id="btn-add-grab-manual">
+                                <i class="fa-solid fa-plus"></i> บันทึก Grab แบบเร่งด่วน
+                            </button>
+                        </div>
+
+                        <!-- Grab Filter -->
+                        <div class="filter-bar">
+                            <div class="filter-group search-group flex-1">
+                                <label for="search-grab-rider"><i class="fa-solid fa-magnifying-glass"></i> ค้นหาชื่อคนขับ/ออเดอร์</label>
+                                <input type="text" id="search-grab-rider" placeholder="ระบุชื่อคนขับ หรือ โต๊ะ/แหล่งออเดอร์...">
+                            </div>
+                        </div>
+
+                        <!-- Grab Log Table -->
+                        <div class="table-responsive">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>วัน-เวลา</th>
+                                        <th>ช่องทางจัดส่ง</th>
+                                        <th>ของที่รับไป</th>
+                                        <th>โต๊ะ / แหล่งออเดอร์</th>
+                                        <th>การจัดการ</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="grab-log-list">
+                                    <!-- Grab pickups load dynamically -->
+                                    <tr>
+                                        <td colspan="5" class="text-center text-muted">ไม่มีบันทึกการรับของจาก Grab</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- 3. SUMMARY & ANALYTICS TAB -->
+                    <div class="tab-pane" id="summary-tab">
+                        <div class="analytics-grid">
+                            <!-- Summary Cards -->
+                            <div class="analytics-card card glass-card glow-teal">
+                                <div class="analytics-card-header">
+                                    <span>ยอดขายวันนี้</span>
+                                    <i class="fa-solid fa-calendar-day text-teal"></i>
+                                </div>
+                                <div class="analytics-card-value text-teal" id="analytics-today-revenue">0 บาท</div>
+                                <div class="analytics-card-sub" id="analytics-today-bottles">0 ขวด</div>
+                            </div>
+
+                            <div class="analytics-card card glass-card glow-purple">
+                                <div class="analytics-card-header">
+                                    <span>ยอดขายทั้งหมด (ทุกวัน)</span>
+                                    <i class="fa-solid fa-coins text-purple"></i>
+                                </div>
+                                <div class="analytics-card-value text-purple" id="analytics-total-revenue-all">0 บาท</div>
+                                <div class="analytics-card-sub" id="analytics-total-bottles-all">0 ขวด</div>
+                            </div>
+
+                            <div class="analytics-card card glass-card glow-warning">
+                                <div class="analytics-card-header">
+                                    <span>ยอดส่วนลดโปรโมชั่นที่ช่วยลูกค้าประหยัด</span>
+                                    <i class="fa-solid fa-gift text-warning"></i>
+                                </div>
+                                <div class="analytics-card-value text-warning" id="analytics-total-discount">0 บาท</div>
+                                <div class="analytics-card-sub">คิดเป็นโปรโมชั่นสะสม</div>
+                            </div>
+                        </div>
+
+                        <!-- Popular Drinks & Grab Share -->
+                        <div class="summary-details-grid">
+                            <div class="card glass-card">
+                                <div class="card-header">
+                                    <h3><i class="fa-solid fa-ranking-star text-primary"></i> 5 อันดับน้ำขายดีที่สุด</h3>
+                                </div>
+                                <div class="card-body">
+                                    <div class="ranking-list" id="popular-drinks-list">
+                                        <!-- Popular drinks dynamic list -->
+                                        <div class="text-muted text-center py-4">ไม่มีข้อมูลยอดขาย</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card glass-card">
+                                <div class="card-header">
+                                    <h3><i class="fa-solid fa-truck-fast text-secondary"></i> สถิติการจัดส่ง</h3>
+                                </div>
+                                <div class="card-body">
+                                    <div class="delivery-stats-wrapper">
+                                        <div class="delivery-stat-row">
+                                            <span>หน้าร้าน / รับเอง</span>
+                                            <span class="stat-num" id="stat-delivery-walkin">0 บิล</span>
+                                        </div>
+                                        <div class="delivery-stat-row">
+                                            <span>Grab Delivery</span>
+                                            <span class="stat-num text-warning" id="stat-delivery-grab">0 บิล</span>
+                                        </div>
+                                        <div class="delivery-stat-row">
+                                            <span>Lineman</span>
+                                            <span class="stat-num text-info" id="stat-delivery-lineman">0 บิล</span>
+                                        </div>
+                                        <div class="delivery-stat-row">
+                                            <span>ช่องทางอื่น</span>
+                                            <span class="stat-num" id="stat-delivery-other">0 บิล</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- MODAL: MANUAL GRAB RECORD -->
+    <div class="modal" id="grab-manual-modal">
+        <div class="modal-content glass-card">
+            <div class="modal-header">
+                <h2><i class="fa-solid fa-helmet-safety text-warning"></i> บันทึกใบรับงาน Grab เร่งด่วน</h2>
+                <button class="modal-close" id="btn-close-grab-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="grab-manual-form">
+                    <div class="form-group" style="display: none !important;">
+                        <label for="grab-modal-driver"><i class="fa-solid fa-user"></i> ชื่อคนขับ Grab *</label>
+                        <input type="text" id="grab-modal-driver" value="Grab" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="grab-modal-customer"><i class="fa-solid fa-user-tag"></i> แหล่งออเดอร์ / โต๊ะ *</label>
+                        <select id="grab-modal-customer" required>
+                            <option value="Grab">Grab</option>
+                            <option value="กลับบ้าน">กลับบ้าน</option>
+                            <option value="โต๊ะ 1">โต๊ะ 1</option>
+                            <option value="โต๊ะ 2">โต๊ะ 2</option>
+                            <option value="โต๊ะ 3">โต๊ะ 3</option>
+                            <option value="โต๊ะ 4">โต๊ะ 4</option>
+                            <option value="โต๊ะ 5">โต๊ะ 5</option>
+                            <option value="โต๊ะ 6">โต๊ะ 6</option>
+                            <option value="โต๊ะ 7">โต๊ะ 7</option>
+                            <option value="โต๊ะ 8">โต๊ะ 8</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fa-solid fa-glass-water"></i> รายการน้ำที่รับไป *</label>
+                        <div class="grab-drinks-select-list" id="grab-modal-drinks-list">
+                            <!-- Dynamically list all drinks with +/- buttons -->
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="grab-modal-time"><i class="fa-solid fa-clock"></i> วันที่และเวลามารับ</label>
+                        <input type="datetime-local" id="grab-modal-time">
+                    </div>
+                    <div class="modal-footer-actions">
+                        <button type="button" class="btn btn-outline" id="btn-cancel-grab-modal">ยกเลิก</button>
+                        <button type="submit" class="btn btn-primary">บันทึกคนขับ</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: BACKUP & RESTORE -->
+    <div class="modal" id="backup-modal">
+        <div class="modal-content glass-card">
+            <div class="modal-header">
+                <h2><i class="fa-solid fa-database text-primary"></i> สำรองและกู้คืนข้อมูล</h2>
+                <button class="modal-close" id="btn-close-backup-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted" style="margin-bottom: 1.5rem;">ระบบทำงานโดยการบันทึกข้อมูลไว้ในเบราว์เซอร์ (Local Storage) คุณสามารถบันทึกไฟล์สำรองเก็บไว้ในเครื่องคอมพิวเตอร์ หรือกู้คืนข้อมูลจากไฟล์สำรองที่เคยบันทึกไว้ได้</p>
+                
+                <div class="backup-actions-grid">
+                    <div class="backup-card">
+                        <h3><i class="fa-solid fa-download text-success"></i> สำรองข้อมูล (Export)</h3>
+                        <p>ดาวน์โหลดไฟล์ข้อมูลบิลและประวัติการขับ Grab ทั้งหมดเป็นไฟล์ .json</p>
+                        <button class="btn btn-success w-100" id="btn-export-data"><i class="fa-solid fa-file-arrow-down"></i> ดาวน์โหลดไฟล์ข้อมูล</button>
+                    </div>
+
+                    <div class="backup-card">
+                        <h3><i class="fa-solid fa-upload text-warning"></i> กู้คืนข้อมูล (Import)</h3>
+                        <p>อัปโหลดไฟล์ข้อมูลสำรอง .json เพื่อกู้คืนประวัติและข้อมูลทั้งหมด</p>
+                        <input type="file" id="import-file-input" accept=".json" style="display: none;">
+                        <button class="btn btn-warning w-100" id="btn-trigger-import"><i class="fa-solid fa-file-import"></i> อัปโหลดไฟล์กู้คืน</button>
+                    </div>
+                </div>
+
+                <div class="backup-card" style="grid-column: 1 / -1; margin-top: 1.5rem; border-top: 1.5px solid var(--border-glass); padding-top: 1.5rem;">
+                    <h3><i class="fa-solid fa-link text-warning"></i> เชื่อมต่อ Google Sheets (สำหรับใช้งานหลายเครื่องพร้อมกัน)</h3>
+                    <p class="text-muted" style="margin-bottom: 1rem; font-size: 0.85rem;">วางลิงก์ Web App URL เพื่อเซฟและซิงค์ข้อมูลสต็อกบิลและ Grab ทั้งหมดไว้บนคลาวด์ Google Drive</p>
+                    <div class="form-group" style="margin-bottom: 1rem;">
+                        <label for="sheet-url-input"><i class="fa-solid fa-cloud"></i> Google Sheets Web App URL</label>
+                        <input type="text" id="sheet-url-input" placeholder="วางลิงก์ Web App URL (Google Apps Script) ที่นี่..." style="width: 100%; padding: 0.75rem; background: rgba(15, 23, 42, 0.4); border: 1.5px solid var(--border-glass); border-radius: var(--radius-md); color: var(--color-text); outline: none;">
+                    </div>
+                    <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+                        <button class="btn btn-outline" id="btn-pull-sheet" style="flex: 1;"><i class="fa-solid fa-cloud-arrow-down"></i> ดึงจากชีต (Pull)</button>
+                        <button class="btn btn-primary" id="btn-push-sheet" style="flex: 1;"><i class="fa-solid fa-cloud-arrow-up"></i> บันทึกไปชีต (Push)</button>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <input type="checkbox" id="auto-sync-checkbox" style="width: 18px; height: 18px; cursor: pointer;">
+                        <label for="auto-sync-checkbox" style="font-size: 0.85rem; color: var(--color-text-muted); cursor: pointer;">ซิงค์อัตโนมัติเมื่อมีการบันทึก/ลบออเดอร์</label>
+                    </div>
+                    <div id="sheet-sync-status" style="font-size: 0.85rem; margin-top: 0.75rem; display: none; font-weight: bold;"></div>
+                </div>
+
+                <div class="danger-zone">
+                    <h3><i class="fa-solid fa-triangle-exclamation text-danger"></i> พื้นที่อันตราย</h3>
+                    <p>การล้างข้อมูลจะลบประวัติการสั่งซื้อและ Grab ทั้งหมดจากเบราว์เซอร์อย่างถาวร</p>
+                    <button class="btn btn-danger btn-sm" id="btn-clear-all-data"><i class="fa-solid fa-trash-can"></i> ล้างข้อมูลทั้งหมด</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN APP SCRIPT -->
+    <script src="app.js"></script>
+</body>
+</html>

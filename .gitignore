@@ -1,0 +1,6 @@
+JuiceBarTracker.exe
+__pycache__/
+*.zip
+*.bat
+desktop_app.py
+server.py
