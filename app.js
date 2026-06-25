@@ -45,8 +45,13 @@ async function init() {
     setupEventListeners();
 
     // Load Google Sheets Settings
-    sheetUrl = localStorage.getItem(SHEET_URL_KEY) || '';
-    autoSync = localStorage.getItem(AUTO_SYNC_KEY) === 'true';
+    const defaultSheetUrl = 'https://script.google.com/macros/s/AKfycbz84s4EmEOUcmxKbxnR9Pfbf3evnqldYgAQ2qmsuEjo9TdJ30K8Bb1nGQvfKoO2b76u/exec';
+    sheetUrl = localStorage.getItem(SHEET_URL_KEY) || defaultSheetUrl;
+    
+    // Default to true if not explicitly set to 'false'
+    const storedAutoSync = localStorage.getItem(AUTO_SYNC_KEY);
+    autoSync = storedAutoSync !== 'false';
+    
     document.getElementById('sheet-url-input').value = sheetUrl;
     document.getElementById('auto-sync-checkbox').checked = autoSync;
     
