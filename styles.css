@@ -1,39 +1,39 @@
 /* DESIGN SYSTEM CONFIGURATION */
 :root {
     /* Color Palette */
-    --bg-main: #0f172a;        /* Deep Slate Blue */
-    --bg-card: #1e293b;        /* Medium Slate Blue */
-    --bg-card-glass: rgba(30, 41, 59, 0.7);
-    --border-glass: rgba(255, 255, 255, 0.08);
-    --border-hover: rgba(255, 255, 255, 0.2);
+    --bg-main: #ECEFE6;        /* Light Sage Green */
+    --bg-card: #2A2C27;        /* Dark Charcoal Chalkboard */
+    --bg-card-glass: rgba(42, 44, 39, 0.95);
+    --border-glass: rgba(255, 255, 255, 0.1);
+    --border-hover: rgba(255, 255, 255, 0.25);
     
-    --color-text: #f8fafc;      /* Very Light Gray/White */
-    --color-text-muted: #94a3b8;/* Muted Slate Gray */
+    --color-text: #FDFBF7;      /* Chalk White Text */
+    --color-text-muted: #A5A9A0;/* Muted Chalk Text */
     
-    /* Neon Accent Colors */
-    --color-primary: #38bdf8;   /* Teal/Neon Blue */
-    --color-primary-glow: rgba(56, 189, 248, 0.25);
+    /* Warm Wood Accent Colors */
+    --color-primary: #D4A373;   /* Warm Wood Brown */
+    --color-primary-glow: rgba(212, 163, 115, 0.25);
     
-    --color-secondary: #c084fc; /* Neon Purple */
-    --color-secondary-glow: rgba(192, 132, 252, 0.25);
+    --color-secondary: #8F9E8B; /* Sage Green */
+    --color-secondary-glow: rgba(143, 158, 139, 0.25);
     
-    --color-success: #34d399;   /* Mint Green */
-    --color-success-glow: rgba(52, 211, 153, 0.2);
+    --color-success: #A7C957;   /* Natural Green */
+    --color-success-glow: rgba(167, 201, 87, 0.2);
     
-    --color-warning: #fbbf24;   /* Amber Gold */
-    --color-warning-glow: rgba(251, 191, 36, 0.2);
+    --color-warning: #F4A261;   /* Soft Amber/Orange */
+    --color-warning-glow: rgba(244, 162, 97, 0.2);
     
-    --color-danger: #f87171;    /* Coral Red */
-    --color-danger-glow: rgba(248, 113, 113, 0.2);
+    --color-danger: #E63946;    /* Soft Red */
+    --color-danger-glow: rgba(230, 57, 70, 0.2);
     
     /* Drink Cards Custom Accents */
-    --color-drink-tea: #4ade80;
-    --color-drink-fruit: #f87171;
-    --color-drink-yogurt: #f472b6;
-    --color-drink-purple: #c084fc;
-    --color-drink-yellow: #fde047;
-    --color-drink-dark: #64748b;
-    --color-drink-cocoa: #a16207;
+    --color-drink-tea: #8FA87B;
+    --color-drink-fruit: #A28AA8;
+    --color-drink-yogurt: #D2A0A8;
+    --color-drink-purple: #B0A2C7;
+    --color-drink-yellow: #E0C068;
+    --color-drink-dark: #7E8578;
+    --color-drink-cocoa: #9C7C60;
     
     /* Typography & Shadows */
     --font-heading: 'Prompt', sans-serif;
@@ -60,13 +60,18 @@
 
 body {
     background-color: var(--bg-main);
-    color: var(--color-text);
+    color: #2A2C27;
     font-family: var(--font-body);
     font-size: 15px;
     line-height: 1.6;
     min-height: 100vh;
     overflow-x: hidden;
     padding-bottom: 2rem;
+}
+
+/* Ensure white chalk text inside dark cards and elements */
+.card, .glass-card, .modal-content, .order-card, .data-table, .tab-navigation, .backup-card, .orders-header-bar .quick-stats strong, .live-clock {
+    color: var(--color-text);
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -100,26 +105,26 @@ h1, h2, h3, h4, h5, h6 {
 .neon-icon {
     font-size: 2.2rem;
     color: var(--color-primary);
-    text-shadow: 0 0 10px rgba(56, 189, 248, 0.6);
-    background: rgba(56, 189, 248, 0.1);
+    text-shadow: 0 0 10px rgba(212, 163, 115, 0.6);
+    background: rgba(212, 163, 115, 0.1);
     width: 60px;
     height: 60px;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: var(--radius-md);
-    border: 1px solid rgba(56, 189, 248, 0.3);
+    border: 1px solid rgba(212, 163, 115, 0.3);
     animation: pulseGlow 3s infinite alternate;
 }
 
 @keyframes pulseGlow {
     0% {
-        box-shadow: 0 0 5px rgba(56, 189, 248, 0.2);
-        border-color: rgba(56, 189, 248, 0.2);
+        box-shadow: 0 0 5px rgba(212, 163, 115, 0.2);
+        border-color: rgba(212, 163, 115, 0.2);
     }
     100% {
-        box-shadow: 0 0 18px rgba(56, 189, 248, 0.5);
-        border-color: rgba(56, 189, 248, 0.6);
+        box-shadow: 0 0 18px rgba(212, 163, 115, 0.5);
+        border-color: rgba(212, 163, 115, 0.6);
     }
 }
 
@@ -127,14 +132,14 @@ h1, h2, h3, h4, h5, h6 {
     font-size: 1.6rem;
     font-weight: 700;
     letter-spacing: 0.5px;
-    background: linear-gradient(to right, var(--color-primary), var(--color-secondary));
+    background: linear-gradient(to right, var(--color-primary), #A7C957);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
 .brand-info p {
     font-size: 0.85rem;
-    color: var(--color-text-muted);
+    color: #55554D;
 }
 
 .header-right {
@@ -687,25 +692,25 @@ select:focus {
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, var(--color-primary), #0284c7);
-    color: #0f172a;
+    background: linear-gradient(135deg, var(--color-primary), #b88655);
+    color: #2A2C27;
     font-weight: 600;
     box-shadow: 0 4px 14px var(--color-primary-glow);
 }
 
 .btn-primary:hover {
-    box-shadow: 0 6px 20px rgba(56, 189, 248, 0.4);
+    box-shadow: 0 6px 20px rgba(212, 163, 115, 0.4);
     transform: translateY(-1px);
 }
 
 .btn-secondary {
-    background: linear-gradient(135deg, var(--color-secondary), #9333ea);
+    background: linear-gradient(135deg, var(--color-secondary), #6e7e6a);
     color: #fff;
     box-shadow: 0 4px 14px var(--color-secondary-glow);
 }
 
 .btn-secondary:hover {
-    box-shadow: 0 6px 20px rgba(192, 132, 252, 0.4);
+    box-shadow: 0 6px 20px rgba(143, 158, 139, 0.4);
     transform: translateY(-1px);
 }
 
@@ -1403,3 +1408,43 @@ select:focus {
 }
 
 .py-4 { padding-top: 1.5rem; padding-bottom: 1.5rem; }
+
+/* Earthy Theme adjustments for elements outside dark cards */
+.app-header {
+    border-bottom: 1px solid rgba(42, 44, 39, 0.15);
+}
+
+.orders-header-bar h3,
+.grab-title-desc h3 {
+    color: #2A2C27;
+}
+
+.quick-stats,
+.grab-title-desc p {
+    color: #55554D;
+}
+
+.orders-header-bar .quick-stats strong.text-secondary {
+    color: var(--color-secondary) !important;
+}
+
+.orders-header-bar .quick-stats strong.text-primary {
+    color: var(--color-primary) !important;
+}
+
+/* Adjust table header background */
+.data-table th {
+    background: rgba(0, 0, 0, 0.3);
+}
+
+/* Modal styling check */
+.modal-header h2 {
+    color: var(--color-text);
+}
+
+/* Google Sheets inputs */
+.sheets-sync-section input[type="text"] {
+    background: rgba(0, 0, 0, 0.3) !important;
+    color: #fff !important;
+}
+

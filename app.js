@@ -1,27 +1,22 @@
 // DRINK DATABASE
 const DRINKS = [
-    { id: 'oishi', nameTH: 'โออิชิ', nameEN: 'Oishi', category: 'tea', color: '#4ade80', colorRgb: '74, 222, 128', icon: 'fa-leaf' },
-    { id: 'grape', nameTH: 'องุ่นเคียวโฮ', nameEN: 'Kyoho Grape', category: 'fruit', color: '#c084fc', colorRgb: '192, 132, 252', icon: 'fa-wine-glass' },
-    { id: 'bitter', nameTH: 'เดิมขม', nameEN: 'Original Bitter', category: 'dark', color: '#94a3b8', colorRgb: '148, 163, 184', icon: 'fa-mug-hot' },
-    { id: 'sweet', nameTH: 'เดิมหวาน', nameEN: 'Original Sweet', category: 'amber', color: '#fbbf24', colorRgb: '251, 191, 36', icon: 'fa-cookie' },
-    { id: 'honey-lemon', nameTH: 'น้ำผึ้งมะนาว', nameEN: 'Honey Lemon', category: 'yellow', color: '#fde047', colorRgb: '253, 224, 71', icon: 'fa-lemon' },
-    { id: 'blueberry', nameTH: 'บลูเบอร์รี่', nameEN: 'Blueberry', category: 'fruit', color: '#38bdf8', colorRgb: '56, 189, 248', icon: 'fa-seedling' },
-    { id: 'yogurt', nameTH: 'โยเกิร์ต', nameEN: 'Yogurt', category: 'yogurt', color: '#f472b6', colorRgb: '244, 114, 182', icon: 'fa-cheese' },
-    { id: 'strawberry-yogurt', nameTH: 'โยเกิร์ตสตอเบอรี่', nameEN: 'Strawberry Yogurt', category: 'yogurt', color: '#ec4899', colorRgb: '236, 72, 153', icon: 'fa-ice-cream' },
-    { id: 'strawberry', nameTH: 'สตอเบอรี่', nameEN: 'Strawberry', category: 'fruit', color: '#f87171', colorRgb: '248, 113, 113', icon: 'fa-apple-whole' },
-    { id: 'apple', nameTH: 'แอปเปิ้ล', nameEN: 'Apple', category: 'fruit', color: '#fb7185', colorRgb: '251, 113, 133', icon: 'fa-apple-whole' },
-    { id: 'greentea', nameTH: 'ชาเขียว', nameEN: 'Green Tea', category: 'tea', color: '#34d399', colorRgb: '52, 211, 153', icon: 'fa-mug-hot' },
-    { id: 'taro', nameTH: 'เผือก', nameEN: 'Taro', category: 'yogurt', color: '#a78bfa', colorRgb: '167, 139, 250', icon: 'fa-egg' },
-    { id: 'cocoa', nameTH: 'โกโก้', nameEN: 'Cocoa', category: 'cocoa', color: '#a16207', colorRgb: '161, 98, 7', icon: 'fa-mug-hot' },
-    { id: 'watermelon', nameTH: 'แตงโม', nameEN: 'Watermelon', category: 'fruit', color: '#fda4af', colorRgb: '253, 164, 175', icon: 'fa-lemon' }
+    { id: 'oishi', nameTH: 'โออิชิ', nameEN: 'Oishi', category: 'tea', color: '#8FA87B', colorRgb: '143, 168, 123', icon: 'fa-leaf' },
+    { id: 'grape', nameTH: 'องุ่นเคียวโฮ', nameEN: 'Kyoho Grape', category: 'fruit', color: '#A28AA8', colorRgb: '162, 138, 168', icon: 'fa-wine-glass' },
+    { id: 'bitter', nameTH: 'เดิมขม', nameEN: 'Original Bitter', category: 'dark', color: '#7E8578', colorRgb: '126, 133, 120', icon: 'fa-mug-hot' },
+    { id: 'sweet', nameTH: 'เดิมหวาน', nameEN: 'Original Sweet', category: 'amber', color: '#DDB87B', colorRgb: '221, 184, 123', icon: 'fa-cookie' },
+    { id: 'honey-lemon', nameTH: 'น้ำผึ้งมะนาว', nameEN: 'Honey Lemon', category: 'yellow', color: '#E0C068', colorRgb: '224, 192, 104', icon: 'fa-lemon' },
+    { id: 'blueberry', nameTH: 'บลูเบอร์รี่', nameEN: 'Blueberry', category: 'fruit', color: '#7B94B8', colorRgb: '123, 148, 184', icon: 'fa-seedling' },
+    { id: 'yogurt', nameTH: 'โยเกิร์ต', nameEN: 'Yogurt', category: 'yogurt', color: '#D2A0A8', colorRgb: '210, 160, 168', icon: 'fa-cheese' },
+    { id: 'strawberry-yogurt', nameTH: 'โยเกิร์ตสตอเบอรี่', nameEN: 'Strawberry Yogurt', category: 'yogurt', color: '#D48A92', colorRgb: '212, 138, 146', icon: 'fa-ice-cream' },
+    { id: 'strawberry', nameTH: 'สตอเบอรี่', nameEN: 'Strawberry', category: 'fruit', color: '#D96B6B', colorRgb: '217, 107, 107', icon: 'fa-apple-whole' },
+    { id: 'apple', nameTH: 'แอปเปิ้ล', nameEN: 'Apple', category: 'fruit', color: '#CE7B7B', colorRgb: '206, 123, 123', icon: 'fa-apple-whole' },
+    { id: 'greentea', nameTH: 'ชาเขียว', nameEN: 'Green Tea', category: 'tea', color: '#7CA682', colorRgb: '124, 166, 130', icon: 'fa-mug-hot' },
+    { id: 'taro', nameTH: 'เผือก', nameEN: 'Taro', category: 'yogurt', color: '#B0A2C7', colorRgb: '176, 162, 199', icon: 'fa-egg' },
+    { id: 'cocoa', nameTH: 'โกโก้', nameEN: 'Cocoa', category: 'cocoa', color: '#9C7C60', colorRgb: '156, 124, 96', icon: 'fa-mug-hot' },
+    { id: 'watermelon', nameTH: 'แตงโม', nameEN: 'Watermelon', category: 'fruit', color: '#DF8A8E', colorRgb: '223, 138, 142', icon: 'fa-lemon' }
 ];
 
 const PRICE_PER_BOTTLE = 80;
-
-const SHEET_URL_KEY = 'juice_bar_sheet_url';
-const AUTO_SYNC_KEY = 'juice_bar_auto_sync';
-let sheetUrl = '';
-let autoSync = false;
 
 // STATE MANAGEMENT
 let state = {
@@ -30,11 +25,41 @@ let state = {
     editingOrderId: null,
     cart: {}, // drinkId -> quantity
     searchQuery: '',
-    tab: 'orders-tab'
+    tab: 'orders-tab',
+    sheetUrl: '',
+    autoSync: false,
+    stock: {} // drinkId -> quantity
 };
 
 // LOAD INITIAL STATE FROM LOCAL STORAGE
-async function init() {
+function init() {
+    const savedState = localStorage.getItem('juice_bar_tracker_state');
+    if (savedState) {
+        try {
+            const parsed = JSON.parse(savedState);
+            state.orders = parsed.orders || [];
+            state.grabPickups = parsed.grabPickups || [];
+            state.stock = parsed.stock || {};
+        } catch (e) {
+            console.error("Error parsing saved state", e);
+        }
+    }
+    
+    // Ensure all drinks in database have a stock quantity (default to 20 if not set)
+    DRINKS.forEach(drink => {
+        if (state.stock[drink.id] === undefined) {
+            state.stock[drink.id] = 20;
+        }
+    });
+    
+    // Load Google Sheets configurations
+    state.sheetUrl = localStorage.getItem('juice_bar_sheet_url') || '';
+    state.autoSync = localStorage.getItem('juice_bar_auto_sync') === 'true';
+    
+    // Populate Google Sheets UI inputs
+    document.getElementById('sheet-url-input').value = state.sheetUrl;
+    document.getElementById('auto-sync-checkbox').checked = state.autoSync;
+    
     // Set default dates
     const todayStr = getLocalDateString(new Date());
     document.getElementById('order-date').value = todayStr;
@@ -43,91 +68,29 @@ async function init() {
     // Bind UI elements & Listeners
     setupClock();
     setupEventListeners();
-
-    // Load Google Sheets Settings
-    const defaultSheetUrl = 'https://script.google.com/macros/s/AKfycbz84s4EmEOUcmxKbxnR9Pfbf3evnqldYgAQ2qmsuEjo9TdJ30K8Bb1nGQvfKoO2b76u/exec';
-    sheetUrl = localStorage.getItem(SHEET_URL_KEY) || defaultSheetUrl;
-    
-    // Default to true if not explicitly set to 'false'
-    const storedAutoSync = localStorage.getItem(AUTO_SYNC_KEY);
-    autoSync = storedAutoSync !== 'false';
-    
-    document.getElementById('sheet-url-input').value = sheetUrl;
-    document.getElementById('auto-sync-checkbox').checked = autoSync;
-    
-    // Load last staff name
-    const lastStaff = localStorage.getItem('juice_bar_last_staff_name') || '';
-    document.getElementById('staff-name').value = lastStaff;
-    
-    // Load state from local server database.json or fall back to localStorage
-    let loaded = false;
-    try {
-        const res = await fetch('/api/data');
-        if (res.ok) {
-            const parsed = await res.json();
-            if (parsed.orders || parsed.grabPickups) {
-                state.orders = parsed.orders || [];
-                state.grabPickups = parsed.grabPickups || [];
-                loaded = true;
-                console.log("State loaded successfully from server database.json");
-            }
-        }
-    } catch (e) {
-        console.warn("Failed to fetch from server database, falling back to localStorage", e);
-    }
-    
-    if (!loaded) {
-        const savedState = localStorage.getItem('juice_bar_tracker_state');
-        if (savedState) {
-            try {
-                const parsed = JSON.parse(savedState);
-                state.orders = parsed.orders || [];
-                state.grabPickups = parsed.grabPickups || [];
-                console.log("State loaded from localStorage");
-            } catch (e) {
-                console.error("Error parsing saved state", e);
-            }
-        }
-    }
-
-    // Auto pull from Google Sheets on start if URL exists (overwrites local if remote has data)
-    if (sheetUrl) {
-        await pullFromSheets();
-    }
-    
     renderDrinkGrid();
     renderCart();
     renderOrders();
     renderGrabLogs();
+    renderStock();
     renderAnalytics();
+    
+    // Auto-pull from sheet on startup if URL is configured
+    if (state.sheetUrl) {
+        pullFromSheets(true);
+    }
 }
 
-// SAVE STATE TO LOCAL STORAGE & SERVER DATABASE
-async function saveToLocalStorage() {
-    const stateStr = JSON.stringify({
+// SAVE STATE TO LOCAL STORAGE
+function saveToLocalStorage(skipSync = false) {
+    localStorage.setItem('juice_bar_tracker_state', JSON.stringify({
         orders: state.orders,
-        grabPickups: state.grabPickups
-    });
+        grabPickups: state.grabPickups,
+        stock: state.stock
+    }));
     
-    // Save to localStorage
-    localStorage.setItem('juice_bar_tracker_state', stateStr);
-    
-    // Save to server database.json
-    try {
-        await fetch('/api/data', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: stateStr
-        });
-    } catch (e) {
-        console.warn("Could not save state to local API, saved to localStorage only", e);
-    }
-
-    // Auto Sync to Google Sheets if configured
-    if (autoSync && sheetUrl) {
-        pushToSheets(false);
+    if (!skipSync && state.autoSync && state.sheetUrl) {
+        pushToSheets(true);
     }
 }
 
@@ -163,23 +126,9 @@ function setupClock() {
 }
 
 // PRICING ALGORITHM - CHEAPEST PROMOTION COMBINATION
-function calculateBestPrice(quantity, deliveryType) {
+function calculateBestPrice(quantity) {
     if (quantity <= 0) {
         return { total: 0, num7: 0, num4: 0, num1: 0, discount: 0 };
-    }
-    
-    if (deliveryType === 'grab') {
-        const grabPrice = 67.90;
-        const total = quantity * grabPrice;
-        const normalPrice = quantity * PRICE_PER_BOTTLE;
-        const discount = normalPrice - total;
-        return {
-            total: Math.round(total * 100) / 100,
-            num7: 0,
-            num4: 0,
-            num1: quantity,
-            discount: Math.round(discount * 100) / 100
-        };
     }
     
     let minCost = Infinity;
@@ -217,9 +166,11 @@ function setupEventListeners() {
     const deliveryTypeSelect = document.getElementById('delivery-type');
     const grabDriverGroup = document.getElementById('grab-driver-group');
     deliveryTypeSelect.addEventListener('change', (e) => {
-        // Always hide grab driver group since we don't need driver names
-        grabDriverGroup.style.display = 'none';
-        renderCart();
+        if (e.target.value === 'grab') {
+            grabDriverGroup.style.display = 'block';
+        } else {
+            grabDriverGroup.style.display = 'none';
+        }
     });
 
     // Drink search input
@@ -243,23 +194,47 @@ function setupEventListeners() {
         clearSearchBtn.style.display = 'none';
     });
 
-    // Customer / Table change event listener
-    const customerSelect = document.getElementById('customer-name');
-    customerSelect.addEventListener('change', (e) => {
-        const val = e.target.value;
-        const deliveryTypeSelect = document.getElementById('delivery-type');
-        const grabDriverGroup = document.getElementById('grab-driver-group');
-        
-        if (val === 'Grab') {
-            deliveryTypeSelect.value = 'grab';
-            grabDriverGroup.style.display = 'block';
-        } else {
-            deliveryTypeSelect.value = 'walkin';
-            grabDriverGroup.style.display = 'none';
+    // Customer Name autocomplete
+    const customerInput = document.getElementById('customer-name');
+    const suggestionsContainer = document.getElementById('name-suggestions');
+    
+    customerInput.addEventListener('input', (e) => {
+        const text = e.target.value.trim().toLowerCase();
+        if (!text) {
+            suggestionsContainer.innerHTML = '';
+            return;
         }
         
-        // Check if there are active orders for this table/source to suggest appending
-        checkCustomerPreviousOrders(val);
+        // Find unique customer names from existing orders
+        const uniqueNames = [...new Set(state.orders.map(o => o.customerName))];
+        const matched = uniqueNames.filter(name => name.toLowerCase().includes(text));
+        
+        if (matched.length > 0) {
+            suggestionsContainer.innerHTML = matched.map(name => `
+                <div class="suggestion-item">${name}</div>
+            `).join('');
+            
+            // Suggestion click
+            const items = suggestionsContainer.querySelectorAll('.suggestion-item');
+            items.forEach(item => {
+                item.addEventListener('click', () => {
+                    customerInput.value = item.textContent;
+                    suggestionsContainer.innerHTML = '';
+                    
+                    // Suggest upgrading if there is an active order for this customer today or yesterday
+                    checkCustomerPreviousOrders(item.textContent);
+                });
+            });
+        } else {
+            suggestionsContainer.innerHTML = '';
+        }
+    });
+    
+    // Close suggestions on outside click
+    document.addEventListener('click', (e) => {
+        if (!customerInput.contains(e.target) && !suggestionsContainer.contains(e.target)) {
+            suggestionsContainer.innerHTML = '';
+        }
     });
 
     // Clear POS Form button
@@ -291,6 +266,8 @@ function setupEventListeners() {
                 renderOrders();
             } else if (targetTab === 'grab-tab') {
                 renderGrabLogs();
+            } else if (targetTab === 'stock-tab') {
+                renderStock();
             } else if (targetTab === 'summary-tab') {
                 renderAnalytics();
             }
@@ -341,16 +318,18 @@ function setupEventListeners() {
 
     document.getElementById('btn-clear-all-data').addEventListener('click', clearAllSystemData);
 
-    // Google Sheets sync listeners
-    document.getElementById('sheet-url-input').addEventListener('change', (e) => {
-        sheetUrl = e.target.value.trim();
-        localStorage.setItem(SHEET_URL_KEY, sheetUrl);
+    // Google Sheets Sync Event Listeners
+    document.getElementById('sheet-url-input').addEventListener('input', (e) => {
+        state.sheetUrl = e.target.value.trim();
+        localStorage.setItem('juice_bar_sheet_url', state.sheetUrl);
     });
+
     document.getElementById('auto-sync-checkbox').addEventListener('change', (e) => {
-        autoSync = e.target.checked;
-        localStorage.setItem(AUTO_SYNC_KEY, autoSync);
+        state.autoSync = e.target.checked;
+        localStorage.setItem('juice_bar_auto_sync', state.autoSync ? 'true' : 'false');
     });
-    document.getElementById('btn-pull-sheet').addEventListener('click', pullFromSheets);
+
+    document.getElementById('btn-pull-sheet').addEventListener('click', () => pullFromSheets(false));
     document.getElementById('btn-push-sheet').addEventListener('click', () => pushToSheets(false));
 
     // Grab Manual Log Modal
@@ -362,11 +341,10 @@ function setupEventListeners() {
 
 // CHECK IF CUSTOMER HAS EXISTING ORDERS TO SUGGEST APPENDING (Incremental ordering)
 function checkCustomerPreviousOrders(custName) {
-    // Only check for orders matching the currently selected bill date
-    const orderDate = document.getElementById('order-date').value;
+    const todayStr = getLocalDateString(new Date());
     
-    // Find active orders for this customer on the selected date
-    const userOrders = state.orders.filter(o => o.customerName === custName && o.date === orderDate);
+    // Find active orders for this customer
+    const userOrders = state.orders.filter(o => o.customerName === custName);
     if (userOrders.length === 0) return;
     
     // Sort by date/time (newest first)
@@ -374,10 +352,11 @@ function checkCustomerPreviousOrders(custName) {
     const latestOrder = userOrders[0];
     
     // Prompt the user if they want to append to the latest order
+    const orderDateFormatted = new Date(latestOrder.createdTime).toLocaleDateString('th-TH');
     const itemsCount = Object.values(latestOrder.items).reduce((a, b) => a + b, 0);
     
     const confirmAppend = confirm(
-        `พบออเดอร์เดิมของ "${custName}" ในบิลวันที่เลือก (${itemsCount} ขวด, ${latestOrder.priceDetails.total} บาท)\n\nคุณต้องการ "เพิ่มสินค้าในบิลเดิม" เพื่อสะสมโปรโมชั่นใช่หรือไม่?`
+        `พบออเดอร์เดิมของลูกค้า "${custName}" เมื่อวันที่ ${orderDateFormatted} (${itemsCount} ขวด, ${latestOrder.priceDetails.total} บาท)\n\nคุณต้องการ "เพิ่มสินค้าในบิลเดิม" เพื่อสะสมโปรโมชั่นใช่หรือไม่?`
     );
     
     if (confirmAppend) {
@@ -403,6 +382,16 @@ function renderDrinkGrid() {
         const qtyInCart = state.cart[drink.id] || 0;
         const activeClass = qtyInCart > 0 ? 'active' : '';
         
+        const stockQty = state.stock[drink.id] !== undefined ? state.stock[drink.id] : 20;
+        let stockLabel = '';
+        if (stockQty === 0) {
+            stockLabel = `<span class="bev-stock text-danger" style="font-size: 0.75rem; font-weight: bold; display: block; margin-top: 0.15rem;">❌ หมด</span>`;
+        } else if (stockQty <= 5) {
+            stockLabel = `<span class="bev-stock text-warning" style="font-size: 0.75rem; font-weight: bold; display: block; margin-top: 0.15rem;">⚠️ เหลือ ${stockQty}</span>`;
+        } else {
+            stockLabel = `<span class="bev-stock text-muted" style="font-size: 0.75rem; display: block; margin-top: 0.15rem;">สต็อก: ${stockQty}</span>`;
+        }
+
         const card = document.createElement('div');
         card.className = `bev-card ${activeClass}`;
         card.setAttribute('style', `--bev-color: ${drink.color}; --bev-color-rgb: ${drink.colorRgb};`);
@@ -413,6 +402,7 @@ function renderDrinkGrid() {
             <div>
                 <span class="bev-name-th">${drink.nameTH}</span>
                 <span class="bev-name-en">${drink.nameEN}</span>
+                ${stockLabel}
             </div>
             <div class="bev-controls">
                 <button type="button" class="bev-btn minus-btn" title="ลดจำนวน"><i class="fa-solid fa-minus"></i></button>
@@ -502,31 +492,26 @@ function renderCart() {
     });
     
     // Live Calculation
-    const deliveryType = document.getElementById('delivery-type').value;
-    const pricing = calculateBestPrice(totalQty, deliveryType);
+    const pricing = calculateBestPrice(totalQty);
     
     totalQtyEl.textContent = `${totalQty} ขวด`;
     calcContainer.style.display = 'flex';
-    document.getElementById('calc-subtotal').textContent = `${(totalQty * PRICE_PER_BOTTLE).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })} บาท`;
+    document.getElementById('calc-subtotal').textContent = `${totalQty * PRICE_PER_BOTTLE} บาท`;
     
     const discountRow = document.getElementById('calc-discount-row');
     if (pricing.discount > 0) {
         discountRow.style.display = 'flex';
-        document.getElementById('calc-discount').textContent = `-${pricing.discount.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })} บาท`;
+        document.getElementById('calc-discount').textContent = `-${pricing.discount} บาท`;
         
-        if (deliveryType === 'grab') {
-            document.getElementById('calc-promo-text').textContent = `(ราคาพิเศษ Grab 67.90 บ./ขวด)`;
-        } else {
-            let promoDesc = [];
-            if (pricing.num7 > 0) promoDesc.push(`โปร 7 ขวด x ${pricing.num7}`);
-            if (pricing.num4 > 0) promoDesc.push(`โปร 4 ขวด x ${pricing.num4}`);
-            document.getElementById('calc-promo-text').textContent = `(${promoDesc.join(' + ')})`;
-        }
+        let promoDesc = [];
+        if (pricing.num7 > 0) promoDesc.push(`โปร 7 ขวด x ${pricing.num7}`);
+        if (pricing.num4 > 0) promoDesc.push(`โปร 4 ขวด x ${pricing.num4}`);
+        document.getElementById('calc-promo-text').textContent = `(${promoDesc.join(' + ')})`;
     } else {
         discountRow.style.display = 'none';
     }
     
-    document.getElementById('calc-total').textContent = `${pricing.total.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })} บาท`;;
+    document.getElementById('calc-total').textContent = `${pricing.total} บาท`;
 }
 
 // SAVE ORDER OR UPDATE ORDER
@@ -535,10 +520,9 @@ function saveOrder() {
     const orderDate = document.getElementById('order-date').value;
     const deliveryType = document.getElementById('delivery-type').value;
     const grabDriverName = document.getElementById('grab-driver-name').value.trim();
-    const staffName = document.getElementById('staff-name').value.trim() || 'ไม่ระบุ';
     
     if (!customerName) {
-        alert("กรุณาเลือกแหล่งออเดอร์ / โต๊ะ");
+        alert("กรุณากรอกชื่อคนสั่ง / ลูกค้า");
         document.getElementById('customer-name').focus();
         return;
     }
@@ -549,13 +533,14 @@ function saveOrder() {
         return;
     }
     
-    // Save last staff name to local storage
-    if (staffName !== 'ไม่ระบุ') {
-        localStorage.setItem('juice_bar_last_staff_name', staffName);
+    if (deliveryType === 'grab' && !grabDriverName) {
+        alert("กรุณากรอกชื่อคนขับ Grab");
+        document.getElementById('grab-driver-name').focus();
+        return;
     }
     
     const totalQty = Object.values(state.cart).reduce((a, b) => a + b, 0);
-    const priceDetails = calculateBestPrice(totalQty, deliveryType);
+    const priceDetails = calculateBestPrice(totalQty);
     
     const now = new Date();
     const currentTimeStr = now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', hour12: false });
@@ -565,9 +550,21 @@ function saveOrder() {
         const index = state.orders.findIndex(o => o.id === state.editingOrderId);
         if (index !== -1) {
             const oldOrder = state.orders[index];
-            
-            // Check if delivery type was changed to Grab or Grab driver updated
             const oldGrabDriver = oldOrder.grabDriverName;
+            
+            // Refund old items to stock
+            if (oldOrder.items) {
+                for (const drinkId in oldOrder.items) {
+                    const oldQty = oldOrder.items[drinkId] || 0;
+                    state.stock[drinkId] = (state.stock[drinkId] || 0) + oldQty;
+                }
+            }
+            
+            // Deduct new items from stock
+            for (const drinkId in state.cart) {
+                const newQty = state.cart[drinkId] || 0;
+                state.stock[drinkId] = Math.max(0, (state.stock[drinkId] || 0) - newQty);
+            }
             
             state.orders[index] = {
                 ...oldOrder,
@@ -577,7 +574,6 @@ function saveOrder() {
                 grabDriverName: deliveryType === 'grab' ? grabDriverName : '',
                 items: { ...state.cart },
                 priceDetails: priceDetails,
-                staffName: staffName,
                 updatedTime: now.toISOString()
             };
             
@@ -588,6 +584,12 @@ function saveOrder() {
         alert("อัปเดตออเดอร์เรียบร้อยแล้ว!");
     } else {
         // Mode: CREATE NEW ORDER
+        // Deduct items from stock
+        for (const drinkId in state.cart) {
+            const qty = state.cart[drinkId] || 0;
+            state.stock[drinkId] = Math.max(0, (state.stock[drinkId] || 0) - qty);
+        }
+
         const newOrderId = 'order-' + Date.now();
         const newOrder = {
             id: newOrderId,
@@ -599,7 +601,6 @@ function saveOrder() {
             items: { ...state.cart },
             priceDetails: priceDetails,
             status: 'paid', // defaults to paid
-            staffName: staffName,
             createdTime: now.toISOString(),
             updatedTime: null
         };
@@ -670,7 +671,6 @@ function loadOrderForEditing(orderId) {
     document.getElementById('customer-name').value = order.customerName;
     document.getElementById('order-date').value = order.date;
     document.getElementById('delivery-type').value = order.deliveryType;
-    document.getElementById('staff-name').value = order.staffName || '';
     
     const grabDriverInput = document.getElementById('grab-driver-name');
     const grabGroup = document.getElementById('grab-driver-group');
@@ -701,14 +701,11 @@ function clearPOSForm() {
     state.editingOrderId = null;
     state.cart = {};
     
-    document.getElementById('customer-name').value = 'กลับบ้าน';
+    document.getElementById('customer-name').value = '';
     document.getElementById('order-date').value = getLocalDateString(new Date());
     document.getElementById('delivery-type').value = 'walkin';
     document.getElementById('grab-driver-name').value = '';
     document.getElementById('grab-driver-group').style.display = 'none';
-    
-    // Set to last used staff name
-    document.getElementById('staff-name').value = localStorage.getItem('juice_bar_last_staff_name') || '';
     
     // UI reset
     document.getElementById('pos-title').innerHTML = `<i class="fa-solid fa-cart-plus text-primary"></i> สั่งน้ำขวด / บันทึกการขาย`;
@@ -761,7 +758,7 @@ function renderOrders() {
     });
     
     document.getElementById('stats-total-bottles').textContent = totalQty;
-    document.getElementById('stats-total-revenue').textContent = totalRevenue.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+    document.getElementById('stats-total-revenue').textContent = totalRevenue.toLocaleString();
     
     if (filteredOrders.length === 0) {
         listContainer.innerHTML = `
@@ -785,7 +782,7 @@ function renderOrders() {
         // Channel Badge
         let channelBadge = '';
         if (order.deliveryType === 'grab') {
-            channelBadge = `<span class="badge badge-warning"><i class="fa-solid fa-helmet-safety"></i> Grab</span>`;
+            channelBadge = `<span class="badge badge-warning"><i class="fa-solid fa-helmet-safety"></i> Grab: ${order.grabDriverName}</span>`;
         } else if (order.deliveryType === 'lineman') {
             channelBadge = `<span class="badge badge-primary"><i class="fa-solid fa-motorcycle"></i> Lineman</span>`;
         } else if (order.deliveryType === 'walkin') {
@@ -817,7 +814,7 @@ function renderOrders() {
                     </div>
                 </div>
                 <div class="order-meta-info">
-                    <span class="order-time"><i class="fa-regular fa-clock"></i> บิลวันที่ ${order.date} (${order.time}) | <i class="fa-solid fa-user-pen"></i> โดย: ${order.staffName || 'ไม่ระบุ'}</span>
+                    <span class="order-time"><i class="fa-regular fa-clock"></i> บิลวันที่ ${order.date} (${order.time})</span>
                     ${order.updatedTime ? `<span class="order-modified-badge"><i class="fa-solid fa-pen"></i> แก้ไขบิลแล้ว</span>` : ''}
                 </div>
             </div>
@@ -826,8 +823,8 @@ function renderOrders() {
             </div>
             <div class="order-card-footer">
                 <div class="order-price-info">
-                    <span class="order-total-price text-primary">${order.priceDetails.total.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })} บาท</span>
-                    ${order.priceDetails.discount > 0 ? `<span class="order-promo-saving"><i class="fa-solid fa-tags"></i> ประหยัดไป ${order.priceDetails.discount.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })} บ.</span>` : ''}
+                    <span class="order-total-price text-primary">${order.priceDetails.total} บาท</span>
+                    ${order.priceDetails.discount > 0 ? `<span class="order-promo-saving"><i class="fa-solid fa-tags"></i> ประหยัดไป ${order.priceDetails.discount} บ.</span>` : ''}
                 </div>
                 <div class="order-actions">
                     <button class="btn btn-outline btn-sm" onclick="loadOrderForEditing('${order.id}')" title="แก้ไขรายการ / ค่อยๆสั่งเพิ่มขวดเพื่อรวมโปร">
@@ -849,6 +846,14 @@ function deleteOrder(orderId) {
     if (!order) return;
     
     if (confirm(`คุณต้องการลบออเดอร์ของ "${order.customerName}" ใช่หรือไม่?\n* ข้อมูล Grab ที่ผูกกับบิลนี้จะถูกลบไปด้วย`)) {
+        // Refund items to stock
+        if (order.items) {
+            for (const drinkId in order.items) {
+                const qty = order.items[drinkId] || 0;
+                state.stock[drinkId] = (state.stock[drinkId] || 0) + qty;
+            }
+        }
+
         state.orders = state.orders.filter(o => o.id !== orderId);
         // Also remove automatic Grab logs associated with this order
         state.grabPickups = state.grabPickups.filter(g => g.orderId !== orderId);
@@ -919,7 +924,7 @@ function renderGrabLogs() {
         const row = document.createElement('tr');
         row.innerHTML = `
             <td><strong>${formattedTime}</strong></td>
-            <td><span class="text-warning"><i class="fa-solid fa-helmet-safety"></i> Grab</span></td>
+            <td><span class="text-warning"><i class="fa-solid fa-helmet-safety"></i> ${g.driverName}</span></td>
             <td>
                 <div class="grab-item-list">
                     ${itemPillsHTML}
@@ -943,6 +948,14 @@ function deleteGrabLog(grabId) {
     if (!grab) return;
     
     if (confirm(`คุณต้องการลบข้อมูลการรับของของคนขับ "${grab.driverName}" ใช่หรือไม่?`)) {
+        // If manual grab pickup (no order linked), refund stock
+        if (!grab.orderId && grab.items) {
+            for (const drinkId in grab.items) {
+                const qty = grab.items[drinkId] || 0;
+                state.stock[drinkId] = (state.stock[drinkId] || 0) + qty;
+            }
+        }
+
         state.grabPickups = state.grabPickups.filter(g => g.id !== grabId);
         
         // Note: We don't delete the order, just disconnect the connection or keep order as is
@@ -1000,7 +1013,7 @@ function printGrabSlip(grabId) {
                 <h3 class="text-center" style="margin:0 0 5px 0;">JUICE BAR TRACKER</h3>
                 <p class="text-center" style="margin:0; font-size:12px;">** ใบรับของสำหรับไรเดอร์ **</p>
                 <hr>
-                <p><span class="bold">ช่องทางจัดส่ง:</span> Grab Delivery</p>
+                <p><span class="bold">ผู้รับของ (ไรเดอร์ Grab):</span> ${grab.driverName}</p>
                 <p><span class="bold">บิลลูกค้า:</span> ${grab.customerName || 'ทั่วไป'}</p>
                 <p><span class="bold">เวลาที่บันทึก:</span> ${dateStr}</p>
                 <hr>
@@ -1097,6 +1110,12 @@ function handleGrabManualSubmit(e) {
         return;
     }
     
+    // Deduct items from stock
+    for (const drinkId in items) {
+        const qty = items[drinkId] || 0;
+        state.stock[drinkId] = Math.max(0, (state.stock[drinkId] || 0) - qty);
+    }
+
     const record = {
         id: 'grab-' + Date.now(),
         driverName: driverName,
@@ -1177,11 +1196,11 @@ function renderAnalytics() {
     });
     
     // Update counters in DOM
-    document.getElementById('analytics-today-revenue').textContent = `${todayRevenue.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })} บาท`;
+    document.getElementById('analytics-today-revenue').textContent = `${todayRevenue.toLocaleString()} บาท`;
     document.getElementById('analytics-today-bottles').textContent = `${todayBottles} ขวด`;
-    document.getElementById('analytics-total-revenue-all').textContent = `${totalRevenue.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })} บาท`;
+    document.getElementById('analytics-total-revenue-all').textContent = `${totalRevenue.toLocaleString()} บาท`;
     document.getElementById('analytics-total-bottles-all').textContent = `${totalBottles} ขวด`;
-    document.getElementById('analytics-total-discount').textContent = `${totalDiscount.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })} บาท`;
+    document.getElementById('analytics-total-discount').textContent = `${totalDiscount.toLocaleString()} บาท`;
     
     document.getElementById('stat-delivery-walkin').textContent = `${deliveryStats.walkin} บิล`;
     document.getElementById('stat-delivery-grab').textContent = `${deliveryStats.grab} บิล`;
@@ -1294,80 +1313,183 @@ function clearAllSystemData() {
     }
 }
 
-// GOOGLE SHEETS CLOUD SYNC MODULE
-async function pullFromSheets() {
-    if (!sheetUrl) return;
-    showSyncStatus('กำลังดึงข้อมูลจาก Google Sheets...', '#fbbf24');
+// GOOGLE SHEETS SYNC MODULE
+async function pullFromSheets(isSilent = false) {
+    if (!state.sheetUrl) {
+        if (!isSilent) alert("กรุณาระบุ Google Apps Script Web App URL ก่อนดึงข้อมูล");
+        return;
+    }
+    
+    const pullBtn = document.getElementById('btn-pull-sheet');
+    const originalText = pullBtn.innerHTML;
+    
+    if (!isSilent) {
+        pullBtn.disabled = true;
+        pullBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> กำลังดึงข้อมูล...';
+    }
+    
     try {
-        const res = await fetch(sheetUrl);
-        if (!res.ok) throw new Error('Network response was not ok');
-        const remoteData = await res.json();
-        if (remoteData && (remoteData.orders || remoteData.grabPickups)) {
-            state.orders = remoteData.orders || [];
-            state.grabPickups = remoteData.grabPickups || [];
+        const response = await fetch(state.sheetUrl);
+        if (!response.ok) throw new Error("HTTP Error: " + response.status);
+        
+        const data = await response.json();
+        if (data && (data.orders || data.grabPickups || data.stock)) {
+            state.orders = data.orders || [];
+            state.grabPickups = data.grabPickups || [];
+            state.stock = data.stock || {};
             
-            // Save to local database.json and localStorage
-            const stateStr = JSON.stringify({
-                orders: state.orders,
-                grabPickups: state.grabPickups
+            // Ensure all drinks in database have a stock quantity (default to 20 if not set)
+            DRINKS.forEach(drink => {
+                if (state.stock[drink.id] === undefined) {
+                    state.stock[drink.id] = 20;
+                }
             });
-            localStorage.setItem('juice_bar_tracker_state', stateStr);
-            try {
-                await fetch('/api/data', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: stateStr
-                });
-            } catch (err) {}
             
+            // Save to LocalStorage skipping the auto-push sync loop
+            saveToLocalStorage(true);
+            
+            // Refresh POS UI
             renderOrders();
             renderGrabLogs();
+            renderStock();
             renderAnalytics();
-            showSyncStatus('ซิงค์ข้อมูลจากคลาวด์สำเร็จ ✅', '#34d399');
-        } else if (remoteData && Object.keys(remoteData).length === 0) {
-            // Sheet is empty, initialize it with local data
-            await pushToSheets(true);
+            
+            if (!isSilent) {
+                alert("ดึงข้อมูลจาก Google Sheets สำเร็จเรียบร้อยแล้ว!");
+            } else {
+                console.log("Auto-pulled from Google Sheets successfully.");
+            }
+        } else {
+            if (!isSilent) alert("ไม่พบข้อมูล หรือรูปแบบข้อมูลในชีตไม่ถูกต้อง");
         }
-    } catch (e) {
-        console.error('Fetch failed', e);
-        showSyncStatus('ดึงข้อมูลล้มเหลว ❌', '#f87171');
+    } catch (err) {
+        console.error("Failed to pull from Google Sheets:", err);
+        if (!isSilent) {
+            alert("ดึงข้อมูลล้มเหลว: " + err.message + "\n\nกรุณาตรวจสอบว่า:\n1. ลิงก์ URL ถูกต้อง\n2. ตั้งค่า Deploy ใน Apps Script เป็นแบบ 'Anyone' (ทุกคน)\n3. บัญชีที่ใช้เปิดสิทธิ์เข้าถึงสาธารณะเรียบร้อยแล้ว");
+        }
+    } finally {
+        if (!isSilent) {
+            pullBtn.disabled = false;
+            pullBtn.innerHTML = originalText;
+        }
     }
 }
 
-async function pushToSheets(isInit = false) {
-    if (!sheetUrl) return;
-    showSyncStatus(isInit ? 'กำลังสร้างข้อมูลบนคลาวด์...' : 'กำลังอัปเดตข้อมูลขึ้นคลาวด์...', '#fbbf24');
+async function pushToSheets(isAuto = false) {
+    if (!state.sheetUrl) {
+        if (!isAuto) alert("กรุณาระบุ Google Apps Script Web App URL ก่อนบันทึกข้อมูล");
+        return;
+    }
+    
+    const pushBtn = document.getElementById('btn-push-sheet');
+    const originalText = pushBtn.innerHTML;
+    
+    if (!isAuto) {
+        pushBtn.disabled = true;
+        pushBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> กำลังบันทึก...';
+    }
+    
     try {
         const payload = JSON.stringify({
             orders: state.orders,
-            grabPickups: state.grabPickups
+            grabPickups: state.grabPickups,
+            stock: state.stock
         });
-        const res = await fetch(`${sheetUrl}?action=save&data=${encodeURIComponent(payload)}`);
-        if (!res.ok) throw new Error('Network response was not ok');
-        const result = await res.json();
+        
+        const url = `${state.sheetUrl}?action=save&data=${encodeURIComponent(payload)}`;
+        const response = await fetch(url);
+        if (!response.ok) throw new Error("HTTP Error: " + response.status);
+        
+        const result = await response.json();
         if (result && result.status === 'success') {
-            showSyncStatus(isInit ? 'เชื่อมโยงคลาวด์สำเร็จ ✅' : 'บันทึกขึ้นคลาวด์สำเร็จ ✅', '#34d399');
+            if (!isAuto) {
+                alert("บันทึกข้อมูลลง Google Sheets สำเร็จเรียบร้อยแล้ว!");
+            } else {
+                console.log("Auto-synced to Google Sheets.");
+            }
         } else {
-            throw new Error('Save status not success');
+            throw new Error(result ? result.message : "ระบบฝั่งชีตตอบรับล้มเหลว");
         }
-    } catch (e) {
-        console.error('Save failed', e);
-        showSyncStatus('บันทึกลงคลาวด์ล้มเหลว ❌', '#f87171');
+    } catch (err) {
+        console.error("Failed to push to Google Sheets:", err);
+        if (!isAuto) {
+            alert("บันทึกข้อมูลลงชีตล้มเหลว: " + err.message);
+        }
+    } finally {
+        if (!isAuto) {
+            pushBtn.disabled = false;
+            pushBtn.innerHTML = originalText;
+        }
     }
 }
 
-function showSyncStatus(msg, color) {
-    const el = document.getElementById('sheet-sync-status');
-    if (el) {
-        el.textContent = msg;
-        el.style.color = color;
-        el.style.display = 'block';
-        setTimeout(() => {
-            if (el.textContent === msg) {
-                el.style.display = 'none';
-            }
-        }, 4000);
-    }
+// RENDER STOCK TABLE
+function renderStock() {
+    const listContainer = document.getElementById('stock-list-container');
+    if (!listContainer) return;
+    
+    listContainer.innerHTML = '';
+    
+    DRINKS.forEach(drink => {
+        const qty = state.stock[drink.id] !== undefined ? state.stock[drink.id] : 20;
+        
+        let statusBadge = '';
+        if (qty === 0) {
+            statusBadge = '<span class="badge badge-danger">❌ หมด</span>';
+        } else if (qty <= 5) {
+            statusBadge = '<span class="badge badge-warning">⚠️ ใกล้หมด</span>';
+        } else {
+            statusBadge = '<span class="badge badge-success">ปกติ</span>';
+        }
+        
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <div style="width: 10px; height: 10px; border-radius: 50%; background-color: ${drink.color};"></div>
+                    <div style="text-align: left;">
+                        <strong style="color: #fff;">${drink.nameTH}</strong>
+                        <div style="font-size: 0.75rem; color: var(--color-text-muted);">${drink.nameEN}</div>
+                    </div>
+                </div>
+            </td>
+            <td style="text-align: center;">
+                <span id="stock-val-display-${drink.id}" style="font-size: 1.1rem; font-weight: 700; color: #fff;">${qty}</span>
+            </td>
+            <td style="text-align: center;">${statusBadge}</td>
+            <td>
+                <div class="stock-qty-control" style="display: flex; align-items: center; justify-content: center; gap: 0.35rem;">
+                    <button class="btn btn-outline btn-sm" style="padding: 0.25rem 0.5rem;" onclick="adjustStockValue('${drink.id}', -5)">-5</button>
+                    <button class="btn btn-outline btn-sm" style="padding: 0.25rem 0.5rem;" onclick="adjustStockValue('${drink.id}', -1)">-1</button>
+                    <input type="number" id="stock-input-${drink.id}" value="${qty}" min="0" style="width: 55px; text-align: center; font-weight: bold; background: rgba(0,0,0,0.2); border: 1px solid var(--border-glass); color: #fff; padding: 0.25rem 0.4rem; border-radius: var(--radius-sm);" onchange="updateStockFromInput('${drink.id}', this.value)">
+                    <button class="btn btn-outline btn-sm" style="padding: 0.25rem 0.5rem;" onclick="adjustStockValue('${drink.id}', 1)">+1</button>
+                    <button class="btn btn-outline btn-sm" style="padding: 0.25rem 0.5rem;" onclick="adjustStockValue('${drink.id}', 5)">+5</button>
+                </div>
+            </td>
+        `;
+        listContainer.appendChild(row);
+    });
+}
+
+// ADJUST STOCK BY DELTA
+function adjustStockValue(drinkId, delta) {
+    const currentVal = state.stock[drinkId] !== undefined ? state.stock[drinkId] : 20;
+    const newVal = Math.max(0, currentVal + delta);
+    state.stock[drinkId] = newVal;
+    
+    saveToLocalStorage();
+    renderStock();
+    renderDrinkGrid(); // Update POS cards stock indicator as well
+}
+
+// UPDATE STOCK DIRECTLY FROM INPUT
+function updateStockFromInput(drinkId, value) {
+    const newVal = Math.max(0, parseInt(value) || 0);
+    state.stock[drinkId] = newVal;
+    
+    saveToLocalStorage();
+    renderStock();
+    renderDrinkGrid();
 }
 
 // RUN ON LOAD

@@ -36,7 +36,7 @@
         </header>
 
         <!-- BANNER DECORATION -->
-        <div class="app-banner" style="background-image: linear-gradient(180deg, rgba(15, 23, 42, 0.4) 0%, rgba(15, 23, 42, 0.95) 100%), url('assets/juice_bar_banner.jpg');">
+        <div class="app-banner" style="background-image: linear-gradient(180deg, rgba(42, 44, 39, 0.4) 0%, rgba(42, 44, 39, 0.95) 100%), url('assets/juice_bar_banner.jpg');">
             <div class="banner-content">
                 <h2>น้ำขวดละ 80 บาท</h2>
                 <p class="promo-badge"><i class="fa-solid fa-star-half-stroke"></i> ซื้อ 4 ขวด 300 บาท | ซื้อ 7 ขวด 500 บาท</p>
@@ -56,19 +56,9 @@
                         <!-- Customer Info Form -->
                         <div class="form-row">
                             <div class="form-group flex-2">
-                                <label for="customer-name"><i class="fa-solid fa-user-tag"></i> แหล่งออเดอร์ / โต๊ะ</label>
-                                <select id="customer-name" required>
-                                    <option value="กลับบ้าน">กลับบ้าน</option>
-                                    <option value="Grab">Grab</option>
-                                    <option value="โต๊ะ 1">โต๊ะ 1</option>
-                                    <option value="โต๊ะ 2">โต๊ะ 2</option>
-                                    <option value="โต๊ะ 3">โต๊ะ 3</option>
-                                    <option value="โต๊ะ 4">โต๊ะ 4</option>
-                                    <option value="โต๊ะ 5">โต๊ะ 5</option>
-                                    <option value="โต๊ะ 6">โต๊ะ 6</option>
-                                    <option value="โต๊ะ 7">โต๊ะ 7</option>
-                                    <option value="โต๊ะ 8">โต๊ะ 8</option>
-                                </select>
+                                <label for="customer-name"><i class="fa-solid fa-user"></i> ชื่อลูกค้า / คนสั่ง</label>
+                                <input type="text" id="customer-name" placeholder="ระบุชื่อลูกค้า (เช่น คุณสมศักดิ์)" required autocomplete="off">
+                                <div class="autocomplete-suggestions" id="name-suggestions"></div>
                             </div>
                             <div class="form-group flex-1">
                                 <label for="order-date"><i class="fa-regular fa-calendar-days"></i> วันที่บิล</label>
@@ -86,13 +76,9 @@
                                     <option value="other">ช่องทางอื่น</option>
                                 </select>
                             </div>
-                            <div class="form-group flex-1">
-                                <label for="staff-name"><i class="fa-solid fa-user-pen"></i> ผู้บันทึกบิล</label>
-                                <input type="text" id="staff-name" placeholder="ชื่อผู้บันทึก" autocomplete="off">
-                            </div>
-                            <div class="form-group flex-1" id="grab-driver-group" style="display: none !important;">
+                            <div class="form-group flex-1" id="grab-driver-group" style="display: none;">
                                 <label for="grab-driver-name"><i class="fa-solid fa-helmet-safety text-warning"></i> ชื่อคนขับ Grab</label>
-                                <input type="text" id="grab-driver-name" value="Grab" placeholder="ชื่อคนขับ / ทะเบียนรถ">
+                                <input type="text" id="grab-driver-name" placeholder="ชื่อคนขับ / ทะเบียนรถ">
                             </div>
                         </div>
 
@@ -156,6 +142,7 @@
                 <nav class="tab-navigation">
                     <button class="tab-btn active" data-tab="orders-tab"><i class="fa-solid fa-receipt"></i> บันทึกออเดอร์</button>
                     <button class="tab-btn" data-tab="grab-tab"><i class="fa-solid fa-helmet-safety"></i> รับของ Grab</button>
+                    <button class="tab-btn" data-tab="stock-tab"><i class="fa-solid fa-boxes-stacked"></i> สต็อกน้ำ</button>
                     <button class="tab-btn" data-tab="summary-tab"><i class="fa-solid fa-chart-line"></i> สรุปยอดขาย</button>
                 </nav>
 
@@ -179,8 +166,8 @@
                                 <input type="date" id="filter-custom-date">
                             </div>
                             <div class="filter-group search-group">
-                                <label for="search-order-customer"><i class="fa-solid fa-user-tag"></i> ค้นหาโต๊ะ/แหล่งออเดอร์</label>
-                                <input type="text" id="search-order-customer" placeholder="ค้นหาตามโต๊ะหรือแหล่งออเดอร์...">
+                                <label for="search-order-customer"><i class="fa-solid fa-user-tag"></i> ค้นหาชื่อลูกค้า</label>
+                                <input type="text" id="search-order-customer" placeholder="ค้นหาชื่อลูกค้า...">
                             </div>
                         </div>
 
@@ -214,7 +201,7 @@
                         <div class="filter-bar">
                             <div class="filter-group search-group flex-1">
                                 <label for="search-grab-rider"><i class="fa-solid fa-magnifying-glass"></i> ค้นหาชื่อคนขับ/ออเดอร์</label>
-                                <input type="text" id="search-grab-rider" placeholder="ระบุชื่อคนขับ หรือ โต๊ะ/แหล่งออเดอร์...">
+                                <input type="text" id="search-grab-rider" placeholder="ระบุชื่อคนขับ หรือ ชื่อลูกค้า...">
                             </div>
                         </div>
 
@@ -224,9 +211,9 @@
                                 <thead>
                                     <tr>
                                         <th>วัน-เวลา</th>
-                                        <th>ช่องทางจัดส่ง</th>
+                                        <th>ชื่อคนขับ Grab</th>
                                         <th>ของที่รับไป</th>
-                                        <th>โต๊ะ / แหล่งออเดอร์</th>
+                                        <th>ออเดอร์ของลูกค้า</th>
                                         <th>การจัดการ</th>
                                     </tr>
                                 </thead>
@@ -240,7 +227,37 @@
                         </div>
                     </div>
 
-                    <!-- 3. SUMMARY & ANALYTICS TAB -->
+                    <!-- 3. STOCK TAB -->
+                    <div class="tab-pane" id="stock-tab">
+                        <div class="grab-manager-header">
+                            <div class="grab-title-desc">
+                                <h3><i class="fa-solid fa-boxes-stacked text-primary"></i> เช็คสต็อกและจัดการสต็อกน้ำ</h3>
+                                <p>ดูจำนวนน้ำคงเหลือ ปรับสต็อก และตรวจสอบสถานะสินค้าใกล้หมด</p>
+                            </div>
+                        </div>
+
+                        <!-- Stock Table -->
+                        <div class="table-responsive">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>ชื่อน้ำ</th>
+                                        <th style="text-align: center;">จำนวนสต็อกคงเหลือ (ขวด)</th>
+                                        <th style="text-align: center;">สถานะ</th>
+                                        <th style="text-align: center;">ปรับสต็อกอย่างรวดเร็ว</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="stock-list-container">
+                                    <!-- Stock rows load dynamically -->
+                                    <tr>
+                                        <td colspan="4" class="text-center text-muted">กำลังโหลดสต็อกน้ำ...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- 4. SUMMARY & ANALYTICS TAB -->
                     <div class="tab-pane" id="summary-tab">
                         <div class="analytics-grid">
                             <!-- Summary Cards -->
@@ -328,24 +345,13 @@
             </div>
             <div class="modal-body">
                 <form id="grab-manual-form">
-                    <div class="form-group" style="display: none !important;">
+                    <div class="form-group">
                         <label for="grab-modal-driver"><i class="fa-solid fa-user"></i> ชื่อคนขับ Grab *</label>
-                        <input type="text" id="grab-modal-driver" value="Grab" required>
+                        <input type="text" id="grab-modal-driver" placeholder="ระบุชื่อคนขับ เช่น นายศักดิ์ชัย" required>
                     </div>
                     <div class="form-group">
-                        <label for="grab-modal-customer"><i class="fa-solid fa-user-tag"></i> แหล่งออเดอร์ / โต๊ะ *</label>
-                        <select id="grab-modal-customer" required>
-                            <option value="Grab">Grab</option>
-                            <option value="กลับบ้าน">กลับบ้าน</option>
-                            <option value="โต๊ะ 1">โต๊ะ 1</option>
-                            <option value="โต๊ะ 2">โต๊ะ 2</option>
-                            <option value="โต๊ะ 3">โต๊ะ 3</option>
-                            <option value="โต๊ะ 4">โต๊ะ 4</option>
-                            <option value="โต๊ะ 5">โต๊ะ 5</option>
-                            <option value="โต๊ะ 6">โต๊ะ 6</option>
-                            <option value="โต๊ะ 7">โต๊ะ 7</option>
-                            <option value="โต๊ะ 8">โต๊ะ 8</option>
-                        </select>
+                        <label for="grab-modal-customer"><i class="fa-solid fa-user-tag"></i> ออเดอร์ของลูกค้า (พิมพ์ระบุ หรือเว้นว่างได้)</label>
+                        <input type="text" id="grab-modal-customer" placeholder="ระบุชื่อลูกค้า เช่น คุณแดง">
                     </div>
                     <div class="form-group">
                         <label><i class="fa-solid fa-glass-water"></i> รายการน้ำที่รับไป *</label>
@@ -391,22 +397,25 @@
                     </div>
                 </div>
 
-                <div class="backup-card" style="grid-column: 1 / -1; margin-top: 1.5rem; border-top: 1.5px solid var(--border-glass); padding-top: 1.5rem;">
-                    <h3><i class="fa-solid fa-link text-warning"></i> เชื่อมต่อ Google Sheets (สำหรับใช้งานหลายเครื่องพร้อมกัน)</h3>
-                    <p class="text-muted" style="margin-bottom: 1rem; font-size: 0.85rem;">วางลิงก์ Web App URL เพื่อเซฟและซิงค์ข้อมูลสต็อกบิลและ Grab ทั้งหมดไว้บนคลาวด์ Google Drive</p>
-                    <div class="form-group" style="margin-bottom: 1rem;">
-                        <label for="sheet-url-input"><i class="fa-solid fa-cloud"></i> Google Sheets Web App URL</label>
-                        <input type="text" id="sheet-url-input" placeholder="วางลิงก์ Web App URL (Google Apps Script) ที่นี่..." style="width: 100%; padding: 0.75rem; background: rgba(15, 23, 42, 0.4); border: 1.5px solid var(--border-glass); border-radius: var(--radius-md); color: var(--color-text); outline: none;">
+                <!-- GOOGLE SHEETS SYNC SECTION -->
+                <div class="sheets-sync-section" style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px dashed var(--border-glass);">
+                    <h3 style="font-size: 1.1rem; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; font-family: var(--font-heading); color: var(--color-primary);"><i class="fa-solid fa-cloud-arrow-up"></i> ซิงค์ข้อมูลกับ Google Sheets</h3>
+                    <p class="text-muted" style="font-size: 0.8rem; margin-bottom: 1rem;">เชื่อมต่อข้อมูลผ่าน Google Apps Script เพื่อแบ่งปันยอดขายและบิลสั่งซื้อไปใช้ร่วมกันบนอุปกรณ์อื่นๆ (เช่น มือถือหรือแท็บเล็ต) ได้พร้อมกันแบบเรียลไทม์</p>
+                    
+                    <div class="form-group" style="margin-bottom: 1rem; display: flex; flex-direction: column; gap: 0.5rem;">
+                        <label for="sheet-url-input" style="font-size: 0.85rem; color: var(--color-text); font-weight: 500;"><i class="fa-solid fa-globe text-primary"></i> Google Apps Script Web App URL</label>
+                        <input type="text" id="sheet-url-input" placeholder="วางลิงก์ Web App URL ที่นี่..." style="width: 100%; padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border-glass); background: rgba(15, 23, 42, 0.6); color: #fff; font-family: var(--font-body); font-size: 0.9rem; outline: none; transition: border var(--transition-fast);">
                     </div>
-                    <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
-                        <button class="btn btn-outline" id="btn-pull-sheet" style="flex: 1;"><i class="fa-solid fa-cloud-arrow-down"></i> ดึงจากชีต (Pull)</button>
-                        <button class="btn btn-primary" id="btn-push-sheet" style="flex: 1;"><i class="fa-solid fa-cloud-arrow-up"></i> บันทึกไปชีต (Push)</button>
+                    
+                    <div style="display: flex; gap: 0.75rem; margin-bottom: 1rem;">
+                        <button class="btn btn-primary" id="btn-pull-sheet" style="flex: 1;"><i class="fa-solid fa-cloud-arrow-down"></i> ดึงจากชีต 📥</button>
+                        <button class="btn btn-secondary" id="btn-push-sheet" style="flex: 1;"><i class="fa-solid fa-cloud-arrow-up"></i> บันทึกไปชีต 📤</button>
                     </div>
+                    
                     <div style="display: flex; align-items: center; gap: 0.5rem;">
-                        <input type="checkbox" id="auto-sync-checkbox" style="width: 18px; height: 18px; cursor: pointer;">
-                        <label for="auto-sync-checkbox" style="font-size: 0.85rem; color: var(--color-text-muted); cursor: pointer;">ซิงค์อัตโนมัติเมื่อมีการบันทึก/ลบออเดอร์</label>
+                        <input type="checkbox" id="auto-sync-checkbox" style="width: 18px; height: 18px; cursor: pointer; accent-color: var(--color-primary);">
+                        <label for="auto-sync-checkbox" style="font-size: 0.85rem; cursor: pointer; color: var(--color-text-muted); select-layout: none;">ซิงค์อัปเดตอัตโนมัติเมื่อทำรายการสั่งซื้อ/แก้ไขข้อมูล</label>
                     </div>
-                    <div id="sheet-sync-status" style="font-size: 0.85rem; margin-top: 0.75rem; display: none; font-weight: bold;"></div>
                 </div>
 
                 <div class="danger-zone">
