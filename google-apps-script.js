@@ -25,11 +25,11 @@ function doGet(e) {
       orderSheet.clear();
       
       // Set headers for Orders
-      orderSheet.getRange(1, 1, 1, 12).setValues([[
+      orderSheet.getRange(1, 1, 1, 13).setValues([[
         "Order ID", "Date", "Table / Source", "Delivery Type", 
         "Driver Name", "Total Qty", "Subtotal (THB)", 
         "Discount (THB)", "Total Price (THB)", "Status", 
-        "Created At", "Updated At"
+        "Created At", "Updated At", "Staff Name"
       ]]);
       
       if (orders.length > 0) {
@@ -53,14 +53,15 @@ function doGet(e) {
             o.total || 0,
             o.status || "",
             o.createdAt || "",
-            o.updatedAt || ""
+            o.updatedAt || "",
+            o.staffName || ""
           ];
         });
         
         // Format headers bold
-        orderSheet.getRange(1, 1, 1, 12).setFontWeight("bold").setBackground("#e2e8f0");
-        orderSheet.getRange(2, 1, orderRows.length, 12).setValues(orderRows);
-        orderSheet.autoResizeColumns(1, 12);
+        orderSheet.getRange(1, 1, 1, 13).setFontWeight("bold").setBackground("#e2e8f0");
+        orderSheet.getRange(2, 1, orderRows.length, 13).setValues(orderRows);
+        orderSheet.autoResizeColumns(1, 13);
       }
       
       // 3. Write Human Readable Grab Pickups

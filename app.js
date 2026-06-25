@@ -55,6 +55,10 @@ async function init() {
     document.getElementById('sheet-url-input').value = sheetUrl;
     document.getElementById('auto-sync-checkbox').checked = autoSync;
     
+    // Load last staff name
+    const lastStaff = localStorage.getItem('juice_bar_last_staff_name') || '';
+    document.getElementById('staff-name').value = lastStaff;
+    
     // Load state from local server database.json or fall back to localStorage
     let loaded = false;
     try {
@@ -531,6 +535,7 @@ function saveOrder() {
     const orderDate = document.getElementById('order-date').value;
     const deliveryType = document.getElementById('delivery-type').value;
     const grabDriverName = document.getElementById('grab-driver-name').value.trim();
+    const staffName = document.getElementById('staff-name').value.trim() || 'ไม่ระบุ';
     
     if (!customerName) {
         alert("กรุณาเลือกแหล่งออเดอร์ / โต๊ะ");
@@ -542,6 +547,11 @@ function saveOrder() {
     if (cartKeys.length === 0) {
         alert("กรุณาเลือกเครื่องดื่มอย่างน้อย 1 ขวด");
         return;
+    }
+    
+    // Save last staff name to local storage
+    if (staffName !== 'ไม่ระบุ') {
+        localStorage.setItem('juice_bar_last_staff_name', staffName);
     }
     
     const totalQty = Object.values(state.cart).reduce((a, b) => a + b, 0);
@@ -567,6 +577,7 @@ function saveOrder() {
                 grabDriverName: deliveryType === 'grab' ? grabDriverName : '',
                 items: { ...state.cart },
                 priceDetails: priceDetails,
+                staffName: staffName,
                 updatedTime: now.toISOString()
             };
             
@@ -588,6 +599,7 @@ function saveOrder() {
             items: { ...state.cart },
             priceDetails: priceDetails,
             status: 'paid', // defaults to paid
+            staffName: staffName,
             createdTime: now.toISOString(),
             updatedTime: null
         };
@@ -658,6 +670,7 @@ function loadOrderForEditing(orderId) {
     document.getElementById('customer-name').value = order.customerName;
     document.getElementById('order-date').value = order.date;
     document.getElementById('delivery-type').value = order.deliveryType;
+    document.getElementById('staff-name').value = order.staffName || '';
     
     const grabDriverInput = document.getElementById('grab-driver-name');
     const grabGroup = document.getElementById('grab-driver-group');
@@ -693,6 +706,9 @@ function clearPOSForm() {
     document.getElementById('delivery-type').value = 'walkin';
     document.getElementById('grab-driver-name').value = '';
     document.getElementById('grab-driver-group').style.display = 'none';
+    
+    // Set to last used staff name
+    document.getElementById('staff-name').value = localStorage.getItem('juice_bar_last_staff_name') || '';
     
     // UI reset
     document.getElementById('pos-title').innerHTML = `<i class="fa-solid fa-cart-plus text-primary"></i> สั่งน้ำขวด / บันทึกการขาย`;
@@ -801,7 +817,7 @@ function renderOrders() {
                     </div>
                 </div>
                 <div class="order-meta-info">
-                    <span class="order-time"><i class="fa-regular fa-clock"></i> บิลวันที่ ${order.date} (${order.time})</span>
+                    <span class="order-time"><i class="fa-regular fa-clock"></i> บิลวันที่ ${order.date} (${order.time}) | <i class="fa-solid fa-user-pen"></i> โดย: ${order.staffName || 'ไม่ระบุ'}</span>
                     ${order.updatedTime ? `<span class="order-modified-badge"><i class="fa-solid fa-pen"></i> แก้ไขบิลแล้ว</span>` : ''}
                 </div>
             </div>
