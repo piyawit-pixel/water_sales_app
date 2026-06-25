@@ -775,8 +775,10 @@ function renderOrders() {
     let totalRevenue = 0;
     
     filteredOrders.forEach(o => {
-        totalQty += Object.values(o.items).reduce((sum, q) => sum + q, 0);
-        totalRevenue += o.priceDetails.total;
+        const orderQty = o.items ? Object.values(o.items).reduce((sum, q) => sum + q, 0) : 0;
+        totalQty += orderQty;
+        const pricing = o.priceDetails || { total: 0, discount: 0 };
+        totalRevenue += pricing.total || 0;
     });
     
     document.getElementById('stats-total-bottles').textContent = totalQty;
@@ -852,8 +854,8 @@ function renderOrders() {
             ${remarkHTML}
             <div class="order-card-footer">
                 <div class="order-price-info">
-                    <span class="order-total-price text-primary">${order.priceDetails.total} บาท</span>
-                    ${order.priceDetails.discount > 0 ? `<span class="order-promo-saving"><i class="fa-solid fa-tags"></i> ประหยัดไป ${order.priceDetails.discount} บ.</span>` : ''}
+                    <span class="order-total-price text-primary">${(order.priceDetails ? order.priceDetails.total : 0)} บาท</span>
+                    ${(order.priceDetails && order.priceDetails.discount > 0) ? `<span class="order-promo-saving"><i class="fa-solid fa-tags"></i> ประหยัดไป ${order.priceDetails.discount} บ.</span>` : ''}
                 </div>
                 <div class="order-actions">
                     <button class="btn btn-outline btn-sm" onclick="loadOrderForEditing('${order.id}')" title="แก้ไขรายการ / ค่อยๆสั่งเพิ่มขวดเพื่อรวมโปร">
@@ -1213,12 +1215,13 @@ function renderAnalytics() {
     let deliveryStats = { walkin: 0, grab: 0, other: 0 };
     
     state.orders.forEach(order => {
-        const orderQty = Object.values(order.items).reduce((a, b) => a + b, 0);
+        const orderQty = order.items ? Object.values(order.items).reduce((a, b) => a + b, 0) : 0;
+        const pricing = order.priceDetails || { total: 0, discount: 0 };
         
         // Sum grand totals (always all-time)
         totalBottles += orderQty;
-        totalRevenue += order.priceDetails.total;
-        totalDiscount += order.priceDetails.discount;
+        totalRevenue += pricing.total || 0;
+        totalDiscount += pricing.discount || 0;
         
         // Check if order matches date filter
         let matchesFilter = false;
@@ -1229,8 +1232,8 @@ function renderAnalytics() {
         
         if (matchesFilter) {
             filteredBottles += orderQty;
-            filteredRevenue += order.priceDetails.total;
-            filteredDiscount += order.priceDetails.discount;
+            filteredRevenue += pricing.total || 0;
+            filteredDiscount += pricing.discount || 0;
             
             // Channel stats (only for filtered dates)
             const type = order.deliveryType;
@@ -1241,11 +1244,13 @@ function renderAnalytics() {
             }
             
             // Accumulate popularity (only for filtered dates)
-            Object.keys(order.items).forEach(drinkId => {
-                if (popTracker.hasOwnProperty(drinkId)) {
-                    popTracker[drinkId] += order.items[drinkId];
-                }
-            });
+            if (order.items) {
+                Object.keys(order.items).forEach(drinkId => {
+                    if (popTracker.hasOwnProperty(drinkId)) {
+                        popTracker[drinkId] += order.items[drinkId];
+                    }
+                });
+            }
         }
     });
     
