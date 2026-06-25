@@ -56,9 +56,10 @@ function init() {
     state.sheetUrl = localStorage.getItem('juice_bar_sheet_url') || '';
     state.autoSync = localStorage.getItem('juice_bar_auto_sync') === 'true';
     
-    // Populate Google Sheets UI inputs
+    // Populate Google Sheets UI inputs & staff name
     document.getElementById('sheet-url-input').value = state.sheetUrl;
     document.getElementById('auto-sync-checkbox').checked = state.autoSync;
+    document.getElementById('staff-name').value = localStorage.getItem('juice_bar_last_staff') || '';
     
     // Set default dates
     const todayStr = getLocalDateString(new Date());
@@ -498,9 +499,11 @@ function saveOrder() {
     const orderDate = document.getElementById('order-date').value;
     const deliveryType = document.getElementById('delivery-type').value;
     const grabDriverName = document.getElementById('grab-driver-name').value.trim();
+    const staffName = document.getElementById('staff-name').value.trim();
+    const orderRemark = document.getElementById('order-remark').value.trim();
     
     if (!customerName) {
-        alert("กรุณากรอกชื่อคนสั่ง / ลูกค้า");
+        alert("กรุณาเลือกโต๊ะ / ช่องทาง");
         document.getElementById('customer-name').focus();
         return;
     }
@@ -515,6 +518,11 @@ function saveOrder() {
         alert("กรุณากรอกชื่อคนขับ Grab");
         document.getElementById('grab-driver-name').focus();
         return;
+    }
+    
+    // Save last used staff name to remember it
+    if (staffName) {
+        localStorage.setItem('juice_bar_last_staff', staffName);
     }
     
     const totalQty = Object.values(state.cart).reduce((a, b) => a + b, 0);
@@ -552,6 +560,8 @@ function saveOrder() {
                 grabDriverName: deliveryType === 'grab' ? grabDriverName : '',
                 items: { ...state.cart },
                 priceDetails: priceDetails,
+                staffName: staffName,
+                remark: orderRemark,
                 updatedTime: now.toISOString()
             };
             
@@ -579,6 +589,8 @@ function saveOrder() {
             items: { ...state.cart },
             priceDetails: priceDetails,
             status: 'paid', // defaults to paid
+            staffName: staffName,
+            remark: orderRemark,
             createdTime: now.toISOString(),
             updatedTime: null
         };
@@ -649,6 +661,8 @@ function loadOrderForEditing(orderId) {
     document.getElementById('customer-name').value = order.customerName;
     document.getElementById('order-date').value = order.date;
     document.getElementById('delivery-type').value = order.deliveryType;
+    document.getElementById('staff-name').value = order.staffName || '';
+    document.getElementById('order-remark').value = order.remark || '';
     
     const grabDriverInput = document.getElementById('grab-driver-name');
     const grabGroup = document.getElementById('grab-driver-group');
@@ -679,11 +693,13 @@ function clearPOSForm() {
     state.editingOrderId = null;
     state.cart = {};
     
-    document.getElementById('customer-name').value = '';
+    document.getElementById('customer-name').value = 'กลับบ้าน';
     document.getElementById('order-date').value = getLocalDateString(new Date());
     document.getElementById('delivery-type').value = 'walkin';
     document.getElementById('grab-driver-name').value = '';
     document.getElementById('grab-driver-group').style.display = 'none';
+    document.getElementById('staff-name').value = localStorage.getItem('juice_bar_last_staff') || '';
+    document.getElementById('order-remark').value = '';
     
     // UI reset
     document.getElementById('pos-title').innerHTML = `<i class="fa-solid fa-cart-plus text-primary"></i> สั่งน้ำขวด / บันทึกการขาย`;
@@ -783,12 +799,20 @@ function renderOrders() {
             }
         });
         
+        const staffBadge = order.staffName ? `<span class="badge badge-outline"><i class="fa-solid fa-user-pen"></i> ผู้บันทึก: ${order.staffName}</span>` : '';
+        const remarkHTML = order.remark ? `
+            <div class="order-remark-text" style="font-size: 0.8rem; color: var(--color-primary); margin-top: 0.5rem; font-style: italic; background: rgba(0,0,0,0.15); padding: 0.35rem 0.5rem; border-radius: 4px; border-left: 2px solid var(--color-primary); display: flex; align-items: center; gap: 0.4rem;">
+                <i class="fa-regular fa-comment-dots"></i> หมายเหตุ: ${order.remark}
+            </div>
+        ` : '';
+
         card.innerHTML = `
             <div class="order-card-header">
                 <div>
                     <h4 class="order-cust-name">${order.customerName}</h4>
                     <div style="margin-top: 0.25rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
                         ${channelBadge}
+                        ${staffBadge}
                     </div>
                 </div>
                 <div class="order-meta-info">
@@ -799,6 +823,7 @@ function renderOrders() {
             <div class="order-details-grid">
                 ${drinkBadgesHTML}
             </div>
+            ${remarkHTML}
             <div class="order-card-footer">
                 <div class="order-price-info">
                     <span class="order-total-price text-primary">${order.priceDetails.total} บาท</span>
