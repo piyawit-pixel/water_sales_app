@@ -57,6 +57,15 @@ function doPost(e) {
   try {
     var ss = SpreadsheetApp.getActiveSpreadsheet();
     var postData = JSON.parse(e.postData.contents);
+    
+    // Check if it is a LINE Webhook event payload
+    if (postData.events && Array.isArray(postData.events)) {
+      handleLineWebhook(ss, postData.events);
+      return ContentService.createTextOutput(JSON.stringify({ status: 'success' }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+    
+    // Standard POS save action
     var action = postData.action;
     var payload = postData.data;
     
@@ -69,6 +78,44 @@ function doPost(e) {
   } catch(err) {
     return ContentService.createTextOutput(JSON.stringify({ status: 'error', message: err.toString() }))
       .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+function handleLineWebhook(ss, events) {
+  var logSheet = ss.getSheetByName("LineLogs");
+  if (!logSheet) {
+    logSheet = ss.insertSheet("LineLogs");
+    logSheet.getRange(1, 1, 1, 5).setValues([[
+      "Timestamp", "Event Type", "User ID", "Group/Room ID", "Message Text / Detail"
+    ]]).setFontWeight("bold").setBackground("#e2e8f0");
+  }
+  
+  var rows = events.map(function(ev) {
+    var timestamp = new Date(ev.timestamp || Date.now());
+    var eventType = ev.type || "";
+    var userId = ev.source ? (ev.source.userId || "") : "";
+    var targetId = ev.source ? (ev.source.groupId || ev.source.roomId || "") : "";
+    
+    var detail = "";
+    if (ev.message) {
+      detail = ev.message.text || ev.message.type || "";
+    } else if (ev.type === "join" || ev.type === "follow") {
+      detail = "Bot joined or User followed";
+    }
+    
+    return [
+      Utilities.formatDate(timestamp, Session.getScriptTimeZone() || "GMT+7", "yyyy-MM-dd HH:mm:ss"),
+      eventType,
+      userId,
+      targetId,
+      detail
+    ];
+  });
+  
+  if (rows.length > 0) {
+    var lastRow = logSheet.getLastRow();
+    logSheet.getRange(lastRow + 1, 1, rows.length, 5).setValues(rows);
+    logSheet.autoResizeColumns(1, 5);
   }
 }
 
