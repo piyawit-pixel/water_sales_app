@@ -497,6 +497,84 @@ function setupEventListeners() {
         });
     }
 
+    // Profile Edit Modal toggle and submission
+    const btnEditProfile = document.getElementById('btn-edit-profile');
+    const headerUsernameSpan = document.getElementById('header-username');
+    const btnCloseProfileModal = document.getElementById('btn-close-profile-modal');
+    const btnCancelProfileSave = document.getElementById('btn-cancel-profile-save');
+    const profileModal = document.getElementById('profile-modal');
+    const profileForm = document.getElementById('profile-edit-form');
+
+    const openProfileModal = () => {
+        const username = sessionStorage.getItem('baanphuan_username');
+        if (!username) return;
+        const foundUser = state.users.find(u => u.username === username);
+        if (!foundUser) return;
+
+        document.getElementById('profile-username').value = foundUser.username;
+        document.getElementById('profile-pin').value = foundUser.pin;
+        profileModal.classList.add('active');
+    };
+
+    const closeProfileModal = () => {
+        profileModal.classList.remove('active');
+    };
+
+    if (btnEditProfile) btnEditProfile.addEventListener('click', openProfileModal);
+    if (headerUsernameSpan) headerUsernameSpan.addEventListener('click', openProfileModal);
+    if (btnCloseProfileModal) btnCloseProfileModal.addEventListener('click', closeProfileModal);
+    if (btnCancelProfileSave) btnCancelProfileSave.addEventListener('click', closeProfileModal);
+
+    if (profileForm) {
+        profileForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const newUsername = document.getElementById('profile-username').value.trim();
+            const newPin = document.getElementById('profile-pin').value.trim();
+            const oldUsername = sessionStorage.getItem('baanphuan_username');
+
+            if (newPin.length < 4 || newPin.length > 6 || isNaN(newPin)) {
+                alert('รหัสผ่าน PIN ต้องเป็นตัวเลข 4-6 หลักเท่านั้น');
+                return;
+            }
+
+            // Check duplicate name (excluding self)
+            if (newUsername.toLowerCase() !== oldUsername.toLowerCase()) {
+                if (state.users.some(u => u.username.toLowerCase() === newUsername.toLowerCase())) {
+                    alert('มีชื่อพนักงานคนนี้อยู่ในระบบแล้ว');
+                    return;
+                }
+            }
+
+            // Update user in state
+            const userIndex = state.users.findIndex(u => u.username === oldUsername);
+            if (userIndex !== -1) {
+                const currentRole = state.users[userIndex].role;
+                state.users[userIndex] = { username: newUsername, pin: newPin, role: currentRole };
+                
+                // Save to localStorage
+                localStorage.setItem('juice_bar_users', JSON.stringify(state.users));
+                
+                // Update session storage
+                sessionStorage.setItem('baanphuan_username', newUsername);
+                
+                // Update last staff logging reference
+                const lastStaff = localStorage.getItem('juice_bar_last_staff');
+                if (lastStaff === oldUsername) {
+                    localStorage.setItem('juice_bar_last_staff', newUsername);
+                }
+
+                // Re-render dropdown & lists
+                renderLoginUserDropdown();
+                renderAdminUsersList();
+                checkLoginStatus();
+                closeProfileModal();
+                alert('บันทึกข้อมูลส่วนตัวสำเร็จ');
+            } else {
+                alert('ไม่พบผู้ใช้นี้ในระบบ');
+            }
+        });
+    }
+
     // Admin Panel - Add/Edit User Form
     const adminUserForm = document.getElementById('admin-user-form');
     if (adminUserForm) {

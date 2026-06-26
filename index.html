@@ -11,7 +11,7 @@
     <!-- FontAwesome for beautiful icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Main Style Sheet -->
-    <link rel="stylesheet" href="styles.css?v=9.0">
+    <link rel="stylesheet" href="styles.css?v=10.0">
 </head>
 <body>
     <div class="app-container">
@@ -27,7 +27,10 @@
             <div class="header-right">
                 <div class="user-badge" id="header-user-badge" style="display: none;">
                     <i class="fa-solid fa-circle-user"></i>
-                    <span id="header-username">พนักงาน</span>
+                    <span id="header-username" style="cursor: pointer;" title="คลิกเพื่อแก้ไขข้อมูลส่วนตัว">พนักงาน</span>
+                    <button id="btn-edit-profile" title="แก้ไขข้อมูลส่วนตัว" style="background: none; border: none; color: var(--color-primary); cursor: pointer; padding: 0.25rem; font-size: 0.9rem; transition: color var(--transition-fast); margin-left: 0.25rem; display: flex; align-items: center; justify-content: center;">
+                        <i class="fa-solid fa-user-gear"></i>
+                    </button>
                     <button id="btn-logout" title="ออกจากระบบ">
                         <i class="fa-solid fa-right-from-bracket"></i>
                     </button>
@@ -464,6 +467,32 @@
         </div>
     </div>
 
+    <!-- PROFILE EDIT MODAL -->
+    <div class="modal" id="profile-modal">
+        <div class="modal-content glass-card" style="max-width: 400px; padding: 2rem;">
+            <div class="modal-header">
+                <h2><i class="fa-solid fa-user-gear text-primary"></i> แก้ไขข้อมูลส่วนตัว</h2>
+                <button class="modal-close" id="btn-close-profile-modal">&times;</button>
+            </div>
+            <div class="modal-body" style="padding-top: 1rem;">
+                <form id="profile-edit-form">
+                    <div class="form-group" style="margin-bottom: 1.25rem; display: flex; flex-direction: column; gap: 0.5rem;">
+                        <label for="profile-username" style="font-size: 0.85rem; font-weight: 500; color: var(--color-text-muted);"><i class="fa-solid fa-user"></i> ชื่อเล่นพนักงาน</label>
+                        <input type="text" id="profile-username" placeholder="ระบุชื่อเล่นใหม่..." required style="width: 100%; padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border-glass); background: rgba(255, 255, 255, 0.85); color: var(--color-text); font-family: var(--font-body); font-size: 0.9rem; outline: none;">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 1.5rem; display: flex; flex-direction: column; gap: 0.5rem;">
+                        <label for="profile-pin" style="font-size: 0.85rem; font-weight: 500; color: var(--color-text-muted);"><i class="fa-solid fa-lock"></i> รหัสผ่านใหม่ (PIN 4-6 หลัก)</label>
+                        <input type="password" id="profile-pin" placeholder="ระบุรหัส PIN ใหม่..." required style="width: 100%; padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border-glass); background: rgba(255, 255, 255, 0.85); color: var(--color-text); font-family: var(--font-body); font-size: 0.9rem; outline: none;">
+                    </div>
+                    <div style="display: flex; gap: 0.75rem;">
+                        <button type="button" class="btn btn-outline btn-sm flex-1" id="btn-cancel-profile-save">ยกเลิก</button>
+                        <button type="submit" class="btn btn-primary btn-sm flex-1" id="btn-save-profile"><i class="fa-solid fa-floppy-disk"></i> บันทึกข้อมูล</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <!-- LOGIN SCREEN -->
     <div id="login-container" class="login-container">
         <div class="login-card glass-card">
@@ -508,6 +537,6 @@
     </div>
 
     <!-- MAIN APP SCRIPT -->
-    <script src="app.js?v=9.0"></script>
+    <script src="app.js?v=10.0"></script>
 </body>
 </html>
