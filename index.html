@@ -11,7 +11,7 @@
     <!-- FontAwesome for beautiful icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Main Style Sheet -->
-    <link rel="stylesheet" href="styles.css?v=6.0">
+    <link rel="stylesheet" href="styles.css?v=7.0">
 </head>
 <body>
     <div class="app-container">
@@ -166,6 +166,7 @@
                     <button class="tab-btn active" data-tab="orders-tab"><i class="fa-solid fa-receipt"></i> บันทึกออเดอร์</button>
                     <button class="tab-btn" data-tab="stock-tab"><i class="fa-solid fa-boxes-stacked"></i> สต็อกน้ำ</button>
                     <button class="tab-btn" data-tab="summary-tab"><i class="fa-solid fa-chart-line"></i> สรุปยอดขาย</button>
+                    <button class="tab-btn" data-tab="admin-tab" id="tab-btn-admin" style="display: none;"><i class="fa-solid fa-user-gear"></i> จัดการพนักงาน</button>
                 </nav>
 
                 <!-- TAB CONTENTS -->
@@ -331,6 +332,72 @@
                                         </div>
                                     </div>
                                 </div>
+                        </div>
+                    </div>
+
+                    <!-- 5. ADMIN/USER MANAGEMENT TAB -->
+                    <div class="tab-pane" id="admin-tab">
+                        <div class="grab-manager-header">
+                            <div class="grab-title-desc">
+                                <h3><i class="fa-solid fa-user-gear text-primary"></i> จัดการข้อมูลพนักงานและสิทธิ์ผู้ใช้งาน</h3>
+                                <p>เพิ่ม ลบ หรือแก้ไขรหัสผ่านพนักงานที่เข้าใช้งานระบบบันทึกยอดขาย</p>
+                            </div>
+                        </div>
+
+                        <div class="main-content" style="grid-template-columns: 1fr 1.5fr; gap: 1.5rem; display: grid;">
+                            <!-- Left Sub-panel: Add/Edit User Form -->
+                            <div class="card glass-card">
+                                <div class="card-header">
+                                    <h3 style="font-size: 1.1rem; color: var(--color-primary);"><i class="fa-solid fa-user-plus"></i> เพิ่ม/แก้ไขพนักงาน</h3>
+                                </div>
+                                <div class="card-body">
+                                    <form id="admin-user-form">
+                                        <input type="hidden" id="admin-edit-original-username">
+                                        <div class="form-group" style="margin-bottom: 1.25rem; display: flex; flex-direction: column; gap: 0.5rem;">
+                                            <label for="admin-username"><i class="fa-solid fa-user"></i> ชื่อพนักงาน</label>
+                                            <input type="text" id="admin-username" placeholder="ระบุชื่อพนักงาน..." required>
+                                        </div>
+                                        <div class="form-group" style="margin-bottom: 1.25rem; display: flex; flex-direction: column; gap: 0.5rem;">
+                                            <label for="admin-pin"><i class="fa-solid fa-lock"></i> รหัสผ่าน (PIN 4-6 หลัก)</label>
+                                            <input type="password" id="admin-pin" placeholder="ระบุรหัส PIN..." required>
+                                        </div>
+                                        <div class="form-group" style="margin-bottom: 1.5rem; display: flex; flex-direction: column; gap: 0.5rem;">
+                                            <label for="admin-role"><i class="fa-solid fa-shield-halved"></i> ระดับสิทธิ์</label>
+                                            <select id="admin-role">
+                                                <option value="staff" selected>พนักงาน (Staff)</option>
+                                                <option value="admin">ผู้ดูแลระบบ (Admin)</option>
+                                            </select>
+                                        </div>
+                                        <div style="display: flex; gap: 0.75rem;">
+                                            <button type="button" class="btn btn-outline btn-sm" id="btn-admin-cancel-edit" style="display: none;">ยกเลิก</button>
+                                            <button type="submit" class="btn btn-primary btn-sm flex-1" id="btn-admin-save-user"><i class="fa-solid fa-floppy-disk"></i> บันทึกข้อมูล</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <!-- Right Sub-panel: Users List Table -->
+                            <div class="card glass-card">
+                                <div class="card-header">
+                                    <h3 style="font-size: 1.1rem; color: var(--color-primary);"><i class="fa-solid fa-users"></i> รายชื่อพนักงานในระบบ</h3>
+                                </div>
+                                <div class="card-body" style="padding: 0;">
+                                    <div class="table-responsive">
+                                        <table class="data-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>ชื่อพนักงาน</th>
+                                                    <th style="text-align: center;">ระดับสิทธิ์</th>
+                                                    <th style="text-align: center;">รหัสผ่าน PIN</th>
+                                                    <th style="text-align: center;">จัดการ</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="admin-users-list">
+                                                <!-- Loaded dynamically -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -407,8 +474,10 @@
             </div>
             <form id="login-form">
                 <div class="form-group" style="margin-bottom: 1.25rem; display: flex; flex-direction: column; gap: 0.5rem;">
-                    <label for="login-username" style="font-size: 0.85rem; font-weight: 500; color: var(--color-text-muted); display: flex; align-items: center; gap: 0.4rem;"><i class="fa-solid fa-user"></i> ชื่อผู้ใช้งาน / พนักงาน</label>
-                    <input type="text" id="login-username" placeholder="ใส่ชื่อพนักงาน..." required>
+                    <label for="login-username" style="font-size: 0.85rem; font-weight: 500; color: var(--color-text-muted); display: flex; align-items: center; gap: 0.4rem;"><i class="fa-solid fa-user"></i> เลือกผู้ใช้งาน / พนักงาน</label>
+                    <select id="login-username" required>
+                        <!-- Loaded dynamically -->
+                    </select>
                 </div>
                 <div class="form-group" style="margin-bottom: 1.5rem; display: flex; flex-direction: column; gap: 0.5rem;">
                     <label for="login-pin" style="font-size: 0.85rem; font-weight: 500; color: var(--color-text-muted); display: flex; align-items: center; gap: 0.4rem;"><i class="fa-solid fa-lock"></i> รหัสผ่าน / PIN (ค่าเริ่มต้น: 1234)</label>

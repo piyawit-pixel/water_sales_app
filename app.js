@@ -29,6 +29,11 @@ const CAP_COLORS_MAP = {
     'ชมพู': '#ec4899'
 };
 
+const DEFAULT_USERS = [
+    { username: 'admin', pin: '5678', role: 'admin' },
+    { username: 'พนักงาน', pin: '1234', role: 'staff' }
+];
+
 // STATE MANAGEMENT
 let state = {
     orders: [],
@@ -44,6 +49,19 @@ let state = {
 
 // LOAD INITIAL STATE FROM LOCAL STORAGE
 function init() {
+    // Initialize users list
+    const savedUsers = localStorage.getItem('juice_bar_users');
+    if (savedUsers) {
+        try {
+            state.users = JSON.parse(savedUsers);
+        } catch (e) {
+            state.users = [...DEFAULT_USERS];
+        }
+    } else {
+        state.users = [...DEFAULT_USERS];
+        localStorage.setItem('juice_bar_users', JSON.stringify(state.users));
+    }
+
     const savedState = localStorage.getItem('juice_bar_tracker_state');
     if (savedState) {
         try {
@@ -91,6 +109,7 @@ function init() {
     // Bind UI elements & Listeners
     setupClock();
     setupEventListeners();
+    renderLoginUserDropdown();
     checkLoginStatus();
     renderDrinkGrid();
     renderCart();
@@ -109,15 +128,27 @@ function init() {
 function checkLoginStatus() {
     const loggedIn = sessionStorage.getItem('baanphuan_logged_in') === 'true';
     const loginContainer = document.getElementById('login-container');
+    const adminTabBtn = document.getElementById('tab-btn-admin');
     if (loggedIn) {
         if (loginContainer) loginContainer.classList.add('hidden');
         const username = sessionStorage.getItem('baanphuan_username') || 'พนักงาน';
+        const role = sessionStorage.getItem('baanphuan_role') || 'staff';
         document.getElementById('header-username').innerText = username;
         document.getElementById('header-user-badge').style.display = 'flex';
         document.getElementById('staff-name').value = username;
+        if (role === 'admin') {
+            if (adminTabBtn) adminTabBtn.style.display = 'flex';
+        } else {
+            if (adminTabBtn) adminTabBtn.style.display = 'none';
+            if (state.tab === 'admin-tab') {
+                switchTab('orders-tab');
+            }
+        }
     } else {
         if (loginContainer) loginContainer.classList.remove('hidden');
         document.getElementById('header-user-badge').style.display = 'none';
+        if (adminTabBtn) adminTabBtn.style.display = 'none';
+        switchTab('orders-tab');
     }
 }
 
@@ -277,26 +308,8 @@ function setupEventListeners() {
     const tabButtons = document.querySelectorAll('.tab-btn');
     tabButtons.forEach(btn => {
         btn.addEventListener('click', () => {
-            tabButtons.forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            
             const targetTab = btn.getAttribute('data-tab');
-            state.tab = targetTab;
-            
-            const panes = document.querySelectorAll('.tab-pane');
-            panes.forEach(pane => pane.classList.remove('active'));
-            document.getElementById(targetTab).classList.add('active');
-            
-            // Re-render corresponding tab
-            if (targetTab === 'orders-tab') {
-                renderOrders();
-            } else if (targetTab === 'grab-tab') {
-                renderGrabLogs();
-            } else if (targetTab === 'stock-tab') {
-                renderStock();
-            } else if (targetTab === 'summary-tab') {
-                renderAnalytics();
-            }
+            switchTab(targetTab);
         });
     });
 
@@ -396,13 +409,15 @@ function setupEventListeners() {
     if (loginForm) {
         loginForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            const username = document.getElementById('login-username').value.trim();
+            const username = document.getElementById('login-username').value;
             const pin = document.getElementById('login-pin').value.trim();
             
-            // Validate: default PIN is '1234'
-            if (pin === '1234') {
+            // Find user in database
+            const foundUser = state.users.find(u => u.username === username);
+            if (foundUser && foundUser.pin === pin) {
                 sessionStorage.setItem('baanphuan_logged_in', 'true');
                 sessionStorage.setItem('baanphuan_username', username);
+                sessionStorage.setItem('baanphuan_role', foundUser.role);
                 localStorage.setItem('juice_bar_last_staff', username);
                 document.getElementById('login-error-msg').style.display = 'none';
                 document.getElementById('login-pin').value = '';
@@ -422,7 +437,79 @@ function setupEventListeners() {
         btnLogout.addEventListener('click', () => {
             sessionStorage.removeItem('baanphuan_logged_in');
             sessionStorage.removeItem('baanphuan_username');
+            sessionStorage.removeItem('baanphuan_role');
             checkLoginStatus();
+        });
+    }
+
+    // Admin Panel - Add/Edit User Form
+    const adminUserForm = document.getElementById('admin-user-form');
+    if (adminUserForm) {
+        adminUserForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const usernameInput = document.getElementById('admin-username');
+            const pinInput = document.getElementById('admin-pin');
+            const roleSelect = document.getElementById('admin-role');
+            const originalUsernameInput = document.getElementById('admin-edit-original-username');
+            
+            const username = usernameInput.value.trim();
+            const pin = pinInput.value.trim();
+            const role = roleSelect.value;
+            const originalUsername = originalUsernameInput.value;
+            
+            if (pin.length < 4 || pin.length > 6 || isNaN(pin)) {
+                alert('รหัสผ่าน PIN ต้องเป็นตัวเลข 4-6 หลักเท่านั้น');
+                return;
+            }
+            
+            if (originalUsername) {
+                // Editing existing user
+                const userIndex = state.users.findIndex(u => u.username === originalUsername);
+                if (userIndex !== -1) {
+                    state.users[userIndex] = { username, pin, role };
+                }
+                originalUsernameInput.value = '';
+                document.getElementById('btn-admin-cancel-edit').style.display = 'none';
+            } else {
+                // Adding new user
+                if (state.users.some(u => u.username.toLowerCase() === username.toLowerCase())) {
+                    alert('มีชื่อพนักงานคนนี้อยู่ในระบบแล้ว');
+                    return;
+                }
+                state.users.push({ username, pin, role });
+            }
+            
+            // Save to localStorage
+            localStorage.setItem('juice_bar_users', JSON.stringify(state.users));
+            
+            // Reset form and re-render
+            usernameInput.value = '';
+            pinInput.value = '';
+            roleSelect.value = 'staff';
+            
+            renderLoginUserDropdown();
+            renderAdminUsersList();
+            
+            // Update current user info if they edited their own account
+            const currentLoggedIn = sessionStorage.getItem('baanphuan_username');
+            if (originalUsername === currentLoggedIn) {
+                sessionStorage.setItem('baanphuan_username', username);
+                sessionStorage.setItem('baanphuan_role', role);
+                checkLoginStatus();
+            }
+            
+            alert('บันทึกข้อมูลสำเร็จ');
+        });
+    }
+
+    const btnAdminCancelEdit = document.getElementById('btn-admin-cancel-edit');
+    if (btnAdminCancelEdit) {
+        btnAdminCancelEdit.addEventListener('click', () => {
+            document.getElementById('admin-username').value = '';
+            document.getElementById('admin-pin').value = '';
+            document.getElementById('admin-role').value = 'staff';
+            document.getElementById('admin-edit-original-username').value = '';
+            btnAdminCancelEdit.style.display = 'none';
         });
     }
 }
@@ -1666,6 +1753,130 @@ function updateStockFromInput(drinkId, value) {
     saveToLocalStorage();
     renderStock();
     renderDrinkGrid();
+}
+
+// SWITCH TABS
+function switchTab(tabId) {
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    tabButtons.forEach(b => {
+        if (b.getAttribute('data-tab') === tabId) {
+            b.classList.add('active');
+        } else {
+            b.classList.remove('active');
+        }
+    });
+    
+    state.tab = tabId;
+    
+    const panes = document.querySelectorAll('.tab-pane');
+    panes.forEach(pane => {
+        if (pane.id === tabId) {
+            pane.classList.add('active');
+        } else {
+            pane.classList.remove('active');
+        }
+    });
+    
+    // Re-render corresponding tab
+    if (tabId === 'orders-tab') {
+        renderOrders();
+    } else if (tabId === 'stock-tab') {
+        renderStock();
+    } else if (tabId === 'summary-tab') {
+        renderAnalytics();
+    } else if (tabId === 'admin-tab') {
+        renderAdminUsersList();
+    }
+}
+
+// RENDER LOGIN USER DROPDOWN SELECTOR
+function renderLoginUserDropdown() {
+    const loginUsernameSelect = document.getElementById('login-username');
+    if (!loginUsernameSelect) return;
+    
+    const lastStaff = localStorage.getItem('juice_bar_last_staff') || '';
+    
+    loginUsernameSelect.innerHTML = state.users.map(u => `
+        <option value="${u.username}" ${u.username === lastStaff ? 'selected' : ''}>${u.username} (${u.role === 'admin' ? 'ผู้ดูแล' : 'พนักงาน'})</option>
+    `).join('');
+}
+
+// RENDER ADMIN USERS LIST TABLE
+function renderAdminUsersList() {
+    const listContainer = document.getElementById('admin-users-list');
+    if (!listContainer) return;
+    
+    if (state.users.length === 0) {
+        listContainer.innerHTML = `<tr><td colspan="4" class="text-center text-muted">ไม่มีข้อมูลพนักงาน</td></tr>`;
+        return;
+    }
+    
+    listContainer.innerHTML = state.users.map(user => `
+        <tr>
+            <td style="font-weight: 600; color: var(--color-text);">
+                <i class="fa-solid ${user.role === 'admin' ? 'fa-user-shield text-primary' : 'fa-user text-muted'}"></i> ${user.username}
+            </td>
+            <td style="text-align: center;">
+                <span class="badge ${user.role === 'admin' ? 'badge-primary' : 'badge-outline'}">
+                    ${user.role === 'admin' ? 'ผู้ดูแล (Admin)' : 'พนักงาน (Staff)'}
+                </span>
+            </td>
+            <td style="text-align: center; font-family: monospace; letter-spacing: 2px; color: var(--color-text);">
+                •••• (PIN: ${user.pin})
+            </td>
+            <td style="text-align: center;">
+                <div style="display: flex; gap: 0.5rem; justify-content: center;">
+                    <button class="btn btn-outline btn-sm" style="padding: 0.25rem 0.5rem;" onclick="editAdminUser('${user.username}')" title="แก้ไข">
+                        <i class="fa-solid fa-user-pen"></i>
+                    </button>
+                    <button class="btn btn-danger btn-sm" style="padding: 0.25rem 0.5rem; background: var(--color-danger);" onclick="deleteAdminUser('${user.username}')" title="ลบ">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                </div>
+            </td>
+        </tr>
+    `).join('');
+}
+
+// EDIT USER IN ADMIN PANEL
+function editAdminUser(username) {
+    const user = state.users.find(u => u.username === username);
+    if (!user) return;
+    
+    document.getElementById('admin-username').value = user.username;
+    document.getElementById('admin-pin').value = user.pin;
+    document.getElementById('admin-role').value = user.role;
+    document.getElementById('admin-edit-original-username').value = user.username;
+    document.getElementById('btn-admin-cancel-edit').style.display = 'inline-block';
+    
+    // Scroll form into view on mobile
+    document.getElementById('admin-user-form').scrollIntoView({ behavior: 'smooth' });
+}
+
+// DELETE USER IN ADMIN PANEL
+function deleteAdminUser(username) {
+    const currentLoggedIn = sessionStorage.getItem('baanphuan_username');
+    if (username === currentLoggedIn) {
+        alert('ไม่สามารถลบตัวเองได้ขณะกำลังล็อกอินใช้งาน');
+        return;
+    }
+    
+    // Prevent deleting the last admin
+    const userToDelete = state.users.find(u => u.username === username);
+    if (userToDelete && userToDelete.role === 'admin') {
+        const adminCount = state.users.filter(u => u.role === 'admin').length;
+        if (adminCount <= 1) {
+            alert('ไม่สามารถลบได้ เนื่องจากต้องมีผู้ดูแลระบบ (Admin) อย่างน้อย 1 คน');
+            return;
+        }
+    }
+    
+    if (confirm(`คุณต้องการลบพนักงาน "${username}" ใช่หรือไม่?`)) {
+        state.users = state.users.filter(u => u.username !== username);
+        localStorage.setItem('juice_bar_users', JSON.stringify(state.users));
+        renderLoginUserDropdown();
+        renderAdminUsersList();
+    }
 }
 
 // RUN ON LOAD

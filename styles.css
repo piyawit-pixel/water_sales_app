@@ -2059,3 +2059,9 @@ select:focus {
 #btn-logout:hover {
     color: var(--color-danger);
 }
+
+@media (max-width: 768px) {
+    #admin-tab .main-content {
+        grid-template-columns: 1fr !important;
+    }
+}
