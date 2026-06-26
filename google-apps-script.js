@@ -15,13 +15,35 @@ function doGet(e) {
     // Default action: Pull/Read data
     try {
       var systemSheet = ss.getSheetByName("SystemState");
-      var stateData = { orders: [], grabPickups: [], stock: {} };
+      var stateData = { orders: [], grabPickups: [], stock: {}, users: [] };
       if (systemSheet) {
         var cellVal = systemSheet.getRange(1, 1).getValue();
         if (cellVal) {
           stateData = JSON.parse(cellVal);
         }
       }
+      
+      // Load users list from human-editable "Users" sheet to support direct management in sheets
+      var userSheet = ss.getSheetByName("Users");
+      if (userSheet) {
+        var lastRow = userSheet.getLastRow();
+        if (lastRow > 1) {
+          var values = userSheet.getRange(2, 1, lastRow - 1, 3).getValues();
+          var sheetUsers = [];
+          for (var i = 0; i < values.length; i++) {
+            var uname = String(values[i][0] || '').trim();
+            var upin = String(values[i][1] || '').trim();
+            var urole = String(values[i][2] || '').trim();
+            if (uname && upin) {
+              sheetUsers.push({ username: uname, pin: upin, role: urole || 'staff' });
+            }
+          }
+          if (sheetUsers.length > 0) {
+            stateData.users = sheetUsers;
+          }
+        }
+      }
+      
       return ContentService.createTextOutput(JSON.stringify(stateData))
         .setMimeType(ContentService.MimeType.JSON);
     } catch(err) {
@@ -217,6 +239,32 @@ function saveData(ss, payload) {
   stockSheet.getRange(1, 1, 1, 6).setFontWeight("bold").setBackground("#e2e8f0");
   stockSheet.getRange(2, 1, stockRows.length, 6).setValues(stockRows);
   stockSheet.autoResizeColumns(1, 6);
+  
+  // 5. Write Human Readable Users
+  var users = payload.users || [];
+  var userSheet = ss.getSheetByName("Users");
+  if (!userSheet) {
+    userSheet = ss.insertSheet("Users");
+  }
+  userSheet.clear();
+  
+  userSheet.getRange(1, 1, 1, 3).setValues([[
+    "Username", "PIN", "Role"
+  ]]);
+  
+  if (users.length > 0) {
+    var userRows = users.map(function(u) {
+      return [
+        u.username || "",
+        u.pin || "",
+        u.role || "staff"
+      ];
+    });
+    
+    userSheet.getRange(1, 1, 1, 3).setFontWeight("bold").setBackground("#e2e8f0");
+    userSheet.getRange(2, 1, userRows.length, 3).setValues(userRows);
+    userSheet.autoResizeColumns(1, 3);
+  }
   
   return ContentService.createTextOutput(JSON.stringify({ status: 'success' }))
     .setMimeType(ContentService.MimeType.JSON);
