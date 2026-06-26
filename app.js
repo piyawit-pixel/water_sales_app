@@ -502,10 +502,12 @@ function setupEventListeners() {
 
     const loginUsernameInput = document.getElementById('login-username');
     if (loginUsernameInput) {
-        loginUsernameInput.addEventListener('input', () => {
+        const resetPinAndDots = () => {
             state.tempPin = '';
             updatePinDots();
-        });
+        };
+        loginUsernameInput.addEventListener('input', resetPinAndDots);
+        loginUsernameInput.addEventListener('change', resetPinAndDots);
     }
 
     const btnLogout = document.getElementById('btn-logout');
@@ -2023,7 +2025,27 @@ function renderLoginUserDropdown() {
     if (!loginUsernameInput) return;
     
     const lastStaff = localStorage.getItem('juice_bar_last_staff') || '';
-    loginUsernameInput.value = lastStaff;
+    
+    loginUsernameInput.innerHTML = '';
+    
+    const defaultOpt = document.createElement('option');
+    defaultOpt.value = '';
+    defaultOpt.textContent = 'เลือกพนักงาน...';
+    defaultOpt.disabled = true;
+    defaultOpt.selected = !lastStaff;
+    loginUsernameInput.appendChild(defaultOpt);
+    
+    if (state.users && Array.isArray(state.users)) {
+        state.users.forEach(user => {
+            const opt = document.createElement('option');
+            opt.value = user.username;
+            opt.textContent = user.username;
+            if (user.username === lastStaff) {
+                opt.selected = true;
+            }
+            loginUsernameInput.appendChild(opt);
+        });
+    }
     
     updatePinDots();
 }
