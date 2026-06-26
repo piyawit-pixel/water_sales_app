@@ -1028,6 +1028,8 @@ function saveOrder() {
             promotionDetail: getPromotionDescription(pricing, deliveryType === 'grab'),
             staffName: staffName,
             remark: orderRemark,
+            tableClosed: false,
+            previouslyPaid: status === 'paid' ? pricing.total : 0,
             createdTime: now.toISOString(),
             updatedTime: null
         };
@@ -2470,7 +2472,13 @@ function toggleOrderStatus(orderId) {
     const order = state.orders.find(o => o.id === orderId);
     if (!order) return;
     
-    order.status = order.status === 'pending_promo' ? 'paid' : 'pending_promo';
+    if (order.status === 'pending_promo') {
+        order.status = 'paid';
+        order.previouslyPaid = order.priceDetails ? order.priceDetails.total : 0;
+    } else {
+        order.status = 'pending_promo';
+        // Keep previouslyPaid or leave it as is so continuing bill works
+    }
     saveToLocalStorage();
     renderTables();
     renderOrders();
@@ -2498,11 +2506,18 @@ function renderTables() {
     let todayRevenue = 0;
     
     state.orders.forEach(o => {
-        if (o.date === todayStr && o.status !== 'pending_promo') {
-            todayRevenue += (o.priceDetails ? o.priceDetails.total : 0);
+        if (o.date === todayStr) {
+            if (o.status !== 'pending_promo') {
+                todayRevenue += (o.priceDetails ? o.priceDetails.total : 0);
+            } else {
+                // If order is reopened / pending promo, count what has been paid so far in today's revenue
+                todayRevenue += (o.previouslyPaid || 0);
+            }
         }
         if (o.status === 'pending_promo' && o.customerName && o.customerName.startsWith('โต๊ะ ')) {
-            pendingTotal += (o.priceDetails ? o.priceDetails.total : 0);
+            const total = o.priceDetails ? o.priceDetails.total : 0;
+            const prevPaid = o.previouslyPaid || 0;
+            pendingTotal += Math.max(0, total - prevPaid);
         }
     });
     
@@ -2558,6 +2573,28 @@ function renderTables() {
                 }
             }
             const total = pendingOrder.priceDetails ? pendingOrder.priceDetails.total : 0;
+            const prevPaid = pendingOrder.previouslyPaid || 0;
+            const remaining = Math.max(0, total - prevPaid);
+            
+            let billTotalHtml = '';
+            if (prevPaid > 0) {
+                billTotalHtml = `
+                    <div style="font-size: 0.8rem; color: var(--color-text-muted); display: flex; justify-content: space-between; margin-bottom: 0.2rem;">
+                        <span>ยอดรวมบิล:</span><span>${total.toLocaleString()} บาท</span>
+                    </div>
+                    <div style="font-size: 0.8rem; color: var(--color-success); display: flex; justify-content: space-between; margin-bottom: 0.2rem;">
+                        <span>จ่ายแล้วก่อนหน้า:</span><span>${prevPaid.toLocaleString()} บาท</span>
+                    </div>
+                    <div class="table-bill-total" style="font-weight: 700; color: var(--color-warning); border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 0.3rem; margin-top: 0.3rem; display: flex; justify-content: space-between;">
+                        <span>ยอดจ่ายเพิ่ม:</span><span>${remaining.toLocaleString()} บาท</span>
+                    </div>
+                `;
+            } else {
+                billTotalHtml = `
+                    <div class="table-bill-total" style="display: flex; justify-content: space-between;"><span>ยอดค้างชำระ:</span><span>${total.toLocaleString()} บาท</span></div>
+                `;
+            }
+            
             card.innerHTML = `
                 <div class="table-header">
                     <div class="table-title text-warning"><i class="fa-solid fa-chair"></i> ${pendingOrder.customerName}</div>
@@ -2566,7 +2603,7 @@ function renderTables() {
                 <div class="table-content">
                     <div style="font-size: 0.8rem; color: var(--color-text-muted); margin-bottom: 0.4rem;"><i class="fa-regular fa-clock"></i> บิลเวลา: ${pendingOrder.time}</div>
                     <div class="table-bill-items">${itemsHtml}</div>
-                    <div class="table-bill-total"><span>ยอดค้างชำระ:</span><span>${total.toLocaleString()} บาท</span></div>
+                    ${billTotalHtml}
                 </div>
                 <div class="table-actions">
                     <button class="btn btn-success btn-sm" onclick="payTableOrder('${pendingOrder.id}')">
@@ -2734,7 +2771,35 @@ function openPayModal(orderId) {
     document.getElementById('pay-modal-items').innerHTML = itemsHtml;
     
     const total = order.priceDetails ? order.priceDetails.total : 0;
-    document.getElementById('pay-modal-amount').textContent = `${total.toLocaleString()} บาท`;
+    const prevPaid = order.previouslyPaid || 0;
+    const remaining = Math.max(0, total - prevPaid);
+    
+    const totalContainer = document.getElementById('pay-modal-total-container');
+    if (prevPaid > 0) {
+        totalContainer.style.flexDirection = 'column';
+        totalContainer.style.alignItems = 'stretch';
+        totalContainer.innerHTML = `
+            <div style="display: flex; justify-content: space-between; font-size: 0.9rem; color: var(--color-text-muted); margin-bottom: 0.25rem; width: 100%;">
+                <span>ยอดรวมบิลนี้:</span>
+                <span>${total.toLocaleString()} บาท</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 0.9rem; color: var(--color-success); margin-bottom: 0.25rem; width: 100%;">
+                <span>ชำระเงินแล้วก่อนหน้า:</span>
+                <span>-${prevPaid.toLocaleString()} บาท</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; border-top: 1px dashed rgba(255,255,255,0.15); padding-top: 0.4rem; font-size: 1.1rem; font-weight: 800; color: var(--color-warning); width: 100%; align-items: center;">
+                <span>ยอดชำระเพิ่ม:</span>
+                <span class="pay-modal-amount" style="color: var(--color-warning); font-size: 1.6rem;">${remaining.toLocaleString()} บาท</span>
+            </div>
+        `;
+    } else {
+        totalContainer.style.flexDirection = 'row';
+        totalContainer.style.alignItems = 'center';
+        totalContainer.innerHTML = `
+            <span>ยอดชำระรวม</span>
+            <span class="pay-modal-amount" id="pay-modal-amount">${total.toLocaleString()} บาท</span>
+        `;
+    }
     
     // Reset method buttons
     document.querySelectorAll('.pay-method-btn').forEach(b => b.classList.remove('selected'));
@@ -2758,6 +2823,7 @@ function confirmPayment() {
     
     order.status = 'paid';
     order.paymentMethod = _payingMethod;
+    order.previouslyPaid = order.priceDetails ? order.priceDetails.total : 0;
     order.updatedTime = new Date().toISOString();
     
     saveToLocalStorage();
