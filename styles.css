@@ -2160,3 +2160,12 @@ select:focus {
         grid-template-columns: 1fr;
     }
 }
+
+/* Full-Width Admin Active Panel styling */
+body.admin-active .pos-panel {
+    display: none;
+}
+
+body.admin-active .main-content {
+    grid-template-columns: 1fr;
+}

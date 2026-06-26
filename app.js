@@ -56,8 +56,13 @@ function init() {
     if (savedUsers) {
         try {
             state.users = JSON.parse(savedUsers);
+            if (!Array.isArray(state.users) || state.users.length === 0) {
+                state.users = [...DEFAULT_USERS];
+                localStorage.setItem('juice_bar_users', JSON.stringify(state.users));
+            }
         } catch (e) {
             state.users = [...DEFAULT_USERS];
+            localStorage.setItem('juice_bar_users', JSON.stringify(state.users));
         }
     } else {
         state.users = [...DEFAULT_USERS];
@@ -119,6 +124,7 @@ function init() {
     renderGrabLogs();
     renderStock();
     renderAnalytics();
+    renderAdminUsersList();
     
     // Auto-pull from sheet on startup if URL is configured
     if (state.sheetUrl) {
