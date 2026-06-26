@@ -858,6 +858,7 @@ function saveOrder() {
     const orderDate = document.getElementById('order-date').value;
     const deliveryType = document.getElementById('delivery-type').value;
     const grabDriverName = deliveryType === 'grab' ? document.getElementById('grab-driver-name').value.trim() : '';
+    const status = document.getElementById('order-status').value;
     const staffName = document.getElementById('staff-name').value.trim();
     const orderRemark = document.getElementById('order-remark').value.trim();
     
@@ -914,6 +915,7 @@ function saveOrder() {
                 grabDriverName: deliveryType === 'grab' ? grabDriverName : '',
                 items: { ...state.cart },
                 priceDetails: pricing,
+                status: status,
                 staffName: staffName,
                 remark: orderRemark,
                 updatedTime: now.toISOString()
@@ -942,7 +944,7 @@ function saveOrder() {
             grabDriverName: deliveryType === 'grab' ? grabDriverName : '',
             items: { ...state.cart },
             priceDetails: pricing,
-            status: 'paid', // defaults to paid
+            status: status,
             staffName: staffName,
             remark: orderRemark,
             createdTime: now.toISOString(),
@@ -1020,6 +1022,7 @@ function loadOrderForEditing(orderId) {
         grabGroup.style.display = order.deliveryType === 'grab' ? 'block' : 'none';
     }
     document.getElementById('grab-driver-name').value = order.grabDriverName || '';
+    document.getElementById('order-status').value = order.status || 'paid';
     document.getElementById('staff-name').value = order.staffName || '';
     document.getElementById('order-remark').value = order.remark || '';
     
@@ -1049,6 +1052,7 @@ function clearPOSForm() {
         grabGroup.style.display = 'none';
     }
     document.getElementById('grab-driver-name').value = '';
+    document.getElementById('order-status').value = 'paid';
     document.getElementById('staff-name').value = localStorage.getItem('juice_bar_last_staff') || '';
     document.getElementById('order-remark').value = '';
     
@@ -1135,6 +1139,11 @@ function renderOrders() {
         } else {
             channelBadge = `<span class="badge badge-outline"><i class="fa-solid fa-paper-plane"></i> อื่นๆ</span>`;
         }
+
+        // Status Badge
+        const statusBadge = order.status === 'pending_promo' 
+            ? `<span class="badge" style="background-color: #ef4444; color: white;"><i class="fa-solid fa-hourglass-half"></i> ยังไม่ครบโปร</span>`
+            : `<span class="badge" style="background-color: #22c55e; color: white;"><i class="fa-solid fa-circle-check"></i> ครบโปร / จ่ายแล้ว</span>`;
         
         // Generate drink badges
         let drinkBadgesHTML = '';
@@ -1163,6 +1172,7 @@ function renderOrders() {
                     <h4 class="order-cust-name">${order.customerName}</h4>
                     <div style="margin-top: 0.25rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
                         ${channelBadge}
+                        ${statusBadge}
                         ${staffBadge}
                     </div>
                 </div>
@@ -1181,6 +1191,9 @@ function renderOrders() {
                     ${(order.priceDetails && order.priceDetails.discount > 0) ? `<span class="order-promo-saving"><i class="fa-solid fa-tags"></i> ประหยัดไป ${order.priceDetails.discount} บ.</span>` : ''}
                 </div>
                 <div class="order-actions">
+                    <button class="btn btn-outline btn-sm" onclick="toggleOrderStatus('${order.id}')" title="เปลี่ยนสถานะบิล">
+                        <i class="fa-solid fa-arrows-spin"></i> ${order.status === 'pending_promo' ? 'ทำเป็นครบโปร' : 'ทำเป็นยังไม่ครบ'}
+                    </button>
                     <button class="btn btn-outline btn-sm" onclick="copyOrderToText('${order.id}')" title="คัดลอกข้อความบิล">
                         <i class="fa-solid fa-copy"></i> คัดลอกบิล
                     </button>
@@ -2340,6 +2353,17 @@ ${popularityText}---------------------------------
 - Grab Delivery: ${deliveryStats.grab} บิล`;
 
     copyToClipboard(summaryText, `คัดลอกสรุปยอดขาย (${targetDateText}) เรียบร้อยแล้ว!`);
+}
+
+// TOGGLE ORDER PROMO STATUS
+function toggleOrderStatus(orderId) {
+    const order = state.orders.find(o => o.id === orderId);
+    if (!order) return;
+    
+    order.status = order.status === 'pending_promo' ? 'paid' : 'pending_promo';
+    saveToLocalStorage();
+    renderOrders();
+    renderAnalytics();
 }
 
 // RUN ON LOAD
