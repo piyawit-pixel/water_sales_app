@@ -1,3 +1,9 @@
+// ==================== CONFIGURATION ====================
+// ใส่รหัส LINE Notify Token ของคุณที่นี่ (เช่น "xxxxxx")
+// หากเว้นว่างไว้ ระบบจะไม่ส่งการแจ้งเตือน
+var LINE_NOTIFY_TOKEN = ""; 
+// =======================================================
+
 function doGet(e) {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var action = e.parameter.action;
@@ -19,7 +25,13 @@ function doGet(e) {
       if (systemSheet) {
         var cellVal = systemSheet.getRange(1, 1).getValue();
         if (cellVal) {
-          stateData = JSON.parse(cellVal);
+          var parsedCell = JSON.parse(cellVal);
+          // Handle new format with notifiedIds
+          if (parsedCell.state) {
+            stateData = parsedCell.state;
+          } else {
+            stateData = parsedCell;
+          }
         }
       }
       return ContentService.createTextOutput(JSON.stringify(stateData))
@@ -69,17 +81,66 @@ function saveData(ss, payload) {
     'watermelon': { th: 'แตงโม', en: 'Watermelon' }
   };
 
-  // 1. Save Raw JSON to a hidden/system sheet for 100% accurate recovery
+  // 1. Read existing notified IDs to prevent duplicate LINE messages
   var systemSheet = ss.getSheetByName("SystemState");
   if (!systemSheet) {
     systemSheet = ss.insertSheet("SystemState");
     systemSheet.hideSheet(); // Hide it from casual viewing
   }
-  systemSheet.clear();
-  systemSheet.getRange(1, 1).setValue(JSON.stringify(payload));
   
-  // 2. Write Human Readable Orders
+  var notifiedIds = [];
+  var lastCellVal = systemSheet.getRange(1, 1).getValue();
+  if (lastCellVal) {
+    try {
+      var parsedCell = JSON.parse(lastCellVal);
+      if (parsedCell && parsedCell.notifiedIds) {
+        notifiedIds = parsedCell.notifiedIds;
+      }
+    } catch(e) {}
+  }
+
+  // 2. Check for new orders to notify via LINE
   var orders = payload.orders || [];
+  var newNotifiedIds = [].concat(notifiedIds);
+  var notifyMessages = [];
+  
+  orders.forEach(function(o) {
+    if (o.id && notifiedIds.indexOf(o.id) === -1) {
+      newNotifiedIds.push(o.id);
+      
+      // Build notification message for this order
+      var totalQty = 0;
+      var itemsDesc = [];
+      if (o.items) {
+        for (var k in o.items) {
+          var nameTH = drinkLookup[k] ? drinkLookup[k].th : k;
+          itemsDesc.push(nameTH + " x" + o.items[k] + " ขวด");
+          totalQty += Number(o.items[k]);
+        }
+      }
+      
+      var price = o.priceDetails ? o.priceDetails.total : 0;
+      var staff = o.staffName ? " (โดย " + o.staffName + ")" : "";
+      var remarkText = o.remark ? "\n📝 หมายเหตุ: " + o.remark : "";
+      
+      var msg = "\n🔔 ออเดอร์ใหม่: " + o.customerName + staff +
+                "\n🔹 ช่องทาง: " + (o.deliveryType === "grab" ? "Grab Delivery" : (o.deliveryType === "walkin" ? "หน้าร้าน / รับเอง" : "ช่องทางอื่น")) +
+                "\n📦 รายการน้ำ: " + itemsDesc.join(", ") +
+                "\n🥤 รวม: " + totalQty + " ขวด" +
+                "\n💰 ยอดชำระ: " + price.toLocaleString() + " บาท" + remarkText;
+      
+      notifyMessages.push(msg);
+    }
+  });
+
+  // 3. Save Raw JSON and new notifiedIds to hidden SystemState sheet
+  systemSheet.clear();
+  systemSheet.getRange(1, 1).setValue(JSON.stringify({
+    state: payload,
+    notifiedIds: newNotifiedIds
+  }));
+  
+  // 4. Write Human Readable Orders
   var orderSheet = ss.getSheetByName("Orders");
   if (!orderSheet) {
     orderSheet = ss.insertSheet("Orders");
@@ -137,7 +198,7 @@ function saveData(ss, payload) {
     orderSheet.autoResizeColumns(1, 15);
   }
   
-  // 3. Write Human Readable Grab Pickups
+  // 5. Write Human Readable Grab Pickups
   var grab = payload.grabPickups || [];
   var grabSheet = ss.getSheetByName("GrabPickups");
   if (!grabSheet) {
@@ -187,7 +248,7 @@ function saveData(ss, payload) {
     grabSheet.autoResizeColumns(1, 5);
   }
 
-  // 4. Write Human Readable Stock
+  // 6. Write Human Readable Stock
   var stock = payload.stock || {};
   var stockSheet = ss.getSheetByName("Stock");
   if (!stockSheet) {
@@ -223,6 +284,35 @@ function saveData(ss, payload) {
   stockSheet.getRange(2, 1, stockRows.length, 6).setValues(stockRows);
   stockSheet.autoResizeColumns(1, 6);
   
+  // 7. Send LINE Notifications
+  if (notifyMessages.length > 0) {
+    notifyMessages.forEach(function(msg) {
+      sendLineNotify(msg);
+    });
+  }
+  
   return ContentService.createTextOutput(JSON.stringify({ status: 'success' }))
     .setMimeType(ContentService.MimeType.JSON);
+}
+
+function sendLineNotify(message) {
+  if (!LINE_NOTIFY_TOKEN || LINE_NOTIFY_TOKEN.trim() === "") return;
+  
+  var url = "https://notify-api.line.me/api/notify";
+  var options = {
+    "method": "post",
+    "headers": {
+      "Authorization": "Bearer " + LINE_NOTIFY_TOKEN
+    },
+    "payload": {
+      "message": message
+    },
+    "muteHttpExceptions": true
+  };
+  
+  try {
+    UrlFetchApp.fetch(url, options);
+  } catch(e) {
+    Logger.log("LINE Notify Error: " + e.toString());
+  }
 }
