@@ -2060,8 +2060,103 @@ select:focus {
     color: var(--color-danger);
 }
 
+/* PIN PAD STYLING */
+.pin-display-container {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.pin-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 2px solid var(--border-glass);
+    background: transparent;
+    transition: all var(--transition-fast);
+}
+
+.pin-dot.filled {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    box-shadow: 0 0 10px var(--color-primary-glow);
+}
+
+.pin-pad-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    max-width: 240px;
+    margin: 0 auto;
+}
+
+.pin-btn {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: 1px solid var(--border-glass);
+    background: rgba(29, 78, 216, 0.03);
+    color: var(--color-text);
+    font-size: 1.5rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-fast);
+    user-select: none;
+    -webkit-user-select: none;
+    outline: none;
+}
+
+.pin-btn:hover {
+    background: rgba(29, 78, 216, 0.08);
+    border-color: var(--color-primary);
+    transform: scale(1.05);
+}
+
+.pin-btn:active {
+    background: var(--color-primary);
+    color: #ffffff;
+    transform: scale(0.95);
+}
+
+.pin-btn.action {
+    background: transparent;
+    border: none;
+    color: var(--color-text-muted);
+}
+
+.pin-btn.action:hover {
+    background: rgba(29, 78, 216, 0.05);
+    color: var(--color-primary);
+}
+
+.pin-btn.action.submit {
+    color: var(--color-success);
+}
+
+.pin-btn.action.submit:hover {
+    background: rgba(16, 185, 129, 0.08);
+    color: var(--color-success);
+}
+
+.pin-btn.action.submit:active {
+    background: var(--color-success);
+    color: #ffffff;
+}
+
+/* Admin Grid Layout styling */
+.admin-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.5fr;
+    gap: 1.5rem;
+    align-items: start;
+}
+
 @media (max-width: 768px) {
-    #admin-tab .main-content {
-        grid-template-columns: 1fr !important;
+    .admin-grid {
+        grid-template-columns: 1fr;
     }
 }

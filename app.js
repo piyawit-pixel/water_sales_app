@@ -44,7 +44,9 @@ let state = {
     tab: 'orders-tab',
     sheetUrl: '',
     autoSync: false,
-    stock: {} // drinkId -> quantity
+    stock: {}, // drinkId -> quantity
+    users: [],
+    tempPin: ''
 };
 
 // LOAD INITIAL STATE FROM LOCAL STORAGE
@@ -405,30 +407,44 @@ function setupEventListeners() {
     if (grabManualForm) grabManualForm.addEventListener('submit', handleGrabManualSubmit);
 
     // Login Screen Event Listeners
+    // PIN pad button click handlers
+    const pinButtons = document.querySelectorAll('.pin-btn');
+    pinButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const val = btn.getAttribute('data-val');
+            handlePinInput(val);
+        });
+    });
+
+    // Keyboard support for login screen PIN
+    document.addEventListener('keydown', (e) => {
+        const loginContainer = document.getElementById('login-container');
+        if (loginContainer && !loginContainer.classList.contains('hidden')) {
+            if (e.key >= '0' && e.key <= '9') {
+                handlePinInput(e.key);
+            } else if (e.key === 'Backspace') {
+                handlePinInput('clear');
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                submitLogin();
+            }
+        }
+    });
+
+    // Login form submit click (handled by check button)
+    const btnSubmitPin = document.getElementById('btn-submit-pin');
+    if (btnSubmitPin) {
+        btnSubmitPin.addEventListener('click', (e) => {
+            e.preventDefault();
+            submitLogin();
+        });
+    }
+
     const loginForm = document.getElementById('login-form');
     if (loginForm) {
         loginForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            const username = document.getElementById('login-username').value;
-            const pin = document.getElementById('login-pin').value.trim();
-            
-            // Find user in database
-            const foundUser = state.users.find(u => u.username === username);
-            if (foundUser && foundUser.pin === pin) {
-                sessionStorage.setItem('baanphuan_logged_in', 'true');
-                sessionStorage.setItem('baanphuan_username', username);
-                sessionStorage.setItem('baanphuan_role', foundUser.role);
-                localStorage.setItem('juice_bar_last_staff', username);
-                document.getElementById('login-error-msg').style.display = 'none';
-                document.getElementById('login-pin').value = '';
-                checkLoginStatus();
-            } else {
-                const errorMsg = document.getElementById('login-error-msg');
-                errorMsg.style.display = 'flex';
-                errorMsg.style.animation = 'none';
-                errorMsg.offsetHeight; /* trigger reflow */
-                errorMsg.style.animation = 'shake 0.3s ease';
-            }
+            submitLogin();
         });
     }
 
@@ -438,6 +454,8 @@ function setupEventListeners() {
             sessionStorage.removeItem('baanphuan_logged_in');
             sessionStorage.removeItem('baanphuan_username');
             sessionStorage.removeItem('baanphuan_role');
+            state.tempPin = '';
+            updatePinDots();
             checkLoginStatus();
         });
     }
@@ -1777,6 +1795,13 @@ function switchTab(tabId) {
         }
     });
     
+    // Toggle full-width admin mode class
+    if (tabId === 'admin-tab') {
+        document.body.classList.add('admin-active');
+    } else {
+        document.body.classList.remove('admin-active');
+    }
+    
     // Re-render corresponding tab
     if (tabId === 'orders-tab') {
         renderOrders();
@@ -1876,6 +1901,58 @@ function deleteAdminUser(username) {
         localStorage.setItem('juice_bar_users', JSON.stringify(state.users));
         renderLoginUserDropdown();
         renderAdminUsersList();
+    }
+}
+
+// HANDLE PIN BUTTON OR KEYBOARD INPUT
+function handlePinInput(val) {
+    if (val === 'clear') {
+        state.tempPin = state.tempPin.slice(0, -1);
+    } else if (state.tempPin.length < 6) {
+        state.tempPin += val;
+    }
+    
+    updatePinDots();
+}
+
+// UPDATE PIN DISPLAY DOTS
+function updatePinDots() {
+    const dots = document.querySelectorAll('.pin-dot');
+    dots.forEach((dot, index) => {
+        if (index < state.tempPin.length) {
+            dot.classList.add('filled');
+        } else {
+            dot.classList.remove('filled');
+        }
+    });
+}
+
+// SUBMIT LOGIN AUTHENTICATION
+function submitLogin() {
+    const username = document.getElementById('login-username').value;
+    const pin = state.tempPin;
+    
+    // Find user in database
+    const foundUser = state.users.find(u => u.username === username);
+    if (foundUser && foundUser.pin === pin) {
+        sessionStorage.setItem('baanphuan_logged_in', 'true');
+        sessionStorage.setItem('baanphuan_username', username);
+        sessionStorage.setItem('baanphuan_role', foundUser.role);
+        localStorage.setItem('juice_bar_last_staff', username);
+        document.getElementById('login-error-msg').style.display = 'none';
+        state.tempPin = '';
+        updatePinDots();
+        checkLoginStatus();
+    } else {
+        const errorMsg = document.getElementById('login-error-msg');
+        errorMsg.style.display = 'flex';
+        errorMsg.style.animation = 'none';
+        errorMsg.offsetHeight; /* trigger reflow */
+        errorMsg.style.animation = 'shake 0.3s ease';
+        
+        // Clear pin on error
+        state.tempPin = '';
+        updatePinDots();
     }
 }
 
