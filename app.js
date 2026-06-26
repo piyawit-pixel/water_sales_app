@@ -2303,7 +2303,13 @@ function copyDailySummaryToText() {
         pendingText = '- ไม่มีรายการค้างโปร\n';
     } else {
         pendingPromoList.forEach(item => {
-            pendingText += `- คุณ ${item.name}: ${item.qty} ขวด (${item.price} บาท)\n`;
+            let cleanName = item.name || '';
+            const match = cleanName.match(/\(([^)]+)\)/);
+            if (match) {
+                cleanName = match[1];
+            }
+            cleanName = cleanName.replace(/^คุณ\s*/, '').trim();
+            pendingText += `- ${cleanName}: ${item.qty} ขวด (${item.price} บาท)\n`;
         });
     }
     
