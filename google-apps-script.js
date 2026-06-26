@@ -1,7 +1,17 @@
 // ==================== CONFIGURATION ====================
-// ใส่รหัส LINE Notify Token ของคุณที่นี่ (เช่น "xxxxxx")
-// หากเว้นว่างไว้ ระบบจะไม่ส่งการแจ้งเตือน
-var LINE_NOTIFY_TOKEN = ""; 
+// ทางเลือกที่ 1: LINE OA Messaging API (ฟรีตามลิมิตของ LINE)
+// นำ Channel Access Token และ Target ID (User ID หรือ Group ID) มากรอกที่นี่
+var LINE_OA_ACCESS_TOKEN = ""; 
+var LINE_OA_TARGET_ID = "";    
+
+// ทางเลือกที่ 2: Discord Webhook (แนะนำ! ฟรี 100% ไม่จำกัดจำนวนข้อความ)
+// นำ Webhook URL ของห้อง Discord มากรอกที่นี่
+var DISCORD_WEBHOOK_URL = "";
+
+// ทางเลือกที่ 3: Telegram Bot API (ฟรี 100% ไม่จำกัดจำนวนข้อความ)
+// นำ Bot Token และ Chat ID มากรอกที่นี่
+var TELEGRAM_BOT_TOKEN = "";
+var TELEGRAM_CHAT_ID = "";
 // =======================================================
 
 function doGet(e) {
@@ -81,7 +91,7 @@ function saveData(ss, payload) {
     'watermelon': { th: 'แตงโม', en: 'Watermelon' }
   };
 
-  // 1. Read existing notified IDs to prevent duplicate LINE messages
+  // 1. Read existing notified IDs to prevent duplicate messages
   var systemSheet = ss.getSheetByName("SystemState");
   if (!systemSheet) {
     systemSheet = ss.insertSheet("SystemState");
@@ -99,7 +109,7 @@ function saveData(ss, payload) {
     } catch(e) {}
   }
 
-  // 2. Check for new orders to notify via LINE
+  // 2. Check for new orders to notify
   var orders = payload.orders || [];
   var newNotifiedIds = [].concat(notifiedIds);
   var notifyMessages = [];
@@ -123,7 +133,7 @@ function saveData(ss, payload) {
       var staff = o.staffName ? " (โดย " + o.staffName + ")" : "";
       var remarkText = o.remark ? "\n📝 หมายเหตุ: " + o.remark : "";
       
-      var msg = "\n🔔 ออเดอร์ใหม่: " + o.customerName + staff +
+      var msg = "🔔 ออเดอร์ใหม่: " + o.customerName + staff +
                 "\n🔹 ช่องทาง: " + (o.deliveryType === "grab" ? "Grab Delivery" : (o.deliveryType === "walkin" ? "หน้าร้าน / รับเอง" : "ช่องทางอื่น")) +
                 "\n📦 รายการน้ำ: " + itemsDesc.join(", ") +
                 "\n🥤 รวม: " + totalQty + " ขวด" +
@@ -284,10 +294,12 @@ function saveData(ss, payload) {
   stockSheet.getRange(2, 1, stockRows.length, 6).setValues(stockRows);
   stockSheet.autoResizeColumns(1, 6);
   
-  // 7. Send LINE Notifications
+  // 7. Send Notifications
   if (notifyMessages.length > 0) {
     notifyMessages.forEach(function(msg) {
-      sendLineNotify(msg);
+      sendLineOAMessage(msg);
+      sendDiscordNotify(msg);
+      sendTelegramNotify(msg);
     });
   }
   
@@ -295,17 +307,67 @@ function saveData(ss, payload) {
     .setMimeType(ContentService.MimeType.JSON);
 }
 
-function sendLineNotify(message) {
-  if (!LINE_NOTIFY_TOKEN || LINE_NOTIFY_TOKEN.trim() === "") return;
+function sendLineOAMessage(messageText) {
+  if (!LINE_OA_ACCESS_TOKEN || LINE_OA_ACCESS_TOKEN.trim() === "" || !LINE_OA_TARGET_ID || LINE_OA_TARGET_ID.trim() === "") return;
   
-  var url = "https://notify-api.line.me/api/notify";
+  var url = "https://api.line.me/v2/bot/message/push";
+  var postData = {
+    "to": LINE_OA_TARGET_ID,
+    "messages": [
+      {
+        "type": "text",
+        "text": messageText
+      }
+    ]
+  };
+  
   var options = {
     "method": "post",
     "headers": {
-      "Authorization": "Bearer " + LINE_NOTIFY_TOKEN
+      "Content-Type": "application/json",
+      "Authorization": "Bearer " + LINE_OA_ACCESS_TOKEN
     },
+    "payload": JSON.stringify(postData),
+    "muteHttpExceptions": true
+  };
+  
+  try {
+    UrlFetchApp.fetch(url, options);
+  } catch(e) {
+    Logger.log("LINE OA Error: " + e.toString());
+  }
+}
+
+function sendDiscordNotify(messageText) {
+  if (!DISCORD_WEBHOOK_URL || DISCORD_WEBHOOK_URL.trim() === "") return;
+  
+  var options = {
+    "method": "post",
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "payload": JSON.stringify({
+      "content": messageText
+    }),
+    "muteHttpExceptions": true
+  };
+  
+  try {
+    UrlFetchApp.fetch(DISCORD_WEBHOOK_URL, options);
+  } catch(e) {
+    Logger.log("Discord Webhook Error: " + e.toString());
+  }
+}
+
+function sendTelegramNotify(messageText) {
+  if (!TELEGRAM_BOT_TOKEN || TELEGRAM_BOT_TOKEN.trim() === "" || !TELEGRAM_CHAT_ID || TELEGRAM_CHAT_ID.trim() === "") return;
+  
+  var url = "https://api.telegram.org/bot" + TELEGRAM_BOT_TOKEN + "/sendMessage";
+  var options = {
+    "method": "post",
     "payload": {
-      "message": message
+      "chat_id": TELEGRAM_CHAT_ID,
+      "text": messageText
     },
     "muteHttpExceptions": true
   };
@@ -313,6 +375,6 @@ function sendLineNotify(message) {
   try {
     UrlFetchApp.fetch(url, options);
   } catch(e) {
-    Logger.log("LINE Notify Error: " + e.toString());
+    Logger.log("Telegram Error: " + e.toString());
   }
 }
