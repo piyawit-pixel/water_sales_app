@@ -2783,8 +2783,20 @@ function reopenPaidOrder(orderId) {
     
     saveToLocalStorage();
     
-    // Load into POS form for editing
+    // Load into POS form for editing (loads existing items into cart)
     loadOrderForEditing(orderId);
+    
+    // Count existing bottles to show in UI
+    const existingQty = Object.values(order.items || {}).reduce((a, b) => a + b, 0);
+    
+    // Override title and save button for clarity
+    document.getElementById('pos-title').innerHTML =
+        '<i class="fa-solid fa-rotate-left text-warning"></i> ' +
+        'ต่อบิล: ' + order.customerName +
+        ' <span style="font-size:0.8rem;color:var(--color-warning);font-weight:500;">— เดิม ' + existingQty + ' ขวด, เพิ่มได้เลย</span>';
+    document.getElementById('order-status').value = 'pending_promo';
+    document.getElementById('btn-save-order').innerHTML =
+        '<i class="fa-solid fa-rotate-left"></i> บันทึกบิลต่อเนื่อง';
     
     // Refresh tables view
     renderTables();
@@ -2793,10 +2805,6 @@ function reopenPaidOrder(orderId) {
     // Scroll to POS
     const posPanel = document.querySelector('.pos-panel');
     if (posPanel) posPanel.scrollIntoView({ behavior: 'smooth' });
-    
-    // Update POS title to indicate continuation
-    const title = document.getElementById('pos-title');
-    if (title) title.innerHTML = `<i class="fa-solid fa-rotate-left text-warning"></i> ต่อบิลเดิม: ${order.customerName}`;
 }
 
 // Close table after payment
