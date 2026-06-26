@@ -2263,6 +2263,16 @@ body.admin-active .main-content {
     box-shadow: 0 4px 20px rgba(230, 126, 34, 0.05);
 }
 
+/* 🟢 Paid but still seated */
+.table-card.table-paid::before {
+    background: var(--color-success);
+}
+
+.table-card.table-paid {
+    border-color: rgba(16, 185, 129, 0.35);
+    box-shadow: 0 4px 20px rgba(16, 185, 129, 0.06);
+}
+
 .table-card:hover {
     transform: translateY(-3px);
     border-color: var(--border-hover);
@@ -2270,6 +2280,10 @@ body.admin-active .main-content {
 
 .table-card.table-occupied:hover {
     border-color: var(--color-warning);
+}
+
+.table-card.table-paid:hover {
+    border-color: var(--color-success);
 }
 
 .table-header {
@@ -2306,6 +2320,15 @@ body.admin-active .main-content {
     color: var(--color-warning);
     border: 1px solid rgba(230, 126, 34, 0.3);
     animation: pulse-glow 2s infinite alternate;
+}
+
+.badge-paid-seated {
+    background: var(--color-success-glow);
+    color: var(--color-success);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
 }
 
 @keyframes pulse-glow {

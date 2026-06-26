@@ -2491,7 +2491,8 @@ function renderTables() {
     const todayStr = getLocalDateString(new Date());
     
     // ─── Update Live Stats ───
-    let occupiedCount = 0;
+    let occupiedCount = 0;  // pending (ค้างชำระ)
+    let paidSeatedCount = 0; // paid but still seated
     let emptyCount = 0;
     let pendingTotal = 0;
     let todayRevenue = 0;
@@ -2507,11 +2508,17 @@ function renderTables() {
     
     for (let i = 1; i <= totalTables; i++) {
         const tableName = `โต๊ะ ${i}`;
-        const hasActive = state.orders.some(o =>
+        const hasPending = state.orders.some(o =>
             (o.customerName === tableName || o.customerName.startsWith(tableName + ' (')) &&
             o.date === todayStr && o.status === 'pending_promo'
         );
-        if (hasActive) occupiedCount++; else emptyCount++;
+        const hasPaid = !hasPending && state.orders.some(o =>
+            (o.customerName === tableName || o.customerName.startsWith(tableName + ' (')) &&
+            o.date === todayStr && o.status === 'paid' && !o.tableClosed
+        );
+        if (hasPending) occupiedCount++;
+        else if (hasPaid) paidSeatedCount++;
+        else emptyCount++;
     }
     
     const elEmpty = document.getElementById('stat-tables-empty');
@@ -2519,7 +2526,7 @@ function renderTables() {
     const elPending = document.getElementById('stat-tables-pending-total');
     const elToday = document.getElementById('stat-today-revenue');
     if (elEmpty) elEmpty.textContent = emptyCount;
-    if (elOccupied) elOccupied.textContent = occupiedCount;
+    if (elOccupied) elOccupied.textContent = `${occupiedCount}ค้าง / ${paidSeatedCount}จ่ายแล้ว`;
     if (elPending) elPending.textContent = pendingTotal.toLocaleString();
     if (elToday) elToday.textContent = todayRevenue.toLocaleString();
     
@@ -2527,58 +2534,85 @@ function renderTables() {
         const tableName = `โต๊ะ ${i}`;
         
         // Find if there is an active (pending/unpaid) order for this table today
-        const activeOrder = state.orders.find(o => {
-            return (o.customerName === tableName || o.customerName.startsWith(tableName + ' (')) && o.date === todayStr && o.status === 'pending_promo';
-        });
+        // Find pending (unpaid) order for this table today
+        const pendingOrder = state.orders.find(o =>
+            (o.customerName === tableName || o.customerName.startsWith(tableName + ' (')) &&
+            o.date === todayStr && o.status === 'pending_promo'
+        );
+        // Find most recent paid order for this table today (only if no pending, not closed)
+        const paidOrder = !pendingOrder ? state.orders.find(o =>
+            (o.customerName === tableName || o.customerName.startsWith(tableName + ' (')) &&
+            o.date === todayStr && o.status === 'paid' && !o.tableClosed
+        ) : null;
         
         const card = document.createElement('div');
         
-        if (activeOrder) {
+        if (pendingOrder) {
+            // 🟡 STATE 1: มีคน + ยังไม่จ่าย
             card.className = 'table-card table-occupied';
-            
-            // Calculate items list
             let itemsHtml = '';
-            if (activeOrder.items) {
-                for (const drinkId in activeOrder.items) {
+            if (pendingOrder.items) {
+                for (const drinkId in pendingOrder.items) {
                     const drink = DRINKS.find(d => d.id === drinkId);
-                    if (drink) {
-                        itemsHtml += `
-                            <div class="table-bill-item">
-                                <span>${drink.nameTH}</span>
-                                <span>x${activeOrder.items[drinkId]}</span>
-                            </div>
-                        `;
-                    }
+                    if (drink) itemsHtml += `<div class="table-bill-item"><span>${drink.nameTH}</span><span>x${pendingOrder.items[drinkId]}</span></div>`;
                 }
             }
-            
-            const total = activeOrder.priceDetails ? activeOrder.priceDetails.total : 0;
-            
+            const total = pendingOrder.priceDetails ? pendingOrder.priceDetails.total : 0;
             card.innerHTML = `
                 <div class="table-header">
-                    <div class="table-title text-warning"><i class="fa-solid fa-chair"></i> ${activeOrder.customerName}</div>
-                    <span class="table-status-badge badge-occupied">มีลูกค้า / ค้างชำระ</span>
+                    <div class="table-title text-warning"><i class="fa-solid fa-chair"></i> ${pendingOrder.customerName}</div>
+                    <span class="table-status-badge badge-occupied"><i class="fa-solid fa-hourglass-half"></i> ค้างชำระ</span>
                 </div>
                 <div class="table-content">
-                    <div style="font-weight: 500; font-size: 0.8rem; color: var(--color-text-muted); margin-bottom: 0.25rem;">บิลเวลา: ${activeOrder.time}</div>
-                    <div class="table-bill-items">
-                        ${itemsHtml}
-                    </div>
-                    <div class="table-bill-total">
-                        <span>ยอดค้างชำระ:</span>
-                        <span>${total.toLocaleString()} บาท</span>
-                    </div>
+                    <div style="font-size: 0.8rem; color: var(--color-text-muted); margin-bottom: 0.4rem;"><i class="fa-regular fa-clock"></i> บิลเวลา: ${pendingOrder.time}</div>
+                    <div class="table-bill-items">${itemsHtml}</div>
+                    <div class="table-bill-total"><span>ยอดค้างชำระ:</span><span>${total.toLocaleString()} บาท</span></div>
                 </div>
                 <div class="table-actions">
-                    <button class="btn btn-success btn-sm" onclick="payTableOrder('${activeOrder.id}')" title="ชำระเงิน">
+                    <button class="btn btn-success btn-sm" onclick="payTableOrder('${pendingOrder.id}')">
                         <i class="fa-solid fa-money-bill-wave"></i> ชำระเงิน
                     </button>
-                    <button class="btn btn-outline btn-sm" onclick="loadOrderForEditing('${activeOrder.id}')" title="สั่งเพิ่ม / แก้ไข">
+                    <button class="btn btn-outline btn-sm" onclick="loadOrderForEditing('${pendingOrder.id}')">
                         <i class="fa-solid fa-plus-minus"></i> สั่งเพิ่ม
                     </button>
                 </div>
             `;
+        } else if (paidOrder) {
+            // 🟢 STATE 2: มีคนนั่ง + จ่ายแล้ว
+            card.className = 'table-card table-paid';
+            let itemsHtml = '';
+            if (paidOrder.items) {
+                for (const drinkId in paidOrder.items) {
+                    const drink = DRINKS.find(d => d.id === drinkId);
+                    if (drink) itemsHtml += `<div class="table-bill-item"><span>${drink.nameTH}</span><span>x${paidOrder.items[drinkId]}</span></div>`;
+                }
+            }
+            const total = paidOrder.priceDetails ? paidOrder.priceDetails.total : 0;
+            const payIcon = paidOrder.paymentMethod === 'cash' ? '💵' : '📱';
+            card.innerHTML = `
+                <div class="table-header">
+                    <div class="table-title text-success"><i class="fa-solid fa-chair"></i> ${paidOrder.customerName}</div>
+                    <span class="table-status-badge badge-paid-seated"><i class="fa-solid fa-circle-check"></i> จ่ายแล้ว</span>
+                </div>
+                <div class="table-content">
+                    <div style="font-size: 0.8rem; color: var(--color-text-muted); margin-bottom: 0.4rem;"><i class="fa-regular fa-clock"></i> บิลเวลา: ${paidOrder.time} &nbsp;${payIcon}</div>
+                    <div class="table-bill-items">${itemsHtml}</div>
+                    <div class="table-bill-total" style="color: var(--color-success);">
+                        <span>จ่ายแล้ว:</span>
+                        <span>${total.toLocaleString()} บาท ✓</span>
+                    </div>
+                </div>
+                <div class="table-actions">
+                    <button class="btn btn-outline btn-sm" onclick="openTable('${tableName}')">
+                        <i class="fa-solid fa-cart-plus"></i> สั่งรอบใหม่
+                    </button>
+                    <button class="btn btn-secondary btn-sm" onclick="closeTableAfterPay('${tableName}')">
+                        <i class="fa-solid fa-right-from-bracket"></i> ปิดโต๊ะ
+                    </button>
+                </div>
+            `;
         } else {
+            // ⚪ STATE 3: ว่าง
             card.className = 'table-card table-empty';
             card.innerHTML = `
                 <div class="table-header">
@@ -2586,17 +2620,18 @@ function renderTables() {
                     <span class="table-status-badge badge-empty">ว่าง</span>
                 </div>
                 <div class="table-content" style="display: flex; align-items: center; justify-content: center; color: var(--color-text-muted); font-style: italic; min-height: 80px;">
-                    ไม่มีลูกค้า / โต๊ะว่าง
+                    โต๊ะว่าง / พร้อมรับลูกค้า
                 </div>
                 <div class="table-actions">
                     <button class="btn btn-primary btn-sm" onclick="openTable('${tableName}')">
-                        <i class="fa-solid fa-cart-plus"></i> เปิดโต๊ะสั่งน้ำ
+                        <i class="fa-solid fa-cart-plus"></i> เปิดโต๊ะ
                     </button>
                 </div>
             `;
         }
         gridContainer.appendChild(card);
     }
+
     
     // Render other pending orders (e.g. walkin or grab that are unpaid)
     const otherContainer = document.getElementById('other-pending-container');
@@ -2728,6 +2763,21 @@ function confirmPayment() {
     renderTables();
     renderOrders();
     renderAnalytics();
+}
+
+// Close table after payment (mark as 'closed' by clearing today's paid orders visually)
+// We don't delete data — just mark so table shows as empty
+function closeTableAfterPay(tableName) {
+    const todayStr = getLocalDateString(new Date());
+    // Find the latest paid order for this table today and mark it as 'closed'
+    const paidOrders = state.orders.filter(o =>
+        (o.customerName === tableName || o.customerName.startsWith(tableName + ' (')) &&
+        o.date === todayStr && o.status === 'paid'
+    );
+    paidOrders.forEach(o => { o.tableClosed = true; });
+    saveToLocalStorage();
+    renderTables();
+    renderOrders();
 }
 
 // Open table helper
