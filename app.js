@@ -289,6 +289,10 @@ function setupEventListeners() {
     // Delivery channel switch
     const deliveryTypeSelect = document.getElementById('delivery-type');
     deliveryTypeSelect.addEventListener('change', (e) => {
+        const grabGroup = document.getElementById('grab-driver-group');
+        if (grabGroup) {
+            grabGroup.style.display = e.target.value === 'grab' ? 'block' : 'none';
+        }
         renderCart();
     });
 
@@ -323,6 +327,11 @@ function setupEventListeners() {
             deliveryTypeSelect.value = 'grab';
         } else {
             deliveryTypeSelect.value = 'walkin';
+        }
+        
+        const grabGroup = document.getElementById('grab-driver-group');
+        if (grabGroup) {
+            grabGroup.style.display = deliveryTypeSelect.value === 'grab' ? 'block' : 'none';
         }
         
         // Re-render cart to update prices instantly
@@ -634,7 +643,7 @@ function setupEventListeners() {
             
             // Update current user info if they edited their own account
             const currentLoggedIn = sessionStorage.getItem('baanphuan_username');
-            if (originalUsername === currentLoggedIn) {
+            if (originalUsername && currentLoggedIn && originalUsername.toLowerCase() === currentLoggedIn.toLowerCase()) {
                 sessionStorage.setItem('baanphuan_username', username);
                 sessionStorage.setItem('baanphuan_role', role);
                 checkLoginStatus();
@@ -843,7 +852,7 @@ function saveOrder() {
     const customerName = document.getElementById('customer-name').value.trim();
     const orderDate = document.getElementById('order-date').value;
     const deliveryType = document.getElementById('delivery-type').value;
-    const grabDriverName = '';
+    const grabDriverName = deliveryType === 'grab' ? document.getElementById('grab-driver-name').value.trim() : '';
     const staffName = document.getElementById('staff-name').value.trim();
     const orderRemark = document.getElementById('order-remark').value.trim();
     
@@ -1001,6 +1010,11 @@ function loadOrderForEditing(orderId) {
     document.getElementById('customer-name').value = order.customerName;
     document.getElementById('order-date').value = order.date;
     document.getElementById('delivery-type').value = order.deliveryType;
+    const grabGroup = document.getElementById('grab-driver-group');
+    if (grabGroup) {
+        grabGroup.style.display = order.deliveryType === 'grab' ? 'block' : 'none';
+    }
+    document.getElementById('grab-driver-name').value = order.grabDriverName || '';
     document.getElementById('staff-name').value = order.staffName || '';
     document.getElementById('order-remark').value = order.remark || '';
     
@@ -1025,6 +1039,11 @@ function clearPOSForm() {
     document.getElementById('customer-name').value = 'กลับบ้าน';
     document.getElementById('order-date').value = getLocalDateString(new Date());
     document.getElementById('delivery-type').value = 'walkin';
+    const grabGroup = document.getElementById('grab-driver-group');
+    if (grabGroup) {
+        grabGroup.style.display = 'none';
+    }
+    document.getElementById('grab-driver-name').value = '';
     document.getElementById('staff-name').value = localStorage.getItem('juice_bar_last_staff') || '';
     document.getElementById('order-remark').value = '';
     
@@ -1795,14 +1814,21 @@ async function pushToSheets(isAuto = false) {
     }
     
     try {
-        const payload = JSON.stringify({
-            orders: state.orders,
-            grabPickups: state.grabPickups,
-            stock: state.stock
-        });
+        const payloadObj = {
+            action: 'save',
+            data: {
+                orders: state.orders,
+                grabPickups: state.grabPickups,
+                stock: state.stock
+            }
+        };
         
-        const url = `${state.sheetUrl}?action=save&data=${encodeURIComponent(payload)}`;
-        const response = await fetch(url);
+        // Use POST method to bypass URL length limitation
+        const response = await fetch(state.sheetUrl, {
+            method: 'POST',
+            mode: 'cors',
+            body: JSON.stringify(payloadObj)
+        });
         if (!response.ok) throw new Error("HTTP Error: " + response.status);
         
         const result = await response.json();
@@ -1938,8 +1964,7 @@ function switchTab(tabId) {
             renderAdminUsersList();
         }
     } catch (e) {
-        alert("Error in switchTab: " + e.message);
-        console.error(e);
+        console.error("Error in switchTab: ", e);
     }
 }
 
@@ -2003,8 +2028,7 @@ function renderAdminUsersList() {
             `;
         }).join('');
     } catch (e) {
-        alert("Error in renderAdminUsersList: " + e.message);
-        console.error(e);
+        console.error("Error in renderAdminUsersList: ", e);
     }
 }
 
@@ -2026,7 +2050,7 @@ function editAdminUser(username) {
 // DELETE USER IN ADMIN PANEL
 function deleteAdminUser(username) {
     const currentLoggedIn = sessionStorage.getItem('baanphuan_username');
-    if (username === currentLoggedIn) {
+    if (username && currentLoggedIn && username.toLowerCase() === currentLoggedIn.toLowerCase()) {
         alert('ไม่สามารถลบตัวเองได้ขณะกำลังล็อกอินใช้งาน');
         return;
     }
