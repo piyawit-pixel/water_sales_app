@@ -448,6 +448,14 @@ function setupEventListeners() {
         });
     }
 
+    const loginUsernameSelect = document.getElementById('login-username');
+    if (loginUsernameSelect) {
+        loginUsernameSelect.addEventListener('change', () => {
+            state.tempPin = '';
+            updatePinDots();
+        });
+    }
+
     const btnLogout = document.getElementById('btn-logout');
     if (btnLogout) {
         btnLogout.addEventListener('click', () => {
@@ -1824,6 +1832,8 @@ function renderLoginUserDropdown() {
     loginUsernameSelect.innerHTML = state.users.map(u => `
         <option value="${u.username}" ${u.username === lastStaff ? 'selected' : ''}>${u.username} (${u.role === 'admin' ? 'ผู้ดูแล' : 'พนักงาน'})</option>
     `).join('');
+    
+    updatePinDots();
 }
 
 // RENDER ADMIN USERS LIST TABLE
@@ -1904,27 +1914,51 @@ function deleteAdminUser(username) {
     }
 }
 
+// GET CURRENT SELECTED USER PIN LENGTH
+function getSelectedUserPinLength() {
+    const loginUsernameSelect = document.getElementById('login-username');
+    if (!loginUsernameSelect) return 4;
+    const username = loginUsernameSelect.value;
+    const foundUser = state.users.find(u => u.username === username);
+    return foundUser && foundUser.pin ? foundUser.pin.length : 4;
+}
+
 // HANDLE PIN BUTTON OR KEYBOARD INPUT
 function handlePinInput(val) {
+    const pinLength = getSelectedUserPinLength();
     if (val === 'clear') {
         state.tempPin = state.tempPin.slice(0, -1);
-    } else if (state.tempPin.length < 6) {
+        updatePinDots();
+    } else if (state.tempPin.length < pinLength) {
         state.tempPin += val;
+        updatePinDots();
+        
+        // Auto-submit when PIN length is reached
+        if (state.tempPin.length === pinLength) {
+            setTimeout(() => {
+                submitLogin();
+            }, 100);
+        }
     }
-    
-    updatePinDots();
 }
 
 // UPDATE PIN DISPLAY DOTS
 function updatePinDots() {
-    const dots = document.querySelectorAll('.pin-dot');
-    dots.forEach((dot, index) => {
-        if (index < state.tempPin.length) {
+    const container = document.querySelector('.pin-display-container');
+    if (!container) return;
+    
+    const pinLength = getSelectedUserPinLength();
+    
+    // Clear and build dots dynamically
+    container.innerHTML = '';
+    for (let i = 0; i < pinLength; i++) {
+        const dot = document.createElement('div');
+        dot.className = 'pin-dot';
+        if (i < state.tempPin.length) {
             dot.classList.add('filled');
-        } else {
-            dot.classList.remove('filled');
         }
-    });
+        container.appendChild(dot);
+    }
 }
 
 // SUBMIT LOGIN AUTHENTICATION
