@@ -756,6 +756,20 @@ function checkCustomerPreviousOrders(custName) {
     }
 }
 
+// GET AVAILABLE STOCK (Accounting for order edit session)
+function getAvailableStock(drinkId) {
+    const stockQty = state.stock[drinkId] !== undefined ? state.stock[drinkId] : 20;
+    
+    // If we are currently editing an order, the items in that order should be considered "available" to be re-ordered
+    if (state.editingOrderId) {
+        const editingOrder = state.orders.find(o => o.id === state.editingOrderId);
+        if (editingOrder && editingOrder.items && editingOrder.items[drinkId]) {
+            return stockQty + editingOrder.items[drinkId];
+        }
+    }
+    return stockQty;
+}
+
 // RENDER BEVERAGES GRID
 function renderDrinkGrid() {
     const grid = document.getElementById('beverages-container');
@@ -774,18 +788,25 @@ function renderDrinkGrid() {
         const qtyInCart = state.cart[drink.id] || 0;
         const activeClass = qtyInCart > 0 ? 'active' : '';
         
-        const stockQty = state.stock[drink.id] !== undefined ? state.stock[drink.id] : 20;
+        const available = getAvailableStock(drink.id);
+        const remaining = Math.max(0, available - qtyInCart);
+        
         let stockLabel = '';
-        if (stockQty === 0) {
+        let cardStatusClass = '';
+        
+        if (available === 0) {
             stockLabel = `<span class="bev-stock text-danger" style="font-size: 0.75rem; font-weight: bold; display: block; margin-top: 0.15rem;">❌ หมด</span>`;
-        } else if (stockQty <= 5) {
-            stockLabel = `<span class="bev-stock text-warning" style="font-size: 0.75rem; font-weight: bold; display: block; margin-top: 0.15rem;">⚠️ เหลือ ${stockQty}</span>`;
+            cardStatusClass = 'out-of-stock';
+        } else if (remaining === 0) {
+            stockLabel = `<span class="bev-stock text-danger" style="font-size: 0.75rem; font-weight: bold; display: block; margin-top: 0.15rem;">❌ เต็มสต็อกแล้ว</span>`;
+        } else if (available <= 5) {
+            stockLabel = `<span class="bev-stock text-warning" style="font-size: 0.75rem; font-weight: bold; display: block; margin-top: 0.15rem;">⚠️ เหลือ ${available}</span>`;
         } else {
-            stockLabel = `<span class="bev-stock text-muted" style="font-size: 0.75rem; display: block; margin-top: 0.15rem;">สต็อก: ${stockQty}</span>`;
+            stockLabel = `<span class="bev-stock text-muted" style="font-size: 0.75rem; display: block; margin-top: 0.15rem;">สต็อก: ${available}</span>`;
         }
 
         const card = document.createElement('div');
-        card.className = `bev-card ${activeClass}`;
+        card.className = `bev-card ${activeClass} ${cardStatusClass}`;
         card.setAttribute('style', `--bev-color: ${drink.color}; --bev-color-rgb: ${drink.colorRgb};`);
         
         card.innerHTML = `
@@ -801,8 +822,8 @@ function renderDrinkGrid() {
                 ${stockLabel}
             </div>
             <div class="bev-controls">
-                <button type="button" class="bev-btn minus-btn" title="ลดจำนวน"><i class="fa-solid fa-minus"></i></button>
-                <button type="button" class="bev-btn plus-btn" title="เพิ่มจำนวน"><i class="fa-solid fa-plus"></i></button>
+                <button type="button" class="bev-btn minus-btn" title="ลดจำนวน" ${qtyInCart === 0 ? 'disabled' : ''}><i class="fa-solid fa-minus"></i></button>
+                <button type="button" class="bev-btn plus-btn" title="เพิ่มจำนวน" ${remaining === 0 ? 'disabled' : ''}><i class="fa-solid fa-plus"></i></button>
             </div>
         `;
         
@@ -819,6 +840,14 @@ function renderDrinkGrid() {
         
         // Clicking card anywhere else adds 1
         card.addEventListener('click', () => {
+            if (available === 0) {
+                alert("ขออภัย! สินค้านี้หมดชั่วคราว");
+                return;
+            }
+            if (remaining === 0) {
+                alert("ขออภัย! สินค้าในสต็อกไม่เพียงพอ");
+                return;
+            }
             changeCartQty(drink.id, 1);
         });
         
@@ -834,6 +863,11 @@ function changeCartQty(drinkId, delta) {
     if (newQty <= 0) {
         delete state.cart[drinkId];
     } else {
+        const available = getAvailableStock(drinkId);
+        if (newQty > available) {
+            alert("ขออภัย! สินค้าในสต็อกไม่เพียงพอ");
+            return;
+        }
         state.cart[drinkId] = newQty;
     }
     

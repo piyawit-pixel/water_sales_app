@@ -460,6 +460,20 @@ select:focus {
     box-shadow: 0 0 20px rgba(var(--bev-color-rgb), 0.3), inset 0 0 10px rgba(var(--bev-color-rgb), 0.1);
 }
 
+.bev-card.out-of-stock {
+    opacity: 0.55;
+    cursor: not-allowed;
+    pointer-events: none;
+    box-shadow: none;
+}
+
+.bev-card.out-of-stock:hover {
+    transform: none;
+    box-shadow: none;
+    border-color: var(--border-glass);
+    background: rgba(255, 255, 255, 0.7);
+}
+
 .bev-card .badge-qty {
     position: absolute;
     top: -8px;
