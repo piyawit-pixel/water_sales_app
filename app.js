@@ -2034,27 +2034,7 @@ function renderLoginUserDropdown() {
     if (!loginUsernameInput) return;
     
     const lastStaff = localStorage.getItem('juice_bar_last_staff') || '';
-    
-    loginUsernameInput.innerHTML = '';
-    
-    const defaultOpt = document.createElement('option');
-    defaultOpt.value = '';
-    defaultOpt.textContent = 'เลือกพนักงาน...';
-    defaultOpt.disabled = true;
-    defaultOpt.selected = !lastStaff;
-    loginUsernameInput.appendChild(defaultOpt);
-    
-    if (state.users && Array.isArray(state.users)) {
-        state.users.forEach(user => {
-            const opt = document.createElement('option');
-            opt.value = user.username;
-            opt.textContent = user.username;
-            if (user.username === lastStaff) {
-                opt.selected = true;
-            }
-            loginUsernameInput.appendChild(opt);
-        });
-    }
+    loginUsernameInput.value = lastStaff;
     
     updatePinDots();
 }
@@ -2175,10 +2155,10 @@ function deleteAdminUser(username) {
 // GET CURRENT SELECTED USER PIN LENGTH
 function getSelectedUserPinLength() {
     const loginUsernameInput = document.getElementById('login-username');
-    if (!loginUsernameInput) return 4;
+    if (!loginUsernameInput) return 6;
     const username = loginUsernameInput.value.trim().toLowerCase();
     const foundUser = state.users.find(u => u.username.toLowerCase() === username);
-    return foundUser && foundUser.pin ? foundUser.pin.length : 4;
+    return foundUser && foundUser.pin ? foundUser.pin.length : 6;
 }
 
 // HANDLE PIN BUTTON OR KEYBOARD INPUT

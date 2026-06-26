@@ -2169,3 +2169,49 @@ body.admin-active .pos-panel {
 body.admin-active .main-content {
     grid-template-columns: 1fr;
 }
+
+/* Mobile & Short Height Optimization for Login Page */
+@media (max-width: 480px), (max-height: 700px) {
+    .login-container {
+        padding: 0.5rem;
+        overflow-y: auto;
+        align-items: flex-start;
+    }
+    .login-card {
+        padding: 1.25rem;
+        margin: 0.5rem auto;
+        max-width: 340px;
+    }
+    .login-logo {
+        margin-bottom: 1rem;
+    }
+    .login-brand-icon {
+        width: 50px;
+        height: 50px;
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+    }
+    .login-logo h2 {
+        font-size: 1.5rem;
+    }
+    .login-logo p {
+        font-size: 0.8rem;
+    }
+    .pin-display-container {
+        margin-bottom: 1rem;
+        gap: 0.75rem;
+    }
+    .pin-dot {
+        width: 12px;
+        height: 12px;
+    }
+    .pin-pad-grid {
+        gap: 0.5rem;
+        max-width: 200px;
+    }
+    .pin-btn {
+        width: 50px;
+        height: 50px;
+        font-size: 1.25rem;
+    }
+}
