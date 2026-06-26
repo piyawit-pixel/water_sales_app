@@ -359,17 +359,18 @@ function setupEventListeners() {
     const customerInput = document.getElementById('customer-name');
     customerInput.addEventListener('change', (e) => {
         const val = e.target.value;
-        const deliveryTypeSelect = document.getElementById('delivery-type');
-        
+        // Auto-set delivery type from customer name selection
+        const deliveryTypeInput = document.getElementById('delivery-type');
         if (val === 'Grab') {
-            deliveryTypeSelect.value = 'grab';
+            deliveryTypeInput.value = 'grab';
         } else {
-            deliveryTypeSelect.value = 'walkin';
+            deliveryTypeInput.value = 'walkin';
         }
         
+        // Show Grab driver field if Grab selected
         const grabGroup = document.getElementById('grab-driver-group');
         if (grabGroup) {
-            grabGroup.style.display = deliveryTypeSelect.value === 'grab' ? 'block' : 'none';
+            grabGroup.style.display = val === 'Grab' ? 'block' : 'none';
         }
         
         // Re-render cart to update prices instantly
@@ -440,6 +441,14 @@ function setupEventListeners() {
     document.getElementById('btn-close-backup-modal').addEventListener('click', () => {
         document.getElementById('backup-modal').classList.remove('active');
     });
+
+    // Payment Modal close
+    const closePayModal = document.getElementById('btn-close-pay-modal');
+    if (closePayModal) {
+        closePayModal.addEventListener('click', () => {
+            document.getElementById('pay-modal').classList.remove('active');
+        });
+    }
 
     document.getElementById('btn-export-data').addEventListener('click', exportData);
     
@@ -914,6 +923,13 @@ function saveOrder() {
     const tableVal = document.getElementById('customer-name').value.trim();
     const customNameVal = document.getElementById('customer-display-name').value.trim();
     const customerName = customNameVal ? `${tableVal} (${customNameVal})` : tableVal;
+    
+    // Auto-fill hidden fields if empty
+    const staffInput = document.getElementById('staff-name');
+    if (!staffInput.value) staffInput.value = sessionStorage.getItem('baanphuan_username') || '';
+    const dateInput = document.getElementById('order-date');
+    if (!dateInput.value) dateInput.value = getLocalDateString(new Date());
+    
     const orderDate = document.getElementById('order-date').value;
     const deliveryType = document.getElementById('delivery-type').value;
     const grabDriverName = deliveryType === 'grab' ? document.getElementById('grab-driver-name').value.trim() : '';
@@ -922,6 +938,7 @@ function saveOrder() {
     const staffName = document.getElementById('staff-name').value.trim();
     const orderRemark = document.getElementById('order-remark').value.trim();
     
+
     if (!customerName) {
         alert("กรุณาเลือกโต๊ะ / ช่องทาง");
         document.getElementById('customer-name').focus();
@@ -2461,6 +2478,9 @@ function toggleOrderStatus(orderId) {
 }
 
 // RENDER TABLES GRID
+let _payingOrderId = null;
+let _payingMethod = 'scan';
+
 function renderTables() {
     const gridContainer = document.getElementById('tables-grid-container');
     if (!gridContainer) return;
@@ -2469,6 +2489,39 @@ function renderTables() {
     
     const totalTables = 8;
     const todayStr = getLocalDateString(new Date());
+    
+    // ─── Update Live Stats ───
+    let occupiedCount = 0;
+    let emptyCount = 0;
+    let pendingTotal = 0;
+    let todayRevenue = 0;
+    
+    state.orders.forEach(o => {
+        if (o.date === todayStr && o.status !== 'pending_promo') {
+            todayRevenue += (o.priceDetails ? o.priceDetails.total : 0);
+        }
+        if (o.status === 'pending_promo' && o.customerName && o.customerName.startsWith('โต๊ะ ')) {
+            pendingTotal += (o.priceDetails ? o.priceDetails.total : 0);
+        }
+    });
+    
+    for (let i = 1; i <= totalTables; i++) {
+        const tableName = `โต๊ะ ${i}`;
+        const hasActive = state.orders.some(o =>
+            (o.customerName === tableName || o.customerName.startsWith(tableName + ' (')) &&
+            o.date === todayStr && o.status === 'pending_promo'
+        );
+        if (hasActive) occupiedCount++; else emptyCount++;
+    }
+    
+    const elEmpty = document.getElementById('stat-tables-empty');
+    const elOccupied = document.getElementById('stat-tables-occupied');
+    const elPending = document.getElementById('stat-tables-pending-total');
+    const elToday = document.getElementById('stat-today-revenue');
+    if (elEmpty) elEmpty.textContent = emptyCount;
+    if (elOccupied) elOccupied.textContent = occupiedCount;
+    if (elPending) elPending.textContent = pendingTotal.toLocaleString();
+    if (elToday) elToday.textContent = todayRevenue.toLocaleString();
     
     for (let i = 1; i <= totalTables; i++) {
         const tableName = `โต๊ะ ${i}`;
@@ -2610,31 +2663,87 @@ function renderTables() {
     }
 }
 
-// Pay table order helper
+// Open pay modal (replaces browser confirm)
 function payTableOrder(orderId) {
     const order = state.orders.find(o => o.id === orderId);
     if (!order) return;
+    openPayModal(orderId);
+}
+
+function openPayModal(orderId) {
+    const order = state.orders.find(o => o.id === orderId);
+    if (!order) return;
     
-    if (confirm(`คุณต้องการยืนยันการชำระเงินสำหรับ "${order.customerName}" ยอดรวม ${order.priceDetails.total} บาท ใช่หรือไม่?`)) {
-        order.status = 'paid';
-        order.updatedTime = new Date().toISOString();
-        
-        saveToLocalStorage();
-        
-        // Refresh everything
-        renderTables();
-        renderOrders();
-        renderAnalytics();
-        
-        alert(`ชำระเงินเรียบร้อยแล้ว!`);
+    _payingOrderId = orderId;
+    _payingMethod = 'scan';
+    
+    // Fill modal info
+    document.getElementById('pay-modal-table-name').textContent = order.customerName;
+    
+    // Build items list
+    let itemsHtml = '';
+    if (order.items) {
+        for (const drinkId in order.items) {
+            const drink = DRINKS.find(d => d.id === drinkId);
+            if (drink) {
+                itemsHtml += `<div class="pay-modal-item"><span>${drink.nameTH}</span><span>x${order.items[drinkId]}</span></div>`;
+            }
+        }
     }
+    document.getElementById('pay-modal-items').innerHTML = itemsHtml;
+    
+    const total = order.priceDetails ? order.priceDetails.total : 0;
+    document.getElementById('pay-modal-amount').textContent = `${total.toLocaleString()} บาท`;
+    
+    // Reset method buttons
+    document.querySelectorAll('.pay-method-btn').forEach(b => b.classList.remove('selected'));
+    document.getElementById('pay-method-scan').classList.add('selected');
+    
+    document.getElementById('pay-modal').classList.add('active');
+}
+
+function selectPayMethod(method) {
+    _payingMethod = method;
+    document.querySelectorAll('.pay-method-btn').forEach(b => b.classList.remove('selected'));
+    const btn = document.getElementById(`pay-method-${method}`);
+    if (btn) btn.classList.add('selected');
+}
+
+function confirmPayment() {
+    if (!_payingOrderId) return;
+    
+    const order = state.orders.find(o => o.id === _payingOrderId);
+    if (!order) return;
+    
+    order.status = 'paid';
+    order.paymentMethod = _payingMethod;
+    order.updatedTime = new Date().toISOString();
+    
+    saveToLocalStorage();
+    
+    document.getElementById('pay-modal').classList.remove('active');
+    _payingOrderId = null;
+    
+    // Refresh
+    renderTables();
+    renderOrders();
+    renderAnalytics();
 }
 
 // Open table helper
 function openTable(tableName) {
     document.getElementById('customer-name').value = tableName;
     document.getElementById('customer-display-name').value = '';
-    document.getElementById('delivery-type').value = 'walkin';
+    // Auto-set delivery type hidden field
+    const deliveryInput = document.getElementById('delivery-type');
+    if (deliveryInput) deliveryInput.value = 'walkin';
+    // Auto-set staff from session
+    const staffInput = document.getElementById('staff-name');
+    if (staffInput) staffInput.value = sessionStorage.getItem('baanphuan_username') || '';
+    // Auto-set date to today
+    const dateInput = document.getElementById('order-date');
+    if (dateInput) dateInput.value = getLocalDateString(new Date());
+    
     document.getElementById('order-status').value = 'pending_promo';
     
     // Clear cart since it's a new opening
@@ -2643,7 +2752,7 @@ function openTable(tableName) {
     renderCart();
     
     // Update POS Header to show table opening mode
-    document.getElementById('pos-title').innerHTML = `<i class="fa-solid fa-cart-plus text-primary"></i> เปิดโต๊ะสั่งน้ำ: ${tableName}`;
+    document.getElementById('pos-title').innerHTML = `<i class="fa-solid fa-cart-plus text-primary"></i> เปิดโต๊ะ: ${tableName}`;
     
     // Scroll to POS Form
     document.querySelector('.pos-panel').scrollIntoView({ behavior: 'smooth' });
