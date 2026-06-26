@@ -109,11 +109,11 @@ function saveData(ss, payload) {
   orderSheet.clear();
   
   // Set headers for Orders
-  orderSheet.getRange(1, 1, 1, 15).setValues([[
+  orderSheet.getRange(1, 1, 1, 16).setValues([[
     "Order ID", "Date", "Time", "Customer Name", "Delivery Type", 
     "Driver Name", "Total Qty", "Subtotal (THB)", 
     "Discount (THB)", "Total Price (THB)", "Status", 
-    "Created At", "Updated At", "Staff Name", "Remark"
+    "Created At", "Updated At", "Staff Name", "Remark", "Payment Method"
   ]]);
   
   if (orders.length > 0) {
@@ -133,6 +133,8 @@ function saveData(ss, payload) {
       }
       var subtotal = total + discount;
       
+      var pm = o.paymentMethod === 'cash' ? 'เงินสด' : 'เงินโอน / สแกน';
+      
       return [
         o.id || "",
         o.date || "",
@@ -148,13 +150,14 @@ function saveData(ss, payload) {
         o.createdTime || "",
         o.updatedTime || "",
         o.staffName || "",
-        o.remark || ""
+        o.remark || "",
+        pm
       ];
     });
     
-    orderSheet.getRange(1, 1, 1, 15).setFontWeight("bold").setBackground("#e2e8f0");
-    orderSheet.getRange(2, 1, orderRows.length, 15).setValues(orderRows);
-    orderSheet.autoResizeColumns(1, 15);
+    orderSheet.getRange(1, 1, 1, 16).setFontWeight("bold").setBackground("#e2e8f0");
+    orderSheet.getRange(2, 1, orderRows.length, 16).setValues(orderRows);
+    orderSheet.autoResizeColumns(1, 16);
   }
   
   // 3. Write Human Readable Grab Pickups

@@ -859,6 +859,7 @@ function saveOrder() {
     const deliveryType = document.getElementById('delivery-type').value;
     const grabDriverName = deliveryType === 'grab' ? document.getElementById('grab-driver-name').value.trim() : '';
     const status = document.getElementById('order-status').value;
+    const paymentMethod = document.getElementById('payment-method').value;
     const staffName = document.getElementById('staff-name').value.trim();
     const orderRemark = document.getElementById('order-remark').value.trim();
     
@@ -916,6 +917,7 @@ function saveOrder() {
                 items: { ...state.cart },
                 priceDetails: pricing,
                 status: status,
+                paymentMethod: paymentMethod,
                 staffName: staffName,
                 remark: orderRemark,
                 updatedTime: now.toISOString()
@@ -945,6 +947,7 @@ function saveOrder() {
             items: { ...state.cart },
             priceDetails: pricing,
             status: status,
+            paymentMethod: paymentMethod,
             staffName: staffName,
             remark: orderRemark,
             createdTime: now.toISOString(),
@@ -1032,6 +1035,7 @@ function loadOrderForEditing(orderId) {
     }
     document.getElementById('grab-driver-name').value = order.grabDriverName || '';
     document.getElementById('order-status').value = order.status || 'paid';
+    document.getElementById('payment-method').value = order.paymentMethod || 'scan';
     document.getElementById('staff-name').value = order.staffName || '';
     document.getElementById('order-remark').value = order.remark || '';
     
@@ -1063,6 +1067,7 @@ function clearPOSForm() {
     }
     document.getElementById('grab-driver-name').value = '';
     document.getElementById('order-status').value = 'paid';
+    document.getElementById('payment-method').value = 'scan';
     document.getElementById('staff-name').value = localStorage.getItem('juice_bar_last_staff') || '';
     document.getElementById('order-remark').value = '';
     
@@ -1156,6 +1161,16 @@ function renderOrders() {
             ? `<span class="badge" style="background-color: #ef4444; color: white;"><i class="fa-solid fa-hourglass-half"></i> ยังไม่ครบโปร</span>`
             : `<span class="badge" style="background-color: #22c55e; color: white;"><i class="fa-solid fa-circle-check"></i> ครบโปร / จ่ายแล้ว</span>`;
         
+        // Payment Badge
+        let paymentBadge = '';
+        if (order.paymentMethod === 'cash') {
+            paymentBadge = `<span class="badge" style="background-color: #0ea5e9; color: white;"><i class="fa-solid fa-money-bill-wave"></i> เงินสด</span>`;
+        } else if (order.paymentMethod === 'scan') {
+            paymentBadge = `<span class="badge" style="background-color: #6366f1; color: white;"><i class="fa-solid fa-qrcode"></i> โอน/สแกน</span>`;
+        } else {
+            paymentBadge = `<span class="badge badge-outline" style="border-color: #94a3b8; color: #64748b;"><i class="fa-solid fa-qrcode"></i> โอน/สแกน</span>`;
+        }
+        
         // Generate drink badges
         let drinkBadgesHTML = '';
         Object.keys(order.items).forEach(drinkId => {
@@ -1184,6 +1199,7 @@ function renderOrders() {
                     <div style="margin-top: 0.25rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
                         ${channelBadge}
                         ${statusBadge}
+                        ${paymentBadge}
                         ${staffBadge}
                     </div>
                 </div>
@@ -1553,6 +1569,8 @@ function renderAnalytics() {
     let filteredBottles = 0;
     let filteredDiscount = 0;
     let filteredCommBottles = 0;
+    let filteredScanRevenue = 0;
+    let filteredCashRevenue = 0;
     
     let totalRevenue = 0;
     let totalBottles = 0;
@@ -1595,6 +1613,11 @@ function renderAnalytics() {
             filteredBottles += orderQty;
             filteredRevenue += pricing.total || 0;
             filteredDiscount += pricing.discount || 0;
+            if (order.paymentMethod === 'cash') {
+                filteredCashRevenue += pricing.total || 0;
+            } else {
+                filteredScanRevenue += pricing.total || 0;
+            }
             if (order.deliveryType !== 'grab' && matchesStaff) {
                 filteredCommBottles += orderQty;
             }
@@ -1658,6 +1681,10 @@ function renderAnalytics() {
     // Update counters in DOM
     document.getElementById('analytics-today-revenue').textContent = `${filteredRevenue.toLocaleString()} บาท`;
     document.getElementById('analytics-today-bottles').textContent = `${filteredBottles} ขวด`;
+    const payDetailsEl = document.getElementById('analytics-today-payment-details');
+    if (payDetailsEl) {
+        payDetailsEl.textContent = `โอน/สแกน: ${filteredScanRevenue.toLocaleString()} บาท | เงินสด: ${filteredCashRevenue.toLocaleString()} บาท`;
+    }
     document.getElementById('analytics-total-revenue-all').textContent = `${totalRevenue.toLocaleString()} บาท`;
     document.getElementById('analytics-total-bottles-all').textContent = `${totalBottles} ขวด`;
     document.getElementById('analytics-total-discount').textContent = `${filteredDiscount.toLocaleString()} บาท`;
@@ -2210,6 +2237,7 @@ function copyOrderToText(orderId) {
     if (!order) return;
     
     const deliveryName = order.deliveryType === 'grab' ? 'Grab Delivery' : (order.deliveryType === 'walkin' ? 'รับเอง/หน้าร้าน' : 'อื่นๆ');
+    const payMethodName = order.paymentMethod === 'cash' ? 'เงินสด' : 'เงินโอน / สแกน';
     
     let itemsText = '';
     const drinkKeys = Object.keys(order.items);
@@ -2233,6 +2261,7 @@ function copyOrderToText(orderId) {
 วันที่: ${order.date} (${order.time})
 ลูกค้า: ${order.customerName}
 ช่องทาง: ${deliveryName}
+การชำระเงิน: ${payMethodName}
 ${staffText}${remarkText}---------------------------------
 รายการเครื่องดื่ม:
 ${itemsText}---------------------------------
@@ -2269,6 +2298,8 @@ function copyDailySummaryToText() {
 
     let filteredRevenue = 0;
     let filteredBottles = 0;
+    let filteredScanRevenue = 0;
+    let filteredCashRevenue = 0;
     let pendingPromoList = [];
     
     state.orders.forEach(order => {
@@ -2292,6 +2323,11 @@ function copyDailySummaryToText() {
             } else {
                 filteredBottles += orderQty;
                 filteredRevenue += pricing.total || 0;
+                if (order.paymentMethod === 'cash') {
+                    filteredCashRevenue += pricing.total || 0;
+                } else {
+                    filteredScanRevenue += pricing.total || 0;
+                }
             }
         }
     });
@@ -2317,6 +2353,8 @@ function copyDailySummaryToText() {
 ---------------------------------
 🥤 ขายได้ทั้งหมด: ${filteredBottles} ขวด
 💰 ยอดขายรวม: ${filteredRevenue.toLocaleString()} บาท
+   • โอน/สแกน: ${filteredScanRevenue.toLocaleString()} บาท
+   • เงินสด: ${filteredCashRevenue.toLocaleString()} บาท
 ---------------------------------
 ⚠️ รายชื่อลูกค้าที่ยังไม่ครบโปร:
 ${pendingText}---------------------------------`;
