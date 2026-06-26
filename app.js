@@ -2186,29 +2186,17 @@ function deleteAdminUser(username) {
 
 // GET CURRENT SELECTED USER PIN LENGTH
 function getSelectedUserPinLength() {
-    const loginUsernameInput = document.getElementById('login-username');
-    if (!loginUsernameInput) return 6;
-    const username = loginUsernameInput.value.trim().toLowerCase();
-    const foundUser = state.users.find(u => u.username.toLowerCase() === username);
-    return foundUser && foundUser.pin ? foundUser.pin.length : 6;
+    return 6;
 }
 
 // HANDLE PIN BUTTON OR KEYBOARD INPUT
 function handlePinInput(val) {
-    const pinLength = getSelectedUserPinLength();
     if (val === 'clear') {
         state.tempPin = state.tempPin.slice(0, -1);
         updatePinDots();
-    } else if (state.tempPin.length < pinLength) {
+    } else if (state.tempPin.length < 6) {
         state.tempPin += val;
         updatePinDots();
-        
-        // Auto-submit when PIN length is reached
-        if (state.tempPin.length === pinLength) {
-            setTimeout(() => {
-                submitLogin();
-            }, 100);
-        }
     }
 }
 
