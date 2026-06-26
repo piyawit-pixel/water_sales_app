@@ -2230,6 +2230,7 @@ ${itemsText}---------------------------------
 }
 
 // COPY DAILY SUMMARY TO FORMATTED TEXT
+// COPY DAILY SUMMARY TO FORMATTED TEXT
 function copyDailySummaryToText() {
     const todayStr = getLocalDateString(new Date());
     
@@ -2255,12 +2256,7 @@ function copyDailySummaryToText() {
 
     let filteredRevenue = 0;
     let filteredBottles = 0;
-    let filteredDiscount = 0;
-    let filteredCommBottles = 0;
-    
-    let popTracker = {};
-    DRINKS.forEach(d => popTracker[d.id] = 0);
-    let deliveryStats = { walkin: 0, grab: 0, other: 0 };
+    let pendingPromoList = [];
     
     state.orders.forEach(order => {
         const orderQty = order.items ? Object.values(order.items).reduce((a, b) => a + b, 0) : 0;
@@ -2275,82 +2271,36 @@ function copyDailySummaryToText() {
         if (matchesFilter) {
             filteredBottles += orderQty;
             filteredRevenue += pricing.total || 0;
-            filteredDiscount += pricing.discount || 0;
-            if (order.deliveryType !== 'grab') {
-                filteredCommBottles += orderQty;
-            }
             
-            const type = order.deliveryType;
-            if (deliveryStats.hasOwnProperty(type)) {
-                deliveryStats[type]++;
-            } else {
-                deliveryStats.other++;
-            }
-            
-            if (order.items) {
-                Object.keys(order.items).forEach(drinkId => {
-                    if (popTracker.hasOwnProperty(drinkId)) {
-                        popTracker[drinkId] += order.items[drinkId];
-                    }
+            // Check if order is pending promotion
+            if (order.status === 'pending_promo') {
+                pendingPromoList.push({
+                    name: order.customerName,
+                    qty: orderQty,
+                    price: pricing.total || 0
                 });
             }
         }
     });
     
-    // Add manual grab log entries to popularity
-    state.grabPickups.forEach(grab => {
-        if (!grab.orderId) {
-            const grabDate = getLocalDateString(new Date(grab.timestamp));
-            let matchesFilter = false;
-            if (filterVal === 'today' && grabDate === todayStr) matchesFilter = true;
-            else if (filterVal === 'yesterday' && grabDate === yesterdayStr) matchesFilter = true;
-            else if (filterVal === 'custom' && grabDate === customDateVal) matchesFilter = true;
-            else if (filterVal === 'all') matchesFilter = true;
-            
-            if (matchesFilter) {
-                Object.keys(grab.items).forEach(drinkId => {
-                    if (popTracker.hasOwnProperty(drinkId)) {
-                        popTracker[drinkId] += grab.items[drinkId];
-                    }
-                });
-            }
-        }
-    });
-    
-    // Beverage sales summary text
-    let popularityText = '';
-    const sortedPopular = Object.keys(popTracker)
-        .map(id => {
-            const drink = DRINKS.find(d => d.id === id);
-            return {
-                id: id,
-                nameTH: drink ? drink.nameTH : id,
-                qty: popTracker[id]
-            };
-        })
-        .filter(item => item.qty > 0)
-        .sort((a, b) => b.qty - a.qty);
-        
-    if (sortedPopular.length === 0) {
-        popularityText = 'ไม่มีข้อมูลยอดขาย\n';
+    // Generate text for pending promotion customers
+    let pendingText = '';
+    if (pendingPromoList.length === 0) {
+        pendingText = '- ไม่มีรายการค้างโปร\n';
     } else {
-        sortedPopular.forEach((item, idx) => {
-            popularityText += `${idx + 1}. ${item.nameTH}: ${item.qty} ขวด\n`;
+        pendingPromoList.forEach(item => {
+            pendingText += `- คุณ ${item.name}: ${item.qty} ขวด (${item.price} บาท)\n`;
         });
     }
     
     const summaryText = `📊 สรุปยอดขายร้านบ้านเพื่อน (BaanPhuan)
 ประจำ: ${targetDateText}
 ---------------------------------
+🥤 ขายได้ทั้งหมด: ${filteredBottles} ขวด
 💰 ยอดขายรวม: ${filteredRevenue.toLocaleString()} บาท
-🥤 จำนวนที่ขายได้: ${filteredBottles} ขวด
-💵 ส่วนลดโปรโมชั่น: ${filteredDiscount.toLocaleString()} บาท
 ---------------------------------
-📦 ยอดขายแยกตามเมนู:
-${popularityText}---------------------------------
-🚚 สถิติช่องทางจำหน่าย:
-- หน้าร้าน / รับเอง: ${deliveryStats.walkin} บิล
-- Grab Delivery: ${deliveryStats.grab} บิล`;
+⚠️ รายชื่อลูกค้าที่ยังไม่ครบโปร:
+${pendingText}---------------------------------`;
 
     copyToClipboard(summaryText, `คัดลอกสรุปยอดขาย (${targetDateText}) เรียบร้อยแล้ว!`);
 }
