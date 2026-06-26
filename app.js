@@ -45,8 +45,7 @@ let state = {
     sheetUrl: '',
     autoSync: false,
     stock: {}, // drinkId -> quantity
-    users: [],
-    tempPin: ''
+    users: []
 };
 
 // LOAD INITIAL STATE FROM LOCAL STORAGE
@@ -459,55 +458,12 @@ function setupEventListeners() {
     if (grabManualForm) grabManualForm.addEventListener('submit', handleGrabManualSubmit);
 
     // Login Screen Event Listeners
-    // PIN pad button click handlers
-    const pinButtons = document.querySelectorAll('.pin-btn');
-    pinButtons.forEach(btn => {
-        btn.addEventListener('click', () => {
-            const val = btn.getAttribute('data-val');
-            handlePinInput(val);
-        });
-    });
-
-    // Keyboard support for login screen PIN
-    document.addEventListener('keydown', (e) => {
-        const loginContainer = document.getElementById('login-container');
-        if (loginContainer && !loginContainer.classList.contains('hidden')) {
-            if (e.key >= '0' && e.key <= '9') {
-                handlePinInput(e.key);
-            } else if (e.key === 'Backspace') {
-                handlePinInput('clear');
-            } else if (e.key === 'Enter') {
-                e.preventDefault();
-                submitLogin();
-            }
-        }
-    });
-
-    // Login form submit click (handled by check button)
-    const btnSubmitPin = document.getElementById('btn-submit-pin');
-    if (btnSubmitPin) {
-        btnSubmitPin.addEventListener('click', (e) => {
-            e.preventDefault();
-            submitLogin();
-        });
-    }
-
     const loginForm = document.getElementById('login-form');
     if (loginForm) {
         loginForm.addEventListener('submit', (e) => {
             e.preventDefault();
             submitLogin();
         });
-    }
-
-    const loginUsernameInput = document.getElementById('login-username');
-    if (loginUsernameInput) {
-        const resetPinAndDots = () => {
-            state.tempPin = '';
-            updatePinDots();
-        };
-        loginUsernameInput.addEventListener('input', resetPinAndDots);
-        loginUsernameInput.addEventListener('change', resetPinAndDots);
     }
 
     const btnLoginPullSheet = document.getElementById('btn-login-pull-sheet');
@@ -548,8 +504,6 @@ function setupEventListeners() {
             sessionStorage.removeItem('baanphuan_logged_in');
             sessionStorage.removeItem('baanphuan_username');
             sessionStorage.removeItem('baanphuan_role');
-            state.tempPin = '';
-            updatePinDots();
             checkLoginStatus();
         });
     }
@@ -2068,7 +2022,8 @@ function renderLoginUserDropdown() {
     const lastStaff = localStorage.getItem('juice_bar_last_staff') || '';
     loginUsernameInput.value = lastStaff;
     
-    updatePinDots();
+    const pinInput = document.getElementById('login-pin');
+    if (pinInput) pinInput.value = '';
 }
 
 // RENDER ADMIN USERS LIST TABLE
@@ -2186,64 +2141,14 @@ function deleteAdminUser(username) {
 
 // GET CURRENT SELECTED USER PIN LENGTH
 function getSelectedUserPinLength() {
-    const loginUsernameInput = document.getElementById('login-username');
-    if (!loginUsernameInput) return 6;
-    const username = loginUsernameInput.value.trim().toLowerCase();
-    const foundUser = state.users.find(u => u.username.toLowerCase() === username);
-    return foundUser && foundUser.pin ? foundUser.pin.length : 6;
-}
-
-// HANDLE PIN BUTTON OR KEYBOARD INPUT
-function handlePinInput(val) {
-    if (val === 'clear') {
-        state.tempPin = state.tempPin.slice(0, -1);
-        updatePinDots();
-    } else if (state.tempPin.length < 6) {
-        state.tempPin += val;
-        updatePinDots();
-        
-        // Auto-submit ONLY if the entered PIN matches the actual user's PIN in the database
-        const loginUsernameInput = document.getElementById('login-username');
-        if (loginUsernameInput) {
-            const username = loginUsernameInput.value.trim().toLowerCase();
-            const foundUser = state.users.find(u => u.username.toLowerCase() === username);
-            if (foundUser && foundUser.pin && state.tempPin === foundUser.pin) {
-                setTimeout(() => {
-                    submitLogin();
-                }, 100);
-            }
-        }
-    }
-}
-
-// UPDATE PIN DISPLAY DOTS
-function updatePinDots() {
-    const container = document.querySelector('.pin-display-container');
-    if (!container) return;
-    
-    let pinLength = getSelectedUserPinLength();
-    if (state.tempPin.length > pinLength) {
-        pinLength = state.tempPin.length;
-    }
-    
-    // Clear and build dots dynamically
-    container.innerHTML = '';
-    for (let i = 0; i < pinLength; i++) {
-        const dot = document.createElement('div');
-        dot.className = 'pin-dot';
-        if (i < state.tempPin.length) {
-            dot.classList.add('filled');
-        }
-        container.appendChild(dot);
-    }
-}
-
 // SUBMIT LOGIN AUTHENTICATION
 function submitLogin() {
     const usernameInput = document.getElementById('login-username');
-    if (!usernameInput) return;
+    const pinInput = document.getElementById('login-pin');
+    if (!usernameInput || !pinInput) return;
+    
     const username = usernameInput.value.trim();
-    const pin = state.tempPin;
+    const pin = pinInput.value.trim();
     
     // Find user in database (case-insensitive)
     const foundUser = state.users.find(u => u.username.toLowerCase() === username.toLowerCase());
@@ -2254,8 +2159,7 @@ function submitLogin() {
         sessionStorage.setItem('baanphuan_role', foundUser.role);
         localStorage.setItem('juice_bar_last_staff', correctUsername);
         document.getElementById('login-error-msg').style.display = 'none';
-        state.tempPin = '';
-        updatePinDots();
+        pinInput.value = '';
         checkLoginStatus();
     } else {
         const errorMsg = document.getElementById('login-error-msg');
@@ -2265,8 +2169,8 @@ function submitLogin() {
         errorMsg.style.animation = 'shake 0.3s ease';
         
         // Clear pin on error
-        state.tempPin = '';
-        updatePinDots();
+        pinInput.value = '';
+        pinInput.focus();
     }
 }
 

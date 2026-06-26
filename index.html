@@ -520,42 +520,31 @@
                 <h2>BaanPhuan</h2>
                 <p>บ้านเพื่อน - POS & Inventory System</p>
             </div>
-            <form id="login-form">
-                <div class="form-group" style="margin-bottom: 1.25rem; display: flex; flex-direction: column; gap: 0.5rem;">
-                    <label for="login-username" style="font-size: 0.85rem; font-weight: 500; color: var(--color-text-muted); display: flex; align-items: center; gap: 0.4rem;"><i class="fa-solid fa-user"></i> ชื่อผู้ใช้งาน / พนักงาน</label>
-                    <input type="text" id="login-username" placeholder="ระบุชื่อผู้ใช้งาน..." required style="width: 100%; padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border-glass); background: rgba(255, 255, 255, 0.85); color: var(--color-text); font-family: var(--font-body); font-size: 0.9rem; outline: none;">
-                </div>
-                <!-- PIN Display Dots -->
-                <div class="pin-display-container">
-                    <!-- Rendered dynamically based on selected user PIN length -->
-                </div>
+             <form id="login-form">
+                 <div class="form-group" style="margin-bottom: 1.25rem; display: flex; flex-direction: column; gap: 0.5rem;">
+                     <label for="login-username" style="font-size: 0.85rem; font-weight: 500; color: var(--color-text-muted); display: flex; align-items: center; gap: 0.4rem;"><i class="fa-solid fa-user"></i> ชื่อผู้ใช้งาน / พนักงาน</label>
+                     <input type="text" id="login-username" placeholder="ระบุชื่อผู้ใช้งาน..." required style="width: 100%; padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border-glass); background: rgba(255, 255, 255, 0.85); color: var(--color-text); font-family: var(--font-body); font-size: 0.9rem; outline: none;">
+                 </div>
+                 
+                 <div class="form-group" style="margin-bottom: 1.5rem; display: flex; flex-direction: column; gap: 0.5rem;">
+                     <label for="login-pin" style="font-size: 0.85rem; font-weight: 500; color: var(--color-text-muted); display: flex; align-items: center; gap: 0.4rem;"><i class="fa-solid fa-lock"></i> รหัสผ่าน PIN (4-6 หลัก)</label>
+                     <input type="password" id="login-pin" inputmode="numeric" pattern="[0-9]*" maxlength="6" placeholder="กรอกรหัส PIN..." required style="width: 100%; padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border-glass); background: rgba(255, 255, 255, 0.85); color: var(--color-text); font-family: var(--font-body); font-size: 0.9rem; outline: none; letter-spacing: 0.5rem; text-align: center;">
+                 </div>
 
-                <!-- PIN Pad Grid -->
-                <div class="pin-pad-grid">
-                    <button type="button" class="pin-btn" data-val="1">1</button>
-                    <button type="button" class="pin-btn" data-val="2">2</button>
-                    <button type="button" class="pin-btn" data-val="3">3</button>
-                    <button type="button" class="pin-btn" data-val="4">4</button>
-                    <button type="button" class="pin-btn" data-val="5">5</button>
-                    <button type="button" class="pin-btn" data-val="6">6</button>
-                    <button type="button" class="pin-btn" data-val="7">7</button>
-                    <button type="button" class="pin-btn" data-val="8">8</button>
-                    <button type="button" class="pin-btn" data-val="9">9</button>
-                    <button type="button" class="pin-btn action" data-val="clear"><i class="fa-solid fa-delete-left"></i></button>
-                    <button type="button" class="pin-btn" data-val="0">0</button>
-                    <button type="button" class="pin-btn action submit" id="btn-submit-pin"><i class="fa-solid fa-circle-check"></i></button>
-                </div>
+                 <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.75rem; justify-content: center; font-size: 1rem; margin-bottom: 1rem;">
+                     <i class="fa-solid fa-right-to-bracket"></i> เข้าสู่ระบบ
+                 </button>
 
-                <div style="margin-top: 1.25rem; text-align: center;">
-                    <button type="button" class="btn btn-outline btn-sm" id="btn-login-pull-sheet" style="width: 100%; justify-content: center; gap: 0.5rem;">
-                        <i class="fa-solid fa-cloud-arrow-down"></i> ดึงข้อมูลจากคลาวด์ (ซิงค์รหัสใหม่)
-                    </button>
-                </div>
+                 <div style="text-align: center;">
+                     <button type="button" class="btn btn-outline btn-sm" id="btn-login-pull-sheet" style="width: 100%; justify-content: center; gap: 0.5rem;">
+                         <i class="fa-solid fa-cloud-arrow-down"></i> ดึงข้อมูลจากคลาวด์ (ซิงค์รหัสใหม่)
+                     </button>
+                 </div>
 
-                <div id="login-error-msg" class="login-error-msg" style="display: none; margin-top: 1.25rem;">
-                    <i class="fa-solid fa-circle-exclamation"></i> รหัสผ่านไม่ถูกต้อง กรุณาลองใหม่
-                </div>
-            </form>
+                 <div id="login-error-msg" class="login-error-msg" style="display: none; margin-top: 1.25rem;">
+                     <i class="fa-solid fa-circle-exclamation"></i> รหัสผ่านไม่ถูกต้อง กรุณาลองใหม่
+                 </div>
+             </form>
         </div>
     </div>
 
