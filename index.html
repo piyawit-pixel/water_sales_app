@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bar Lounge Tracker - ระบบบันทึกยอดขายเครื่องดื่ม & Grab</title>
+    <title>Juice Bar Tracker - ระบบบันทึกยอดขายน้ำและ Grab</title>
     <!-- Google Fonts: Prompt & Sarabun -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -18,9 +18,9 @@
         <!-- TOP NAVBAR -->
         <header class="app-header">
             <div class="header-logo">
-                <div class="neon-icon"><i class="fa-solid fa-martini-glass-citrus"></i></div>
+                <div class="neon-icon"><i class="fa-solid fa-glass-water"></i></div>
                 <div class="brand-info">
-                    <h1>Bar Lounge Tracker</h1>
+                    <h1>Juice Bar Tracker</h1>
                     <p>ระบบบันทึกยอดขาย & การจัดการโปรโมชั่นอัจฉริยะ</p>
                 </div>
             </div>
@@ -36,9 +36,9 @@
         </header>
 
         <!-- BANNER DECORATION -->
-        <div class="app-banner" style="background-image: linear-gradient(180deg, rgba(10, 10, 15, 0.3) 0%, rgba(10, 10, 15, 0.95) 100%), url('assets/bar_lounge_banner.jpg');">
+        <div class="app-banner" style="background-image: linear-gradient(180deg, rgba(42, 44, 39, 0.4) 0%, rgba(42, 44, 39, 0.95) 100%), url('assets/juice_bar_banner.jpg');">
             <div class="banner-content">
-                <h2><i class="fa-solid fa-champagne-glasses"></i> น้ำขวดละ 80 บาท</h2>
+                <h2>น้ำขวดละ 80 บาท</h2>
                 <p class="promo-badge"><i class="fa-solid fa-star-half-stroke"></i> ซื้อ 4 ขวด 300 บาท | ซื้อ 7 ขวด 500 บาท</p>
             </div>
         </div>
@@ -49,7 +49,7 @@
             <section class="pos-panel">
                 <div class="card glass-card">
                     <div class="card-header">
-                        <h2 id="pos-title"><i class="fa-solid fa-wine-bottle text-primary"></i> สั่งเครื่องดื่ม / บันทึกการขาย</h2>
+                        <h2 id="pos-title"><i class="fa-solid fa-cart-plus text-primary"></i> สั่งน้ำขวด / บันทึกการขาย</h2>
                         <span class="badge badge-outline" id="edit-indicator" style="display: none;">โหมดแก้ไขออเดอร์</span>
                     </div>
                     <div class="card-body">
@@ -109,7 +109,7 @@
 
                         <!-- Beverages Grid -->
                         <div class="beverage-section">
-                            <label><i class="fa-solid fa-wine-glass"></i> เลือกเครื่องดื่ม (ขวดละ 80.-)</label>
+                            <label><i class="fa-solid fa-bottle-water"></i> เลือกเครื่องดื่ม (ขวดละ 80.-)</label>
                             <div class="beverages-grid" id="beverages-container">
                                 <!-- Beverage Cards dynamically loaded here -->
                             </div>
@@ -285,7 +285,7 @@
                         <div class="summary-details-grid">
                             <div class="card glass-card">
                                 <div class="card-header">
-                                    <h3><i class="fa-solid fa-ranking-star text-primary"></i> 5 อันดับน้ำขายดีที่สุด</h3>
+                                    <h3><i class="fa-solid fa-bottle-water text-primary"></i> ยอดขายแยกตามเมนูเครื่องดื่ม</h3>
                                 </div>
                                 <div class="card-body">
                                     <div class="ranking-list" id="popular-drinks-list">

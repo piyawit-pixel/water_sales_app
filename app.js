@@ -1,19 +1,19 @@
 // DRINK DATABASE
 const DRINKS = [
     { id: 'oishi', nameTH: 'โออิชิ', nameEN: 'Oishi', category: 'tea', color: '#8FA87B', colorRgb: '143, 168, 123', icon: 'fa-leaf' },
-    { id: 'grape', nameTH: 'องุ่นเคียวโฮ', nameEN: 'Kyoho Grape', category: 'fruit', color: '#9B6BA8', colorRgb: '155, 107, 168', icon: 'fa-wine-glass' },
-    { id: 'bitter', nameTH: 'เดิมขม', nameEN: 'Original Bitter', category: 'dark', color: '#7E8578', colorRgb: '126, 133, 120', icon: 'fa-whiskey-glass' },
-    { id: 'sweet', nameTH: 'เดิมหวาน', nameEN: 'Original Sweet', category: 'amber', color: '#DDB87B', colorRgb: '221, 184, 123', icon: 'fa-whiskey-glass' },
+    { id: 'grape', nameTH: 'องุ่นเคียวโฮ', nameEN: 'Kyoho Grape', category: 'fruit', color: '#A28AA8', colorRgb: '162, 138, 168', icon: 'fa-wine-glass' },
+    { id: 'bitter', nameTH: 'เดิมขม', nameEN: 'Original Bitter', category: 'dark', color: '#7E8578', colorRgb: '126, 133, 120', icon: 'fa-mug-hot' },
+    { id: 'sweet', nameTH: 'เดิมหวาน', nameEN: 'Original Sweet', category: 'amber', color: '#DDB87B', colorRgb: '221, 184, 123', icon: 'fa-cookie' },
     { id: 'honey-lemon', nameTH: 'น้ำผึ้งมะนาว', nameEN: 'Honey Lemon', category: 'yellow', color: '#E0C068', colorRgb: '224, 192, 104', icon: 'fa-lemon' },
-    { id: 'blueberry', nameTH: 'บลูเบอร์รี่', nameEN: 'Blueberry', category: 'fruit', color: '#6B8AB8', colorRgb: '107, 138, 184', icon: 'fa-martini-glass' },
-    { id: 'yogurt', nameTH: 'โยเกิร์ต', nameEN: 'Yogurt', category: 'yogurt', color: '#D2A0A8', colorRgb: '210, 160, 168', icon: 'fa-glass-water' },
-    { id: 'strawberry-yogurt', nameTH: 'โยเกิร์ตสตอเบอรี่', nameEN: 'Strawberry Yogurt', category: 'yogurt', color: '#D48A92', colorRgb: '212, 138, 146', icon: 'fa-glass-water' },
-    { id: 'strawberry', nameTH: 'สตอเบอรี่', nameEN: 'Strawberry', category: 'fruit', color: '#D96B6B', colorRgb: '217, 107, 107', icon: 'fa-wine-glass' },
-    { id: 'apple', nameTH: 'แอปเปิ้ล', nameEN: 'Apple', category: 'fruit', color: '#CE7B7B', colorRgb: '206, 123, 123', icon: 'fa-wine-glass' },
+    { id: 'blueberry', nameTH: 'บลูเบอร์รี่', nameEN: 'Blueberry', category: 'fruit', color: '#7B94B8', colorRgb: '123, 148, 184', icon: 'fa-seedling' },
+    { id: 'yogurt', nameTH: 'โยเกิร์ต', nameEN: 'Yogurt', category: 'yogurt', color: '#D2A0A8', colorRgb: '210, 160, 168', icon: 'fa-cheese' },
+    { id: 'strawberry-yogurt', nameTH: 'โยเกิร์ตสตอเบอรี่', nameEN: 'Strawberry Yogurt', category: 'yogurt', color: '#D48A92', colorRgb: '212, 138, 146', icon: 'fa-ice-cream' },
+    { id: 'strawberry', nameTH: 'สตอเบอรี่', nameEN: 'Strawberry', category: 'fruit', color: '#D96B6B', colorRgb: '217, 107, 107', icon: 'fa-apple-whole' },
+    { id: 'apple', nameTH: 'แอปเปิ้ล', nameEN: 'Apple', category: 'fruit', color: '#CE7B7B', colorRgb: '206, 123, 123', icon: 'fa-apple-whole' },
     { id: 'greentea', nameTH: 'ชาเขียว', nameEN: 'Green Tea', category: 'tea', color: '#7CA682', colorRgb: '124, 166, 130', icon: 'fa-mug-hot' },
-    { id: 'taro', nameTH: 'เผือก', nameEN: 'Taro', category: 'yogurt', color: '#B0A2C7', colorRgb: '176, 162, 199', icon: 'fa-martini-glass-citrus' },
+    { id: 'taro', nameTH: 'เผือก', nameEN: 'Taro', category: 'yogurt', color: '#B0A2C7', colorRgb: '176, 162, 199', icon: 'fa-egg' },
     { id: 'cocoa', nameTH: 'โกโก้', nameEN: 'Cocoa', category: 'cocoa', color: '#9C7C60', colorRgb: '156, 124, 96', icon: 'fa-mug-hot' },
-    { id: 'watermelon', nameTH: 'แตงโม', nameEN: 'Watermelon', category: 'fruit', color: '#DF8A8E', colorRgb: '223, 138, 142', icon: 'fa-martini-glass' }
+    { id: 'watermelon', nameTH: 'แตงโม', nameEN: 'Watermelon', category: 'fruit', color: '#DF8A8E', colorRgb: '223, 138, 142', icon: 'fa-lemon' }
 ];
 
 const PRICE_PER_BOTTLE = 80;
@@ -1288,7 +1288,7 @@ function renderAnalytics() {
     document.getElementById('stat-delivery-grab').textContent = `${deliveryStats.grab} บิล`;
     document.getElementById('stat-delivery-other').textContent = `${deliveryStats.other} บิล`;
     
-    // 2. RENDER POPULAR DRINKS (Top 5)
+    // 2. RENDER BEVERAGES SALES SUMMARY
     const sortedPopular = Object.keys(popTracker)
         .map(id => {
             const drink = DRINKS.find(d => d.id === id);
@@ -1298,20 +1298,18 @@ function renderAnalytics() {
                 qty: popTracker[id]
             };
         })
-        .filter(item => item.qty > 0)
         .sort((a, b) => b.qty - a.qty);
         
     const popularContainer = document.getElementById('popular-drinks-list');
     
-    if (sortedPopular.length === 0) {
+    const maxQty = sortedPopular.length > 0 ? sortedPopular[0].qty : 0;
+    
+    if (maxQty === 0) {
         popularContainer.innerHTML = `<div class="text-muted text-center py-4">ยังไม่มีข้อมูลยอดขายช่วงนี้</div>`;
         return;
     }
     
-    const maxQty = sortedPopular[0].qty; // For scale percentage
-    
-    const top5 = sortedPopular.slice(0, 5);
-    popularContainer.innerHTML = top5.map((item, idx) => {
+    popularContainer.innerHTML = sortedPopular.map((item, idx) => {
         const percentage = maxQty > 0 ? (item.qty / maxQty) * 100 : 0;
         return `
             <div class="ranking-item">
