@@ -2601,12 +2601,18 @@ function renderTables() {
                         <span>จ่ายแล้ว:</span>
                         <span>${total.toLocaleString()} บาท ✓</span>
                     </div>
+                    <div class="reopen-hint">
+                        <i class="fa-solid fa-circle-info"></i> ลูกค้ายังนั่งอยู่ — กด “ต่อบิลเดิม” เพื่อเพิ่มรายการและคำนวณโปรโมชั่นรวม
+                    </div>
                 </div>
-                <div class="table-actions">
-                    <button class="btn btn-outline btn-sm" onclick="openTable('${tableName}')">
-                        <i class="fa-solid fa-cart-plus"></i> สั่งรอบใหม่
+                <div class="table-actions table-actions-3">
+                    <button class="btn btn-warning btn-sm" onclick="reopenPaidOrder('${paidOrder.id}')" style="flex:2;">
+                        <i class="fa-solid fa-rotate-left"></i> ต่อบิลเดิม
                     </button>
-                    <button class="btn btn-secondary btn-sm" onclick="closeTableAfterPay('${tableName}')">
+                    <button class="btn btn-outline btn-sm" onclick="openTable('${tableName}')" style="flex:1.5;">
+                        <i class="fa-solid fa-cart-plus"></i> บิลใหม่
+                    </button>
+                    <button class="btn btn-secondary btn-sm" onclick="closeTableAfterPay('${tableName}')" style="flex:1.5;">
                         <i class="fa-solid fa-right-from-bracket"></i> ปิดโต๊ะ
                     </button>
                 </div>
@@ -2765,8 +2771,35 @@ function confirmPayment() {
     renderAnalytics();
 }
 
-// Close table after payment (mark as 'closed' by clearing today's paid orders visually)
-// We don't delete data — just mark so table shows as empty
+// Reopen a paid order back to pending so more items can be added (for promo completion)
+function reopenPaidOrder(orderId) {
+    const order = state.orders.find(o => o.id === orderId);
+    if (!order) return;
+    
+    // Revert status back to pending
+    order.status = 'pending_promo';
+    order.tableClosed = false;
+    order.updatedTime = new Date().toISOString();
+    
+    saveToLocalStorage();
+    
+    // Load into POS form for editing
+    loadOrderForEditing(orderId);
+    
+    // Refresh tables view
+    renderTables();
+    renderOrders();
+    
+    // Scroll to POS
+    const posPanel = document.querySelector('.pos-panel');
+    if (posPanel) posPanel.scrollIntoView({ behavior: 'smooth' });
+    
+    // Update POS title to indicate continuation
+    const title = document.getElementById('pos-title');
+    if (title) title.innerHTML = `<i class="fa-solid fa-rotate-left text-warning"></i> ต่อบิลเดิม: ${order.customerName}`;
+}
+
+// Close table after payment
 function closeTableAfterPay(tableName) {
     const todayStr = getLocalDateString(new Date());
     // Find the latest paid order for this table today and mark it as 'closed'
