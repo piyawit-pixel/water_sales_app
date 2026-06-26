@@ -1,34 +1,34 @@
-/* PREMIUM NEON DIGITAL WELLNESS CAFE THEME */
+/* PREMIUM NEON KRATOM LEAF THEME */
 :root {
-    /* Color Palette - Inspired by Banner */
-    --bg-main: #050b14;        /* Deep Space Blue/Black */
-    --bg-card: #0a1120;        /* Dark blue base for cards */
-    --bg-card-glass: rgba(10, 17, 32, 0.65); /* Translucent dark glass */
-    --border-glass: rgba(34, 211, 238, 0.2); /* Cyan tinted glass border */
-    --border-hover: rgba(192, 132, 252, 0.5); /* Purple hover */
+    /* Color Palette - Inspired by Kratom Leaf Vibe */
+    --bg-main: #040e06;        /* Deep Kratom Forest Green/Black */
+    --bg-card: #07190c;        /* Dark herb green base for cards */
+    --bg-card-glass: rgba(7, 25, 12, 0.7); /* Translucent dark herb glass */
+    --border-glass: rgba(74, 222, 128, 0.25); /* Kratom Green tinted glass border */
+    --border-hover: rgba(245, 158, 11, 0.5); /* Boiled Tea Gold hover */
     
-    --color-text: #f8fafc;      /* White Text */
-    --color-text-muted: #94a3b8;/* Muted Blue-Gray Text */
+    --color-text: #f0fdf4;      /* Off-White Greenish Text */
+    --color-text-muted: #86a38e;/* Muted Herbal Green Text */
     
     /* Neon Accents */
-    --color-primary: #22d3ee;   /* Cyan Neon */
-    --color-primary-glow: rgba(34, 211, 238, 0.3);
+    --color-primary: #4ade80;   /* Bright Kratom Leaf Green */
+    --color-primary-glow: rgba(74, 222, 128, 0.3);
     
-    --color-secondary: #c084fc; /* Purple Neon */
-    --color-secondary-glow: rgba(192, 132, 252, 0.3);
+    --color-secondary: #f59e0b; /* Golden Boiled Kratom Tea Amber */
+    --color-secondary-glow: rgba(245, 158, 11, 0.3);
     
-    --color-success: #34d399;   /* Emerald Green */
-    --color-success-glow: rgba(52, 211, 153, 0.2);
+    --color-success: #22c55e;   /* Bright Herb Green */
+    --color-success-glow: rgba(34, 197, 94, 0.2);
     
-    --color-warning: #facc15;   /* Yellow/Gold */
-    --color-warning-glow: rgba(250, 204, 21, 0.2);
+    --color-warning: #fbbf24;   /* Leaf Vein Golden Yellow */
+    --color-warning-glow: rgba(251, 191, 36, 0.2);
     
-    --color-danger: #f43f5e;    /* Rose Red */
-    --color-danger-glow: rgba(244, 63, 94, 0.2);
+    --color-danger: #ef4444;    /* Crimson Red Alert */
+    --color-danger-glow: rgba(239, 68, 68, 0.2);
     
     /* Drink Cards Custom Accents (Brightened for dark theme) */
     --color-drink-tea: #4ade80;
-    --color-drink-fruit: #f472b6;
+    --color-drink-fruit: #fb7185;
     --color-drink-yogurt: #fda4af;
     --color-drink-purple: #c084fc;
     --color-drink-yellow: #fde047;
@@ -38,11 +38,11 @@
     /* Typography & Shadows */
     --font-heading: 'Prompt', sans-serif;
     --font-body: 'Sarabun', sans-serif;
-    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.3);
-    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -2px rgba(0, 0, 0, 0.4);
-    --shadow-lg: 0 10px 25px -3px rgba(0, 0, 0, 0.6), 0 4px 10px -4px rgba(0, 0, 0, 0.6);
-    --shadow-neon-cyan: 0 0 15px var(--color-primary-glow), inset 0 0 10px rgba(34, 211, 238, 0.1);
-    --shadow-neon-purple: 0 0 15px var(--color-secondary-glow), inset 0 0 10px rgba(192, 132, 252, 0.1);
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.4);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -2px rgba(0, 0, 0, 0.5);
+    --shadow-lg: 0 10px 25px -3px rgba(0, 0, 0, 0.7), 0 4px 10px -4px rgba(0, 0, 0, 0.7);
+    --shadow-neon-cyan: 0 0 15px var(--color-primary-glow), inset 0 0 10px rgba(74, 222, 128, 0.15);
+    --shadow-neon-purple: 0 0 15px var(--color-secondary-glow), inset 0 0 10px rgba(245, 158, 11, 0.15);
     
     --radius-sm: 8px;
     --radius-md: 16px;
@@ -62,8 +62,8 @@
 body {
     background-color: var(--bg-main);
     background-image: 
-        radial-gradient(circle at 15% 50%, rgba(34, 211, 238, 0.05), transparent 25%),
-        radial-gradient(circle at 85% 30%, rgba(192, 132, 252, 0.05), transparent 25%);
+        radial-gradient(circle at 15% 50%, rgba(74, 222, 128, 0.08), transparent 25%),
+        radial-gradient(circle at 85% 30%, rgba(245, 158, 11, 0.06), transparent 25%);
     background-attachment: fixed;
     color: var(--color-text);
     font-family: var(--font-body);
@@ -755,27 +755,27 @@ select:focus {
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, var(--color-primary), #0ea5e9);
+    background: linear-gradient(135deg, var(--color-primary), #22c55e);
     color: #000;
-    box-shadow: 0 4px 15px rgba(34, 211, 238, 0.4);
+    box-shadow: 0 4px 15px rgba(74, 222, 128, 0.4);
 }
 
 .btn-primary:hover {
-    box-shadow: 0 6px 20px rgba(34, 211, 238, 0.6), 0 0 15px rgba(34, 211, 238, 0.4);
+    box-shadow: 0 6px 20px rgba(74, 222, 128, 0.6), 0 0 15px rgba(74, 222, 128, 0.4);
     transform: translateY(-2px);
-    background: linear-gradient(135deg, #67e8f9, #38bdf8);
+    background: linear-gradient(135deg, #86efac, #4ade80);
 }
 
 .btn-secondary {
-    background: linear-gradient(135deg, var(--color-secondary), #8b5cf6);
-    color: #fff;
-    box-shadow: 0 4px 15px rgba(192, 132, 252, 0.4);
+    background: linear-gradient(135deg, var(--color-secondary), #d97706);
+    color: #000;
+    box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
 }
 
 .btn-secondary:hover {
-    box-shadow: 0 6px 20px rgba(192, 132, 252, 0.6), 0 0 15px rgba(192, 132, 252, 0.4);
+    box-shadow: 0 6px 20px rgba(245, 158, 11, 0.5), 0 0 15px rgba(245, 158, 11, 0.3);
     transform: translateY(-2px);
-    background: linear-gradient(135deg, #d8b4fe, #a855f7);
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
 }
 
 .btn-success {
@@ -858,10 +858,10 @@ select:focus {
 
 .tab-btn.active {
     color: var(--color-primary);
-    background: rgba(34, 211, 238, 0.1);
-    box-shadow: inset 0 0 10px rgba(34, 211, 238, 0.2);
-    border: 1px solid rgba(34, 211, 238, 0.3);
-    text-shadow: 0 0 5px rgba(34, 211, 238, 0.5);
+    background: rgba(74, 222, 128, 0.1);
+    box-shadow: inset 0 0 10px rgba(74, 222, 128, 0.2);
+    border: 1px solid rgba(74, 222, 128, 0.3);
+    text-shadow: 0 0 5px rgba(74, 222, 128, 0.5);
 }
 
 /* TAB CONTENT CONTROLLERS */
@@ -1198,11 +1198,11 @@ select:focus {
 .text-success { color: var(--color-success); }
 .text-warning { color: var(--color-warning); }
 .text-danger { color: var(--color-danger); }
-.text-teal { color: #2dd4bf; }
-.text-purple { color: #c084fc; }
+.text-teal { color: #4ade80; }
+.text-purple { color: #f59e0b; }
 
-.glow-teal { box-shadow: 0 0 20px rgba(45, 212, 191, 0.15), inset 0 0 10px rgba(45, 212, 191, 0.05); border-color: rgba(45, 212, 191, 0.3); }
-.glow-purple { box-shadow: 0 0 20px rgba(192, 132, 252, 0.15), inset 0 0 10px rgba(192, 132, 252, 0.05); border-color: rgba(192, 132, 252, 0.3); }
+.glow-teal { box-shadow: 0 0 20px rgba(74, 222, 128, 0.15), inset 0 0 10px rgba(74, 222, 128, 0.05); border-color: rgba(74, 222, 128, 0.3); }
+.glow-purple { box-shadow: 0 0 20px rgba(245, 158, 11, 0.15), inset 0 0 10px rgba(245, 158, 11, 0.05); border-color: rgba(245, 158, 11, 0.3); }
 .glow-warning { box-shadow: 0 0 20px rgba(251, 191, 36, 0.15), inset 0 0 10px rgba(251, 191, 36, 0.05); border-color: rgba(251, 191, 36, 0.3); }
 
 /* SUMMARY AND ANALYTICS PAGE */
