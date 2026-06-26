@@ -2326,22 +2326,18 @@ function copyDailySummaryToText() {
         });
     }
     
-    const filteredCommVal = filteredCommBottles * 5;
-    
     const summaryText = `📊 สรุปยอดขายร้านบ้านเพื่อน (BaanPhuan)
 ประจำ: ${targetDateText}
 ---------------------------------
 💰 ยอดขายรวม: ${filteredRevenue.toLocaleString()} บาท
 🥤 จำนวนที่ขายได้: ${filteredBottles} ขวด
 💵 ส่วนลดโปรโมชั่น: ${filteredDiscount.toLocaleString()} บาท
-🧑‍✈️ ค่าคอมมิชชั่นสะสม: ${filteredCommVal.toLocaleString()} บาท (คิดจาก ${filteredCommBottles} ขวด)
 ---------------------------------
 📦 ยอดขายแยกตามเมนู:
 ${popularityText}---------------------------------
 🚚 สถิติช่องทางจำหน่าย:
 - หน้าร้าน / รับเอง: ${deliveryStats.walkin} บิล
-- Grab Delivery: ${deliveryStats.grab} บิล
-- ช่องทางอื่น: ${deliveryStats.other} บิล`;
+- Grab Delivery: ${deliveryStats.grab} บิล`;
 
     copyToClipboard(summaryText, `คัดลอกสรุปยอดขาย (${targetDateText}) เรียบร้อยแล้ว!`);
 }
