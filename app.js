@@ -477,9 +477,9 @@ function setupEventListeners() {
         });
     }
 
-    const loginUsernameSelect = document.getElementById('login-username');
-    if (loginUsernameSelect) {
-        loginUsernameSelect.addEventListener('change', () => {
+    const loginUsernameInput = document.getElementById('login-username');
+    if (loginUsernameInput) {
+        loginUsernameInput.addEventListener('input', () => {
             state.tempPin = '';
             updatePinDots();
         });
@@ -1929,16 +1929,13 @@ function switchTab(tabId) {
     }
 }
 
-// RENDER LOGIN USER DROPDOWN SELECTOR
+// INITIALIZE LOGIN USERNAME FIELD
 function renderLoginUserDropdown() {
-    const loginUsernameSelect = document.getElementById('login-username');
-    if (!loginUsernameSelect) return;
+    const loginUsernameInput = document.getElementById('login-username');
+    if (!loginUsernameInput) return;
     
     const lastStaff = localStorage.getItem('juice_bar_last_staff') || '';
-    
-    loginUsernameSelect.innerHTML = state.users.map(u => `
-        <option value="${u.username}" ${u.username === lastStaff ? 'selected' : ''}>${u.username} (${u.role === 'admin' ? 'ผู้ดูแล' : 'พนักงาน'})</option>
-    `).join('');
+    loginUsernameInput.value = lastStaff;
     
     updatePinDots();
 }
@@ -2023,10 +2020,10 @@ function deleteAdminUser(username) {
 
 // GET CURRENT SELECTED USER PIN LENGTH
 function getSelectedUserPinLength() {
-    const loginUsernameSelect = document.getElementById('login-username');
-    if (!loginUsernameSelect) return 4;
-    const username = loginUsernameSelect.value;
-    const foundUser = state.users.find(u => u.username === username);
+    const loginUsernameInput = document.getElementById('login-username');
+    if (!loginUsernameInput) return 4;
+    const username = loginUsernameInput.value.trim().toLowerCase();
+    const foundUser = state.users.find(u => u.username.toLowerCase() === username);
     return foundUser && foundUser.pin ? foundUser.pin.length : 4;
 }
 
@@ -2070,16 +2067,19 @@ function updatePinDots() {
 
 // SUBMIT LOGIN AUTHENTICATION
 function submitLogin() {
-    const username = document.getElementById('login-username').value;
+    const usernameInput = document.getElementById('login-username');
+    if (!usernameInput) return;
+    const username = usernameInput.value.trim();
     const pin = state.tempPin;
     
-    // Find user in database
-    const foundUser = state.users.find(u => u.username === username);
+    // Find user in database (case-insensitive)
+    const foundUser = state.users.find(u => u.username.toLowerCase() === username.toLowerCase());
     if (foundUser && foundUser.pin === pin) {
+        const correctUsername = foundUser.username;
         sessionStorage.setItem('baanphuan_logged_in', 'true');
-        sessionStorage.setItem('baanphuan_username', username);
+        sessionStorage.setItem('baanphuan_username', correctUsername);
         sessionStorage.setItem('baanphuan_role', foundUser.role);
-        localStorage.setItem('juice_bar_last_staff', username);
+        localStorage.setItem('juice_bar_last_staff', correctUsername);
         document.getElementById('login-error-msg').style.display = 'none';
         state.tempPin = '';
         updatePinDots();
