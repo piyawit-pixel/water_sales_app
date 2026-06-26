@@ -105,25 +105,25 @@ h1, h2, h3, h4, h5, h6 {
 .neon-icon {
     font-size: 2.2rem;
     color: var(--color-primary);
-    text-shadow: 0 0 15px var(--color-primary);
-    background: rgba(34, 211, 238, 0.05);
+    text-shadow: 0 0 10px rgba(29, 78, 216, 0.3);
+    background: rgba(29, 78, 216, 0.05);
     width: 60px;
     height: 60px;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: var(--radius-md);
-    border: 1px solid rgba(34, 211, 238, 0.3);
+    border: 1px solid rgba(29, 78, 216, 0.2);
     box-shadow: var(--shadow-neon-cyan);
     animation: pulseGlow 3s infinite alternate;
 }
 
 @keyframes pulseGlow {
     0% {
-        box-shadow: 0 0 5px rgba(34, 211, 238, 0.2), inset 0 0 5px rgba(34, 211, 238, 0.1);
+        box-shadow: 0 0 5px rgba(29, 78, 216, 0.1), inset 0 0 5px rgba(29, 78, 216, 0.05);
     }
     100% {
-        box-shadow: 0 0 20px rgba(34, 211, 238, 0.6), inset 0 0 10px rgba(34, 211, 238, 0.3);
+        box-shadow: 0 0 15px rgba(29, 78, 216, 0.3), inset 0 0 8px rgba(29, 78, 216, 0.15);
     }
 }
 
@@ -186,7 +186,7 @@ h1, h2, h3, h4, h5, h6 {
     content: '';
     position: absolute;
     top: 0; left: 0; right: 0; bottom: 0;
-    background: linear-gradient(0deg, rgba(5, 11, 20, 0.9) 0%, rgba(5, 11, 20, 0.2) 100%);
+    background: linear-gradient(0deg, rgba(244, 246, 250, 0.85) 0%, rgba(244, 246, 250, 0.15) 100%);
     z-index: 1;
 }
 
