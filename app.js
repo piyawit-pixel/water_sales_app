@@ -438,8 +438,8 @@ function renderDrinkGrid() {
             <div>
                 <span class="bev-name-th">${drink.nameTH}</span>
                 <span class="bev-name-en">${drink.nameEN}</span>
-                <span class="bev-cap-color" style="font-size: 0.7rem; color: var(--color-text-muted); display: inline-flex; align-items: center; justify-content: center; gap: 0.25rem; margin-top: 0.2rem; background: rgba(0,0,0,0.3); padding: 0.1rem 0.5rem; border-radius: 50px; border: 1px solid rgba(255,255,255,0.05); user-select: none;">
-                    <i class="fa-solid fa-circle" style="color: ${CAP_COLORS_MAP[drink.capColor] || '#ccc'}; font-size: 0.6rem; filter: drop-shadow(0 0 2px ${CAP_COLORS_MAP[drink.capColor] || '#ccc'}); ${drink.capColor === 'ขาว' ? 'border: 1px solid #555; border-radius: 50%;' : ''}"></i>
+                <span class="bev-cap-color" style="font-size: 0.7rem; color: var(--color-text-muted); display: inline-flex; align-items: center; justify-content: center; gap: 0.25rem; margin-top: 0.2rem; background: rgba(29, 78, 216, 0.05); padding: 0.1rem 0.5rem; border-radius: 50px; border: 1px solid var(--border-glass); user-select: none;">
+                    <i class="fa-solid fa-circle" style="color: ${CAP_COLORS_MAP[drink.capColor] || '#ccc'}; font-size: 0.6rem; filter: drop-shadow(0 0 2px ${CAP_COLORS_MAP[drink.capColor] || '#ccc'}); ${drink.capColor === 'ขาว' ? 'border: 1px solid #94a3b8; border-radius: 50%;' : ''}"></i>
                     ฝา${drink.capColor}
                 </span>
                 ${stockLabel}
@@ -847,7 +847,7 @@ function renderOrders() {
         
         const staffBadge = order.staffName ? `<span class="badge badge-outline"><i class="fa-solid fa-user-pen"></i> ผู้บันทึก: ${order.staffName}</span>` : '';
         const remarkHTML = order.remark ? `
-            <div class="order-remark-text" style="font-size: 0.8rem; color: var(--color-primary); margin-top: 0.5rem; font-style: italic; background: rgba(0,0,0,0.15); padding: 0.35rem 0.5rem; border-radius: 4px; border-left: 2px solid var(--color-primary); display: flex; align-items: center; gap: 0.4rem;">
+            <div class="order-remark-text" style="font-size: 0.8rem; color: var(--color-primary); margin-top: 0.5rem; font-style: italic; background: rgba(29, 78, 216, 0.05); padding: 0.35rem 0.5rem; border-radius: 4px; border-left: 2px solid var(--color-primary); display: flex; align-items: center; gap: 0.4rem;">
                 <i class="fa-regular fa-comment-dots"></i> หมายเหตุ: ${order.remark}
             </div>
         ` : '';
@@ -1106,7 +1106,7 @@ function openGrabManualModal() {
             <span class="grab-drink-row-name">${drink.nameTH}</span>
             <div class="cart-qty-control">
                 <button type="button" class="cart-qty-btn modal-minus-btn" data-id="${drink.id}"><i class="fa-solid fa-minus"></i></button>
-                <input type="number" class="modal-drink-input" id="modal-qty-${drink.id}" value="0" min="0" style="width: 40px; text-align: center; border: none; background: transparent; color: white; font-weight: bold;" readonly>
+                <input type="number" class="modal-drink-input" id="modal-qty-${drink.id}" value="0" min="0" style="width: 40px; text-align: center; border: none; background: transparent; color: var(--color-text); font-weight: bold;" readonly>
                 <button type="button" class="cart-qty-btn modal-plus-btn" data-id="${drink.id}"><i class="fa-solid fa-plus"></i></button>
             </div>
         </div>
@@ -1572,20 +1572,20 @@ function renderStock() {
                 <div style="display: flex; align-items: center; gap: 0.5rem;">
                     <div style="width: 10px; height: 10px; border-radius: 50%; background-color: ${drink.color};"></div>
                     <div style="text-align: left;">
-                        <strong style="color: #fff;">${drink.nameTH}</strong>
+                        <strong style="color: var(--color-text);">${drink.nameTH}</strong>
                         <div style="font-size: 0.75rem; color: var(--color-text-muted);">${drink.nameEN}</div>
                     </div>
                 </div>
             </td>
             <td style="text-align: center;">
-                <span id="stock-val-display-${drink.id}" style="font-size: 1.1rem; font-weight: 700; color: #fff;">${qty}</span>
+                <span id="stock-val-display-${drink.id}" style="font-size: 1.1rem; font-weight: 700; color: var(--color-text);">${qty}</span>
             </td>
             <td style="text-align: center;">${statusBadge}</td>
             <td>
                 <div class="stock-qty-control" style="display: flex; align-items: center; justify-content: center; gap: 0.35rem;">
                     <button class="btn btn-outline btn-sm" style="padding: 0.25rem 0.5rem;" onclick="adjustStockValue('${drink.id}', -5)">-5</button>
                     <button class="btn btn-outline btn-sm" style="padding: 0.25rem 0.5rem;" onclick="adjustStockValue('${drink.id}', -1)">-1</button>
-                    <input type="number" id="stock-input-${drink.id}" value="${qty}" min="0" style="width: 55px; text-align: center; font-weight: bold; background: rgba(0,0,0,0.2); border: 1px solid var(--border-glass); color: #fff; padding: 0.25rem 0.4rem; border-radius: var(--radius-sm);" onchange="updateStockFromInput('${drink.id}', this.value)">
+                    <input type="number" id="stock-input-${drink.id}" value="${qty}" min="0" style="width: 55px; text-align: center; font-weight: bold; background: rgba(255, 255, 255, 0.85); border: 1px solid var(--border-glass); color: var(--color-text); padding: 0.25rem 0.4rem; border-radius: var(--radius-sm);" onchange="updateStockFromInput('${drink.id}', this.value)">
                     <button class="btn btn-outline btn-sm" style="padding: 0.25rem 0.5rem;" onclick="adjustStockValue('${drink.id}', 1)">+1</button>
                     <button class="btn btn-outline btn-sm" style="padding: 0.25rem 0.5rem;" onclick="adjustStockValue('${drink.id}', 5)">+5</button>
                 </div>
