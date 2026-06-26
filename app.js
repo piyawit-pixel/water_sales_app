@@ -41,7 +41,7 @@ let state = {
     editingOrderId: null,
     cart: {}, // drinkId -> quantity
     searchQuery: '',
-    tab: 'orders-tab',
+    tab: 'tables-tab',
     sheetUrl: '',
     autoSync: false,
     stock: {}, // drinkId -> quantity
@@ -181,14 +181,14 @@ function checkLoginStatus() {
         } else {
             if (adminTabBtn) adminTabBtn.style.display = 'none';
             if (state.tab === 'admin-tab') {
-                switchTab('orders-tab');
+                switchTab('tables-tab');
             }
         }
     } else {
         if (loginContainer) loginContainer.classList.remove('hidden');
         document.getElementById('header-user-badge').style.display = 'none';
         if (adminTabBtn) adminTabBtn.style.display = 'none';
-        switchTab('orders-tab');
+        switchTab('tables-tab');
     }
 }
 
