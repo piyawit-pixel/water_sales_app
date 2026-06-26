@@ -1830,13 +1830,14 @@ async function pullFromSheets(isSilent = false) {
                 console.log("Auto-pulled from Google Sheets successfully.");
             }
         } else {
-            if (!isSilent) alert("ไม่พบข้อมูล หรือรูปแบบข้อมูลในชีตไม่ถูกต้อง");
+            throw new Error("ไม่พบข้อมูล หรือรูปแบบข้อมูลในชีตไม่ถูกต้อง");
         }
     } catch (err) {
         console.error("Failed to pull from Google Sheets:", err);
         if (!isSilent) {
             alert("ดึงข้อมูลล้มเหลว: " + err.message + "\n\nกรุณาตรวจสอบว่า:\n1. ลิงก์ URL ถูกต้อง\n2. ตั้งค่า Deploy ใน Apps Script เป็นแบบ 'Anyone' (ทุกคน)\n3. บัญชีที่ใช้เปิดสิทธิ์เข้าถึงสาธารณะเรียบร้อยแล้ว");
         }
+        throw err;
     } finally {
         if (!isSilent) {
             pullBtn.disabled = false;
@@ -2139,10 +2140,8 @@ function deleteAdminUser(username) {
         renderAdminUsersList();
     }
 }
-
-// GET CURRENT SELECTED USER PIN LENGTH
-function getSelectedUserPinLength() {
 // SUBMIT LOGIN AUTHENTICATION
+
 function submitLogin() {
     const usernameInput = document.getElementById('login-username');
     const pinInput = document.getElementById('login-pin');
