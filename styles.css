@@ -105,7 +105,6 @@ h1, h2, h3, h4, h5, h6 {
 .neon-icon {
     font-size: 2.2rem;
     color: var(--color-primary);
-    text-shadow: 0 0 10px rgba(29, 78, 216, 0.3);
     background: rgba(29, 78, 216, 0.05);
     width: 60px;
     height: 60px;
@@ -199,7 +198,6 @@ h1, h2, h3, h4, h5, h6 {
     font-size: 2.2rem;
     color: #fff;
     margin-bottom: 0.5rem;
-    text-shadow: 0 0 10px rgba(34, 211, 238, 0.8), 0 2px 4px rgba(0,0,0,0.8);
     font-weight: 700;
 }
 
@@ -417,10 +415,10 @@ select:focus {
     max-height: 400px;
     overflow-y: auto;
     padding-right: 0.5rem;
-    border: 1px solid rgba(255,255,255,0.05);
+    border: 1px solid var(--border-glass);
     border-radius: var(--radius-md);
     padding: 1rem;
-    background: rgba(0, 0, 0, 0.2);
+    background: rgba(255, 255, 255, 0.45);
 }
 
 /* Custom Scrollbar for scrolling elements */
@@ -429,11 +427,11 @@ select:focus {
     height: 8px;
 }
 ::-webkit-scrollbar-track {
-    background: rgba(0, 0, 0, 0.3);
+    background: rgba(29, 78, 216, 0.03);
     border-radius: 10px;
 }
 ::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(29, 78, 216, 0.15);
     border-radius: 10px;
 }
 ::-webkit-scrollbar-thumb:hover {
@@ -499,7 +497,6 @@ select:focus {
     font-size: 1.8rem;
     color: var(--bev-color);
     margin-bottom: 0.5rem;
-    text-shadow: 0 0 10px rgba(var(--bev-color-rgb), 0.5);
 }
 
 .bev-name-th {
@@ -508,7 +505,7 @@ select:focus {
     display: block;
     line-height: 1.2;
     margin-bottom: 0.25rem;
-    color: #fff;
+    color: var(--color-text);
 }
 
 .bev-name-en {
@@ -531,8 +528,8 @@ select:focus {
     width: 28px;
     height: 28px;
     border-radius: 50%;
-    border: 1px solid rgba(255,255,255,0.1);
-    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid var(--border-glass);
+    background: rgba(255, 255, 255, 0.9);
     color: var(--color-text);
     font-size: 0.85rem;
     cursor: pointer;
@@ -666,7 +663,6 @@ select:focus {
 
 .cart-qty-btn:hover {
     color: var(--color-primary);
-    text-shadow: 0 0 5px var(--color-primary);
 }
 
 .cart-item-price {
@@ -688,7 +684,6 @@ select:focus {
 
 .cart-item-delete:hover {
     color: var(--color-danger);
-    text-shadow: 0 0 8px var(--color-danger);
 }
 
 .cart-calculation {
@@ -856,10 +851,9 @@ select:focus {
 
 .tab-btn.active {
     color: var(--color-primary);
-    background: rgba(74, 222, 128, 0.1);
-    box-shadow: inset 0 0 10px rgba(74, 222, 128, 0.2);
-    border: 1px solid rgba(74, 222, 128, 0.3);
-    text-shadow: 0 0 5px rgba(74, 222, 128, 0.5);
+    background: rgba(29, 78, 216, 0.08);
+    border: 1px solid var(--border-glass);
+    box-shadow: none;
 }
 
 /* TAB CONTENT CONTROLLERS */
@@ -1044,7 +1038,6 @@ select:focus {
 .order-item-qty {
     font-weight: 700;
     color: var(--bev-color);
-    text-shadow: 0 0 5px rgba(var(--bev-color-rgb), 0.5);
 }
 
 .order-card-footer {
@@ -1064,7 +1057,6 @@ select:focus {
     font-size: 1.25rem;
     font-weight: 700;
     color: var(--color-primary);
-    text-shadow: 0 0 5px rgba(34, 211, 238, 0.3);
 }
 
 .order-promo-saving {
@@ -1227,7 +1219,8 @@ select:focus {
     flex-direction: column;
     justify-content: space-between;
     height: 140px;
-    background: rgba(10, 17, 32, 0.7);
+    background: rgba(255, 255, 255, 0.75);
+    border: 1px solid var(--border-glass);
     transition: all 0.3s ease;
 }
 
@@ -1249,7 +1242,6 @@ select:focus {
     font-weight: 700;
     font-family: var(--font-heading);
     margin: 0.5rem 0;
-    text-shadow: 0 0 10px currentColor;
 }
 
 .analytics-card-sub {
@@ -1375,7 +1367,6 @@ select:focus {
     font-weight: 700;
     font-size: 1.2rem;
     color: var(--color-primary);
-    text-shadow: 0 0 5px rgba(34, 211, 238, 0.5);
 }
 
 /* MODAL SYSTEM */
@@ -1557,7 +1548,6 @@ select:focus {
     font-size: 1.1rem;
     color: var(--color-danger);
     margin-bottom: 0.5rem;
-    text-shadow: 0 0 10px rgba(244, 63, 94, 0.4);
 }
 
 .danger-zone p {
@@ -1575,18 +1565,15 @@ select:focus {
 
 .orders-header-bar .quick-stats strong.text-secondary {
     color: var(--color-secondary) !important;
-    text-shadow: 0 0 5px rgba(192, 132, 252, 0.5);
 }
 
 .orders-header-bar .quick-stats strong.text-primary {
     color: var(--color-primary) !important;
-    text-shadow: 0 0 5px rgba(34, 211, 238, 0.5);
 }
 
 /* Modal styling check */
 .modal-header h2 {
     color: var(--color-primary);
-    text-shadow: 0 0 10px rgba(29, 78, 216, 0.15);
 }
 
 /* Google Sheets inputs */
