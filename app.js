@@ -62,19 +62,28 @@ function init() {
             } else {
                 // Migrate: Ensure all users have a role, and 'admin' is always admin
                 let migrated = false;
-                state.users = state.users.map(u => {
-                    let updatedUser = { ...u };
-                    if (!updatedUser.role) {
-                        updatedUser.role = (updatedUser.username.toLowerCase() === 'admin') ? 'admin' : 'staff';
-                        migrated = true;
+                try {
+                    state.users = state.users
+                        .filter(u => u && typeof u === 'object' && u.username)
+                        .map(u => {
+                            let updatedUser = { ...u };
+                            const usernameLower = (updatedUser.username || '').toLowerCase();
+                            if (!updatedUser.role) {
+                                updatedUser.role = (usernameLower === 'admin') ? 'admin' : 'staff';
+                                migrated = true;
+                            }
+                            if (usernameLower === 'admin' && updatedUser.role !== 'admin') {
+                                updatedUser.role = 'admin';
+                                migrated = true;
+                            }
+                            return updatedUser;
+                        });
+                    if (migrated) {
+                        localStorage.setItem('juice_bar_users', JSON.stringify(state.users));
                     }
-                    if (updatedUser.username.toLowerCase() === 'admin' && updatedUser.role !== 'admin') {
-                        updatedUser.role = 'admin';
-                        migrated = true;
-                    }
-                    return updatedUser;
-                });
-                if (migrated) {
+                } catch (migrationErr) {
+                    console.error("Migration error", migrationErr);
+                    state.users = [...DEFAULT_USERS];
                     localStorage.setItem('juice_bar_users', JSON.stringify(state.users));
                 }
             }
@@ -1890,42 +1899,47 @@ function updateStockFromInput(drinkId, value) {
 
 // SWITCH TABS
 function switchTab(tabId) {
-    const tabButtons = document.querySelectorAll('.tab-btn');
-    tabButtons.forEach(b => {
-        if (b.getAttribute('data-tab') === tabId) {
-            b.classList.add('active');
+    try {
+        const tabButtons = document.querySelectorAll('.tab-btn');
+        tabButtons.forEach(b => {
+            if (b.getAttribute('data-tab') === tabId) {
+                b.classList.add('active');
+            } else {
+                b.classList.remove('active');
+            }
+        });
+        
+        state.tab = tabId;
+        
+        const panes = document.querySelectorAll('.tab-pane');
+        panes.forEach(pane => {
+            if (pane.id === tabId) {
+                pane.classList.add('active');
+            } else {
+                pane.classList.remove('active');
+            }
+        });
+        
+        // Toggle full-width admin mode class
+        if (tabId === 'admin-tab') {
+            document.body.classList.add('admin-active');
         } else {
-            b.classList.remove('active');
+            document.body.classList.remove('admin-active');
         }
-    });
-    
-    state.tab = tabId;
-    
-    const panes = document.querySelectorAll('.tab-pane');
-    panes.forEach(pane => {
-        if (pane.id === tabId) {
-            pane.classList.add('active');
-        } else {
-            pane.classList.remove('active');
+        
+        // Re-render corresponding tab
+        if (tabId === 'orders-tab') {
+            renderOrders();
+        } else if (tabId === 'stock-tab') {
+            renderStock();
+        } else if (tabId === 'summary-tab') {
+            renderAnalytics();
+        } else if (tabId === 'admin-tab') {
+            renderAdminUsersList();
         }
-    });
-    
-    // Toggle full-width admin mode class
-    if (tabId === 'admin-tab') {
-        document.body.classList.add('admin-active');
-    } else {
-        document.body.classList.remove('admin-active');
-    }
-    
-    // Re-render corresponding tab
-    if (tabId === 'orders-tab') {
-        renderOrders();
-    } else if (tabId === 'stock-tab') {
-        renderStock();
-    } else if (tabId === 'summary-tab') {
-        renderAnalytics();
-    } else if (tabId === 'admin-tab') {
-        renderAdminUsersList();
+    } catch (e) {
+        alert("Error in switchTab: " + e.message);
+        console.error(e);
     }
 }
 
@@ -1942,39 +1956,56 @@ function renderLoginUserDropdown() {
 
 // RENDER ADMIN USERS LIST TABLE
 function renderAdminUsersList() {
-    const listContainer = document.getElementById('admin-users-list');
-    if (!listContainer) return;
-    
-    if (state.users.length === 0) {
-        listContainer.innerHTML = `<tr><td colspan="4" class="text-center text-muted">ไม่มีข้อมูลพนักงาน</td></tr>`;
-        return;
+    try {
+        const listContainer = document.getElementById('admin-users-list');
+        if (!listContainer) return;
+        
+        if (!state.users || !Array.isArray(state.users)) {
+            listContainer.innerHTML = `<tr><td colspan="4" class="text-center text-muted">เกิดข้อผิดพลาดในการโหลดข้อมูล</td></tr>`;
+            return;
+        }
+
+        if (state.users.length === 0) {
+            listContainer.innerHTML = `<tr><td colspan="4" class="text-center text-muted">ไม่มีข้อมูลพนักงาน</td></tr>`;
+            return;
+        }
+        
+        listContainer.innerHTML = state.users.map(user => {
+            if (!user) return '';
+            const roleText = user.role === 'admin' ? 'ผู้ดูแล (Admin)' : 'พนักงาน (Staff)';
+            const roleBadge = user.role === 'admin' ? 'badge-primary' : 'badge-outline';
+            const iconClass = user.role === 'admin' ? 'fa-user-shield text-primary' : 'fa-user text-muted';
+            
+            return `
+                <tr>
+                    <td style="font-weight: 600; color: var(--color-text);">
+                        <i class="fa-solid ${iconClass}"></i> ${user.username || 'ไม่มีชื่อ'}
+                    </td>
+                    <td style="text-align: center;">
+                        <span class="badge ${roleBadge}">
+                            ${roleText}
+                        </span>
+                    </td>
+                    <td style="text-align: center; font-family: monospace; letter-spacing: 2px; color: var(--color-text);">
+                        •••• (PIN: ${user.pin || ''})
+                    </td>
+                    <td style="text-align: center;">
+                        <div style="display: flex; gap: 0.5rem; justify-content: center;">
+                            <button class="btn btn-outline btn-sm" style="padding: 0.25rem 0.5rem;" onclick="editAdminUser('${user.username || ''}')" title="แก้ไข">
+                                <i class="fa-solid fa-user-pen"></i>
+                            </button>
+                            <button class="btn btn-danger btn-sm" style="padding: 0.25rem 0.5rem; background: var(--color-danger);" onclick="deleteAdminUser('${user.username || ''}')" title="ลบ">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    } catch (e) {
+        alert("Error in renderAdminUsersList: " + e.message);
+        console.error(e);
     }
-    
-    listContainer.innerHTML = state.users.map(user => `
-        <tr>
-            <td style="font-weight: 600; color: var(--color-text);">
-                <i class="fa-solid ${user.role === 'admin' ? 'fa-user-shield text-primary' : 'fa-user text-muted'}"></i> ${user.username}
-            </td>
-            <td style="text-align: center;">
-                <span class="badge ${user.role === 'admin' ? 'badge-primary' : 'badge-outline'}">
-                    ${user.role === 'admin' ? 'ผู้ดูแล (Admin)' : 'พนักงาน (Staff)'}
-                </span>
-            </td>
-            <td style="text-align: center; font-family: monospace; letter-spacing: 2px; color: var(--color-text);">
-                •••• (PIN: ${user.pin})
-            </td>
-            <td style="text-align: center;">
-                <div style="display: flex; gap: 0.5rem; justify-content: center;">
-                    <button class="btn btn-outline btn-sm" style="padding: 0.25rem 0.5rem;" onclick="editAdminUser('${user.username}')" title="แก้ไข">
-                        <i class="fa-solid fa-user-pen"></i>
-                    </button>
-                    <button class="btn btn-danger btn-sm" style="padding: 0.25rem 0.5rem; background: var(--color-danger);" onclick="deleteAdminUser('${user.username}')" title="ลบ">
-                        <i class="fa-solid fa-trash-can"></i>
-                    </button>
-                </div>
-            </td>
-        </tr>
-    `).join('');
 }
 
 // EDIT USER IN ADMIN PANEL
