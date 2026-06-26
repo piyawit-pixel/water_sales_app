@@ -2224,8 +2224,11 @@ function copyOrderToText(orderId) {
         }
     });
     
+    const isPendingPromo = order.status === 'pending_promo';
     const totalQty = Object.values(order.items).reduce((a, b) => a + b, 0);
-    const discountText = (order.priceDetails && order.priceDetails.discount > 0) ? ` (ประหยัดโปรโมชั่นไป ${order.priceDetails.discount} บ.)` : '';
+    const netTotal = isPendingPromo ? 0 : (order.priceDetails ? order.priceDetails.total : 0);
+    const discountText = (!isPendingPromo && order.priceDetails && order.priceDetails.discount > 0) ? ` (ประหยัดโปรโมชั่นไป ${order.priceDetails.discount} บ.)` : '';
+    const pendingNote = isPendingPromo ? ' (ยังไม่ครบโปร)' : '';
     const remarkText = order.remark ? `หมายเหตุ: ${order.remark}\n` : '';
     const staffText = order.staffName ? `ผู้บันทึก: ${order.staffName}\n` : '';
     
@@ -2238,7 +2241,7 @@ ${staffText}${remarkText}---------------------------------
 รายการเครื่องดื่ม:
 ${itemsText}---------------------------------
 🥤 รวมทั้งหมด: ${totalQty} ขวด
-💰 ยอดชำระสุทธิ: ${order.priceDetails ? order.priceDetails.total : 0} บาท${discountText}`;
+💰 ยอดชำระสุทธิ: ${netTotal} บาท${discountText}${pendingNote}`;
 
     copyToClipboard(receiptText, "คัดลอกข้อความบิลเรียบร้อยแล้ว!");
 }
@@ -2309,7 +2312,7 @@ function copyDailySummaryToText() {
                 cleanName = match[1];
             }
             cleanName = cleanName.replace(/^คุณ\s*/, '').trim();
-            pendingText += `- ${cleanName}: ${item.qty} ขวด (${item.price} บาท)\n`;
+            pendingText += `- ${cleanName}: ${item.qty} ขวด\n`;
         });
     }
     
