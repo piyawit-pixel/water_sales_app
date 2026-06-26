@@ -1808,10 +1808,18 @@ async function pullFromSheets(isSilent = false) {
         if (!response.ok) throw new Error("HTTP Error: " + response.status);
         
         const data = await response.json();
-        if (data && (data.orders || data.grabPickups || data.stock)) {
+        if (data && (data.orders || data.grabPickups || data.stock || data.users)) {
             state.orders = data.orders || [];
             state.grabPickups = data.grabPickups || [];
             state.stock = data.stock || {};
+            
+            // Sync users if present
+            if (data.users && Array.isArray(data.users) && data.users.length > 0) {
+                state.users = data.users;
+                localStorage.setItem('juice_bar_users', JSON.stringify(state.users));
+                renderLoginUserDropdown();
+                renderAdminUsersList();
+            }
             
             // Ensure all drinks in database have a stock quantity (default to 20 if not set)
             DRINKS.forEach(drink => {
@@ -1870,7 +1878,8 @@ async function pushToSheets(isAuto = false) {
             data: {
                 orders: state.orders,
                 grabPickups: state.grabPickups,
-                stock: state.stock
+                stock: state.stock,
+                users: state.users
             }
         };
         
