@@ -292,6 +292,35 @@ function calculateBestPrice(quantity, isGrab = false) {
     };
 }
 
+// GET HUMAN READABLE PROMOTION DESCRIPTION
+function getPromotionDescription(pricing, isGrab = false) {
+    if (isGrab) return "Grab Delivery";
+    
+    const num7 = pricing.num7 || 0;
+    const num4 = pricing.num4 || 0;
+    const num1 = pricing.num1 || 0;
+    
+    let parts = [];
+    if (num7 > 0) {
+        parts.push(num7 === 1 ? "โปร 7" : `โปร 7 (x${num7})`);
+    }
+    if (num4 > 0) {
+        parts.push(num4 === 1 ? "โปร 4" : `โปร 4 (x${num4})`);
+    }
+    if (num1 > 0) {
+        parts.push(num1 === 1 ? "1 ขวด" : `${num1} ขวด`);
+    }
+    
+    if (parts.length === 0) return "-";
+    
+    // If it's only single bottles (1-3 bottles), show "เป็นขวด" instead of just "1 ขวด" or "2 ขวด"
+    if (num7 === 0 && num4 === 0) {
+        return `เป็นขวด (${num1} ขวด)`;
+    }
+    
+    return parts.join(" และ ");
+}
+
 // EVENT LISTENERS BINDING
 function setupEventListeners() {
     // Delivery channel switch
@@ -848,6 +877,11 @@ function renderCart() {
     }
     
     document.getElementById('calc-total').textContent = `${pricing.total} บาท`;
+    const promoDetailText = getPromotionDescription(pricing, isGrab);
+    const calcPromoDetailEl = document.getElementById('calc-promo-detail');
+    if (calcPromoDetailEl) {
+        calcPromoDetailEl.textContent = promoDetailText;
+    }
 }
 
 // SAVE ORDER OR UPDATE ORDER
@@ -918,6 +952,7 @@ function saveOrder() {
                 priceDetails: pricing,
                 status: status,
                 paymentMethod: paymentMethod,
+                promotionDetail: getPromotionDescription(pricing, deliveryType === 'grab'),
                 staffName: staffName,
                 remark: orderRemark,
                 updatedTime: now.toISOString()
@@ -948,6 +983,7 @@ function saveOrder() {
             priceDetails: pricing,
             status: status,
             paymentMethod: paymentMethod,
+            promotionDetail: getPromotionDescription(pricing, deliveryType === 'grab'),
             staffName: staffName,
             remark: orderRemark,
             createdTime: now.toISOString(),
@@ -1171,6 +1207,16 @@ function renderOrders() {
             paymentBadge = `<span class="badge badge-outline" style="border-color: #94a3b8; color: #64748b;"><i class="fa-solid fa-qrcode"></i> โอน/สแกน</span>`;
         }
         
+        // Promotion Detail Badge
+        let promoBadge = '';
+        if (order.promotionDetail) {
+            promoBadge = `<span class="badge" style="background-color: #f59e0b; color: white;"><i class="fa-solid fa-gift"></i> ${order.promotionDetail}</span>`;
+        } else {
+            const oldPricing = order.priceDetails || { num7: 0, num4: 0, num1: 0 };
+            const oldDetail = getPromotionDescription(oldPricing, order.deliveryType === 'grab');
+            promoBadge = `<span class="badge" style="background-color: #f59e0b; color: white;"><i class="fa-solid fa-gift"></i> ${oldDetail}</span>`;
+        }
+        
         // Generate drink badges
         let drinkBadgesHTML = '';
         Object.keys(order.items).forEach(drinkId => {
@@ -1200,6 +1246,7 @@ function renderOrders() {
                         ${channelBadge}
                         ${statusBadge}
                         ${paymentBadge}
+                        ${promoBadge}
                         ${staffBadge}
                     </div>
                 </div>
