@@ -443,6 +443,11 @@ function setupEventListeners() {
         });
     }
 
+    const btnCopySummary = document.getElementById('btn-copy-summary');
+    if (btnCopySummary) {
+        btnCopySummary.addEventListener('click', copyDailySummaryToText);
+    }
+
     // Grab Manual Log Modal (safeguarded/disabled since tab is removed)
     const btnAddGrab = document.getElementById('btn-add-grab-manual');
     if (btnAddGrab) btnAddGrab.addEventListener('click', openGrabManualModal);
@@ -1176,6 +1181,9 @@ function renderOrders() {
                     ${(order.priceDetails && order.priceDetails.discount > 0) ? `<span class="order-promo-saving"><i class="fa-solid fa-tags"></i> ประหยัดไป ${order.priceDetails.discount} บ.</span>` : ''}
                 </div>
                 <div class="order-actions">
+                    <button class="btn btn-outline btn-sm" onclick="copyOrderToText('${order.id}')" title="คัดลอกข้อความบิล">
+                        <i class="fa-solid fa-copy"></i> คัดลอกบิล
+                    </button>
                     <button class="btn btn-outline btn-sm" onclick="loadOrderForEditing('${order.id}')" title="แก้ไขรายการ / ค่อยๆสั่งเพิ่มขวดเพื่อรวมโปร">
                         <i class="fa-solid fa-plus-minus"></i> เพิ่มของ / แก้ไข
                     </button>
@@ -2150,6 +2158,192 @@ function submitLogin() {
         state.tempPin = '';
         updatePinDots();
     }
+}
+
+// COPY TO CLIPBOARD HELPER
+function copyToClipboard(text, successMessage = "คัดลอกลงคลิปบอร์ดแล้ว!") {
+    navigator.clipboard.writeText(text).then(() => {
+        alert(successMessage);
+    }).catch(err => {
+        console.error("Failed to copy text: ", err);
+        // Fallback for older browsers
+        const tempTextArea = document.createElement("textarea");
+        tempTextArea.value = text;
+        document.body.appendChild(tempTextArea);
+        tempTextArea.select();
+        try {
+            document.execCommand("copy");
+            alert(successMessage);
+        } catch (e) {
+            alert("ไม่สามารถคัดลอกได้อัตโนมัติ กรุณาลองคัดลอกด้วยตนเอง");
+        }
+        document.body.removeChild(tempTextArea);
+    });
+}
+
+// COPY SINGLE ORDER TO FORMATTED TEXT
+function copyOrderToText(orderId) {
+    const order = state.orders.find(o => o.id === orderId);
+    if (!order) return;
+    
+    const deliveryName = order.deliveryType === 'grab' ? 'Grab Delivery' : (order.deliveryType === 'walkin' ? 'รับเอง/หน้าร้าน' : 'อื่นๆ');
+    
+    let itemsText = '';
+    const drinkKeys = Object.keys(order.items);
+    drinkKeys.forEach(drinkId => {
+        const drink = DRINKS.find(d => d.id === drinkId);
+        if (drink) {
+            itemsText += `• ${drink.nameTH} (${drink.nameEN}) x${order.items[drinkId]} ขวด\n`;
+        }
+    });
+    
+    const totalQty = Object.values(order.items).reduce((a, b) => a + b, 0);
+    const discountText = (order.priceDetails && order.priceDetails.discount > 0) ? ` (ประหยัดโปรโมชั่นไป ${order.priceDetails.discount} บ.)` : '';
+    const remarkText = order.remark ? `หมายเหตุ: ${order.remark}\n` : '';
+    const staffText = order.staffName ? `ผู้บันทึก: ${order.staffName}\n` : '';
+    
+    const receiptText = `📝 บิลร้านบ้านเพื่อน (BaanPhuan)
+---------------------------------
+วันที่: ${order.date} (${order.time})
+ลูกค้า: ${order.customerName}
+ช่องทาง: ${deliveryName}
+${staffText}${remarkText}---------------------------------
+รายการเครื่องดื่ม:
+${itemsText}---------------------------------
+🥤 รวมทั้งหมด: ${totalQty} ขวด
+💰 ยอดชำระสุทธิ: ${order.priceDetails ? order.priceDetails.total : 0} บาท${discountText}`;
+
+    copyToClipboard(receiptText, "คัดลอกข้อความบิลเรียบร้อยแล้ว!");
+}
+
+// COPY DAILY SUMMARY TO FORMATTED TEXT
+function copyDailySummaryToText() {
+    const todayStr = getLocalDateString(new Date());
+    
+    let yesterdayDate = new Date();
+    yesterdayDate.setDate(yesterdayDate.getDate() - 1);
+    const yesterdayStr = getLocalDateString(yesterdayDate);
+    
+    // Get filter settings from Summary tab
+    const summaryFilterDate = document.getElementById('summary-filter-date');
+    const filterVal = summaryFilterDate ? summaryFilterDate.value : 'today';
+    const summaryFilterCustomDate = document.getElementById('summary-filter-custom-date');
+    const customDateVal = summaryFilterCustomDate ? summaryFilterCustomDate.value : todayStr;
+    
+    let targetDateText = 'วันนี้';
+    if (filterVal === 'yesterday') {
+        targetDateText = 'เมื่อวาน';
+    } else if (filterVal === 'custom') {
+        const dObj = new Date(customDateVal);
+        targetDateText = isNaN(dObj.getTime()) ? customDateVal : dObj.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' });
+    } else if (filterVal === 'all') {
+        targetDateText = 'ทั้งหมด (ทุกวัน)';
+    }
+
+    let filteredRevenue = 0;
+    let filteredBottles = 0;
+    let filteredDiscount = 0;
+    let filteredCommBottles = 0;
+    
+    let popTracker = {};
+    DRINKS.forEach(d => popTracker[d.id] = 0);
+    let deliveryStats = { walkin: 0, grab: 0, other: 0 };
+    
+    state.orders.forEach(order => {
+        const orderQty = order.items ? Object.values(order.items).reduce((a, b) => a + b, 0) : 0;
+        const pricing = order.priceDetails || { total: 0, discount: 0 };
+        
+        let matchesFilter = false;
+        if (filterVal === 'today' && order.date === todayStr) matchesFilter = true;
+        else if (filterVal === 'yesterday' && order.date === yesterdayStr) matchesFilter = true;
+        else if (filterVal === 'custom' && order.date === customDateVal) matchesFilter = true;
+        else if (filterVal === 'all') matchesFilter = true;
+        
+        if (matchesFilter) {
+            filteredBottles += orderQty;
+            filteredRevenue += pricing.total || 0;
+            filteredDiscount += pricing.discount || 0;
+            if (order.deliveryType !== 'grab') {
+                filteredCommBottles += orderQty;
+            }
+            
+            const type = order.deliveryType;
+            if (deliveryStats.hasOwnProperty(type)) {
+                deliveryStats[type]++;
+            } else {
+                deliveryStats.other++;
+            }
+            
+            if (order.items) {
+                Object.keys(order.items).forEach(drinkId => {
+                    if (popTracker.hasOwnProperty(drinkId)) {
+                        popTracker[drinkId] += order.items[drinkId];
+                    }
+                });
+            }
+        }
+    });
+    
+    // Add manual grab log entries to popularity
+    state.grabPickups.forEach(grab => {
+        if (!grab.orderId) {
+            const grabDate = getLocalDateString(new Date(grab.timestamp));
+            let matchesFilter = false;
+            if (filterVal === 'today' && grabDate === todayStr) matchesFilter = true;
+            else if (filterVal === 'yesterday' && grabDate === yesterdayStr) matchesFilter = true;
+            else if (filterVal === 'custom' && grabDate === customDateVal) matchesFilter = true;
+            else if (filterVal === 'all') matchesFilter = true;
+            
+            if (matchesFilter) {
+                Object.keys(grab.items).forEach(drinkId => {
+                    if (popTracker.hasOwnProperty(drinkId)) {
+                        popTracker[drinkId] += grab.items[drinkId];
+                    }
+                });
+            }
+        }
+    });
+    
+    // Beverage sales summary text
+    let popularityText = '';
+    const sortedPopular = Object.keys(popTracker)
+        .map(id => {
+            const drink = DRINKS.find(d => d.id === id);
+            return {
+                id: id,
+                nameTH: drink ? drink.nameTH : id,
+                qty: popTracker[id]
+            };
+        })
+        .filter(item => item.qty > 0)
+        .sort((a, b) => b.qty - a.qty);
+        
+    if (sortedPopular.length === 0) {
+        popularityText = 'ไม่มีข้อมูลยอดขาย\n';
+    } else {
+        sortedPopular.forEach((item, idx) => {
+            popularityText += `${idx + 1}. ${item.nameTH}: ${item.qty} ขวด\n`;
+        });
+    }
+    
+    const filteredCommVal = filteredCommBottles * 5;
+    
+    const summaryText = `📊 สรุปยอดขายร้านบ้านเพื่อน (BaanPhuan)
+ประจำ: ${targetDateText}
+---------------------------------
+💰 ยอดขายรวม: ${filteredRevenue.toLocaleString()} บาท
+🥤 จำนวนที่ขายได้: ${filteredBottles} ขวด
+💵 ส่วนลดโปรโมชั่น: ${filteredDiscount.toLocaleString()} บาท
+🧑‍✈️ ค่าคอมมิชชั่นสะสม: ${filteredCommVal.toLocaleString()} บาท (คิดจาก ${filteredCommBottles} ขวด)
+---------------------------------
+📦 ยอดขายแยกตามเมนู:
+${popularityText}---------------------------------
+🚚 สถิติช่องทางจำหน่าย:
+- หน้าร้าน / รับเอง: ${deliveryStats.walkin} บิล
+- Grab Delivery: ${deliveryStats.grab} บิล
+- ช่องทางอื่น: ${deliveryStats.other} บิล`;
+
+    copyToClipboard(summaryText, `คัดลอกสรุปยอดขาย (${targetDateText}) เรียบร้อยแล้ว!`);
 }
 
 // RUN ON LOAD

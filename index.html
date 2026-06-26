@@ -250,20 +250,23 @@
                     <!-- 4. SUMMARY & ANALYTICS TAB -->
                     <div class="tab-pane" id="summary-tab">
                         <!-- Date Filter for History Sales -->
-                        <div class="filter-bar" style="margin-bottom: 1.5rem;">
-                            <div class="filter-group">
-                                <label for="summary-filter-date"><i class="fa-solid fa-calendar"></i> ตัวกรองวันที่ย้อนหลัง</label>
-                                <select id="summary-filter-date">
-                                    <option value="today" selected>วันนี้</option>
-                                    <option value="yesterday">เมื่อวาน</option>
-                                    <option value="all">ทั้งหมด</option>
-                                    <option value="custom">ระบุเอง</option>
-                                </select>
+                        <div class="filter-bar" style="margin-bottom: 1.5rem; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1rem;">
+                            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                                <div class="filter-group">
+                                    <label for="summary-filter-date"><i class="fa-solid fa-calendar"></i> ตัวกรองวันที่ย้อนหลัง</label>
+                                    <select id="summary-filter-date">
+                                        <option value="today" selected>วันนี้</option>
+                                        <option value="yesterday">เมื่อวาน</option>
+                                        <option value="all">ทั้งหมด</option>
+                                        <option value="custom">ระบุเอง</option>
+                                    </select>
+                                </div>
+                                <div class="filter-group" id="summary-custom-date-group" style="display: none;">
+                                    <label for="summary-filter-custom-date">เลือกวันที่</label>
+                                    <input type="date" id="summary-filter-custom-date">
+                                </div>
                             </div>
-                            <div class="filter-group" id="summary-custom-date-group" style="display: none;">
-                                <label for="summary-filter-custom-date">เลือกวันที่</label>
-                                <input type="date" id="summary-filter-custom-date">
-                            </div>
+                            <button class="btn btn-outline" id="btn-copy-summary" style="padding: 0.65rem 1rem; font-size: 0.9rem; display: flex; align-items: center; gap: 0.5rem;"><i class="fa-solid fa-copy"></i> คัดลอกรายงานสรุปยอด</button>
                         </div>
 
                         <div class="analytics-grid">
