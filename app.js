@@ -488,7 +488,8 @@ function setupEventListeners() {
             
             try {
                 await pullFromSheets(true);
-                alert("ซิงค์ข้อมูลผู้ใช้งานและยอดขายจาก Google Sheets สำเร็จเรียบร้อยแล้ว!");
+                const userSummary = state.users.map(u => `${u.username} (${u.pin ? u.pin.length : 0} หลัก)`).join(", ");
+                alert("ซิงค์ข้อมูลผู้ใช้งานและยอดขายสำเร็จ!\n\nบัญชีพนักงานที่โหลดได้:\n" + userSummary);
             } catch(e) {
                 alert("ซิงค์ข้อมูลล้มเหลว: " + e.message);
             } finally {
