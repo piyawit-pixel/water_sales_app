@@ -204,6 +204,15 @@ function saveToLocalStorage(skipSync = false) {
     }
 }
 
+// SAVE USERS TO LOCAL STORAGE
+function saveUsersToLocalStorage(skipSync = false) {
+    localStorage.setItem('juice_bar_users', JSON.stringify(state.users));
+    
+    if (!skipSync && state.autoSync && state.sheetUrl) {
+        pushToSheets(true);
+    }
+}
+
 // GET DATE STRING IN YYYY-MM-DD
 function getLocalDateString(date) {
     const year = date.getFullYear();
@@ -564,7 +573,7 @@ function setupEventListeners() {
                 state.users[userIndex] = { username: newUsername, pin: newPin, role: currentRole };
                 
                 // Save to localStorage
-                localStorage.setItem('juice_bar_users', JSON.stringify(state.users));
+                saveUsersToLocalStorage();
                 
                 // Update session storage
                 sessionStorage.setItem('baanphuan_username', newUsername);
@@ -625,7 +634,7 @@ function setupEventListeners() {
             }
             
             // Save to localStorage
-            localStorage.setItem('juice_bar_users', JSON.stringify(state.users));
+            saveUsersToLocalStorage();
             
             // Reset form and re-render
             usernameInput.value = '';
@@ -2135,7 +2144,7 @@ function deleteAdminUser(username) {
     
     if (confirm(`คุณต้องการลบพนักงาน "${username}" ใช่หรือไม่?`)) {
         state.users = state.users.filter(u => u.username.toLowerCase() !== username.toLowerCase());
-        localStorage.setItem('juice_bar_users', JSON.stringify(state.users));
+        saveUsersToLocalStorage();
         renderLoginUserDropdown();
         renderAdminUsersList();
     }
