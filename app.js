@@ -59,6 +59,24 @@ function init() {
             if (!Array.isArray(state.users) || state.users.length === 0) {
                 state.users = [...DEFAULT_USERS];
                 localStorage.setItem('juice_bar_users', JSON.stringify(state.users));
+            } else {
+                // Migrate: Ensure all users have a role, and 'admin' is always admin
+                let migrated = false;
+                state.users = state.users.map(u => {
+                    let updatedUser = { ...u };
+                    if (!updatedUser.role) {
+                        updatedUser.role = (updatedUser.username.toLowerCase() === 'admin') ? 'admin' : 'staff';
+                        migrated = true;
+                    }
+                    if (updatedUser.username.toLowerCase() === 'admin' && updatedUser.role !== 'admin') {
+                        updatedUser.role = 'admin';
+                        migrated = true;
+                    }
+                    return updatedUser;
+                });
+                if (migrated) {
+                    localStorage.setItem('juice_bar_users', JSON.stringify(state.users));
+                }
             }
         } catch (e) {
             state.users = [...DEFAULT_USERS];
@@ -140,7 +158,12 @@ function checkLoginStatus() {
     if (loggedIn) {
         if (loginContainer) loginContainer.classList.add('hidden');
         const username = sessionStorage.getItem('baanphuan_username') || 'พนักงาน';
-        const role = sessionStorage.getItem('baanphuan_role') || 'staff';
+        
+        // Lookup user in state.users to get the most up-to-date role and prevent session cache issues
+        const foundUser = state.users.find(u => u.username === username);
+        const role = foundUser ? foundUser.role : (sessionStorage.getItem('baanphuan_role') || 'staff');
+        sessionStorage.setItem('baanphuan_role', role);
+        
         document.getElementById('header-username').innerText = username;
         document.getElementById('header-user-badge').style.display = 'flex';
         document.getElementById('staff-name').value = username;
