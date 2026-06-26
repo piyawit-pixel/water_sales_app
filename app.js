@@ -2283,9 +2283,6 @@ function copyDailySummaryToText() {
         else if (filterVal === 'all') matchesFilter = true;
         
         if (matchesFilter) {
-            filteredBottles += orderQty;
-            filteredRevenue += pricing.total || 0;
-            
             // Check if order is pending promotion
             if (order.status === 'pending_promo') {
                 pendingPromoList.push({
@@ -2293,6 +2290,9 @@ function copyDailySummaryToText() {
                     qty: orderQty,
                     price: pricing.total || 0
                 });
+            } else {
+                filteredBottles += orderQty;
+                filteredRevenue += pricing.total || 0;
             }
         }
     });
