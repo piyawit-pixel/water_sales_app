@@ -854,7 +854,9 @@ function renderCart() {
 
 // SAVE ORDER OR UPDATE ORDER
 function saveOrder() {
-    const customerName = document.getElementById('customer-name').value.trim();
+    const tableVal = document.getElementById('customer-name').value.trim();
+    const customNameVal = document.getElementById('customer-display-name').value.trim();
+    const customerName = customNameVal ? `${tableVal} (${customNameVal})` : tableVal;
     const orderDate = document.getElementById('order-date').value;
     const deliveryType = document.getElementById('delivery-type').value;
     const grabDriverName = deliveryType === 'grab' ? document.getElementById('grab-driver-name').value.trim() : '';
@@ -1013,8 +1015,17 @@ function loadOrderForEditing(orderId) {
     state.editingOrderId = order.id;
     state.cart = { ...order.items };
     
+    let tableName = order.customerName || '';
+    let nickName = '';
+    const match = tableName.match(/^(.+?)\s*\((.+?)\)$/);
+    if (match) {
+        tableName = match[1];
+        nickName = match[2];
+    }
+    
     // Fill inputs
-    document.getElementById('customer-name').value = order.customerName;
+    document.getElementById('customer-name').value = tableName;
+    document.getElementById('customer-display-name').value = nickName;
     document.getElementById('order-date').value = order.date;
     document.getElementById('delivery-type').value = order.deliveryType;
     const grabGroup = document.getElementById('grab-driver-group');
@@ -1045,6 +1056,7 @@ function clearPOSForm() {
     state.cart = {};
     
     document.getElementById('customer-name').value = 'กลับบ้าน';
+    document.getElementById('customer-display-name').value = '';
     document.getElementById('order-date').value = getLocalDateString(new Date());
     document.getElementById('delivery-type').value = 'walkin';
     const grabGroup = document.getElementById('grab-driver-group');
