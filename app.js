@@ -146,6 +146,7 @@ function init() {
     checkLoginStatus();
     renderDrinkGrid();
     renderCart();
+    renderTables();
     renderOrders();
     renderGrabLogs();
     renderStock();
@@ -412,6 +413,10 @@ function setupEventListeners() {
     });
 
     document.getElementById('filter-custom-date').addEventListener('change', () => {
+        renderOrders();
+    });
+
+    document.getElementById('filter-payment-status').addEventListener('change', () => {
         renderOrders();
     });
 
@@ -702,23 +707,43 @@ function checkCustomerPreviousOrders(custName) {
     const selectedDate = document.getElementById('order-date').value;
     
     // Find active orders for this customer on the selected date
-    const userOrders = state.orders.filter(o => o.customerName === custName && o.date === selectedDate);
-    if (userOrders.length === 0) return;
+    const userOrders = state.orders.filter(o => {
+        // Since customerName might contain the display name like "โต๊ะ 1 (ชื่อลูกค้า)", we match by prefix
+        return o.customerName === custName || o.customerName.startsWith(custName + ' (');
+    });
+    
+    if (userOrders.length === 0) {
+        if (custName.startsWith('โต๊ะ ')) {
+            document.getElementById('order-status').value = 'pending_promo';
+        }
+        return;
+    }
     
     // Sort by date/time (newest first)
     userOrders.sort((a,b) => new Date(b.createdTime) - new Date(a.createdTime));
     const latestOrder = userOrders[0];
     
-    // Prompt the user if they want to append to the latest order
-    const orderDateFormatted = new Date(latestOrder.createdTime).toLocaleDateString('th-TH');
-    const itemsCount = Object.values(latestOrder.items).reduce((a, b) => a + b, 0);
-    
-    const confirmAppend = confirm(
-        `พบออเดอร์เดิมของลูกค้า "${custName}" เมื่อวันที่ ${orderDateFormatted} (${itemsCount} ขวด, ${latestOrder.priceDetails.total} บาท)\n\nคุณต้องการ "เพิ่มสินค้าในบิลเดิม" เพื่อสะสมโปรโมชั่นใช่หรือไม่?`
-    );
-    
-    if (confirmAppend) {
-        loadOrderForEditing(latestOrder.id);
+    // Only suggest merging if the latest order is still unpaid (pending_promo)
+    if (latestOrder.status === 'pending_promo') {
+        const itemsCount = Object.values(latestOrder.items).reduce((a, b) => a + b, 0);
+        const confirmAppend = confirm(
+            `พบออเดอร์ค้างชำระของ "${latestOrder.customerName}" (${itemsCount} ขวด, ${latestOrder.priceDetails.total} บาท)\n\nคุณต้องการ "สั่งสินค้าเพิ่มในบิลเดิม" ใช่หรือไม่?`
+        );
+        
+        if (confirmAppend) {
+            loadOrderForEditing(latestOrder.id);
+        } else {
+            if (custName.startsWith('โต๊ะ ')) {
+                document.getElementById('order-status').value = 'pending_promo';
+            }
+        }
+    } else {
+        // If the latest order is already paid, a new session is started
+        if (custName.startsWith('โต๊ะ ')) {
+            document.getElementById('order-status').value = 'pending_promo';
+        } else {
+            document.getElementById('order-status').value = 'paid';
+        }
     }
 }
 
@@ -1004,6 +1029,7 @@ function saveOrder() {
     clearPOSForm();
     
     // Refresh UI
+    renderTables();
     renderOrders();
     renderGrabLogs();
     renderAnalytics();
@@ -1139,7 +1165,14 @@ function renderOrders() {
         if (filterDateVal === 'yesterday' && order.date !== yesterdayStr) return false;
         if (filterDateVal === 'custom' && order.date !== filterCustomDate) return false;
         
-        // 2. Name Search
+        // 2. Payment Status Filter
+        const filterPaymentVal = document.getElementById('filter-payment-status').value;
+        if (filterPaymentVal !== 'all') {
+            const orderStatus = order.status || 'paid';
+            if (filterPaymentVal !== orderStatus) return false;
+        }
+        
+        // 3. Name Search
         if (searchCust && !order.customerName.toLowerCase().includes(searchCust)) return false;
         
         return true;
@@ -1303,6 +1336,7 @@ function deleteOrder(orderId) {
         state.grabPickups = state.grabPickups.filter(g => g.orderId !== orderId);
         
         saveToLocalStorage();
+        renderTables();
         renderOrders();
         renderGrabLogs();
         renderAnalytics();
@@ -1825,6 +1859,7 @@ function importData(e) {
                 clearPOSForm();
                 
                 // Refresh UI
+                renderTables();
                 renderOrders();
                 renderGrabLogs();
                 renderAnalytics();
@@ -1849,6 +1884,7 @@ function clearAllSystemData() {
         saveToLocalStorage();
         
         clearPOSForm();
+        renderTables();
         renderOrders();
         renderGrabLogs();
         renderAnalytics();
@@ -1902,6 +1938,7 @@ async function pullFromSheets(isSilent = false) {
             saveToLocalStorage(true);
             
             // Refresh POS UI
+            renderTables();
             renderOrders();
             renderGrabLogs();
             renderStock();
@@ -2085,7 +2122,9 @@ function switchTab(tabId) {
         }
         
         // Re-render corresponding tab
-        if (tabId === 'orders-tab') {
+        if (tabId === 'tables-tab') {
+            renderTables();
+        } else if (tabId === 'orders-tab') {
             renderOrders();
         } else if (tabId === 'stock-tab') {
             renderStock();
@@ -2416,8 +2455,198 @@ function toggleOrderStatus(orderId) {
     
     order.status = order.status === 'pending_promo' ? 'paid' : 'pending_promo';
     saveToLocalStorage();
+    renderTables();
     renderOrders();
     renderAnalytics();
+}
+
+// RENDER TABLES GRID
+function renderTables() {
+    const gridContainer = document.getElementById('tables-grid-container');
+    if (!gridContainer) return;
+    
+    gridContainer.innerHTML = '';
+    
+    const totalTables = 8;
+    const todayStr = getLocalDateString(new Date());
+    
+    for (let i = 1; i <= totalTables; i++) {
+        const tableName = `โต๊ะ ${i}`;
+        
+        // Find if there is an active (pending/unpaid) order for this table today
+        const activeOrder = state.orders.find(o => {
+            return (o.customerName === tableName || o.customerName.startsWith(tableName + ' (')) && o.date === todayStr && o.status === 'pending_promo';
+        });
+        
+        const card = document.createElement('div');
+        
+        if (activeOrder) {
+            card.className = 'table-card table-occupied';
+            
+            // Calculate items list
+            let itemsHtml = '';
+            if (activeOrder.items) {
+                for (const drinkId in activeOrder.items) {
+                    const drink = DRINKS.find(d => d.id === drinkId);
+                    if (drink) {
+                        itemsHtml += `
+                            <div class="table-bill-item">
+                                <span>${drink.nameTH}</span>
+                                <span>x${activeOrder.items[drinkId]}</span>
+                            </div>
+                        `;
+                    }
+                }
+            }
+            
+            const total = activeOrder.priceDetails ? activeOrder.priceDetails.total : 0;
+            
+            card.innerHTML = `
+                <div class="table-header">
+                    <div class="table-title text-warning"><i class="fa-solid fa-chair"></i> ${activeOrder.customerName}</div>
+                    <span class="table-status-badge badge-occupied">มีลูกค้า / ค้างชำระ</span>
+                </div>
+                <div class="table-content">
+                    <div style="font-weight: 500; font-size: 0.8rem; color: var(--color-text-muted); margin-bottom: 0.25rem;">บิลเวลา: ${activeOrder.time}</div>
+                    <div class="table-bill-items">
+                        ${itemsHtml}
+                    </div>
+                    <div class="table-bill-total">
+                        <span>ยอดค้างชำระ:</span>
+                        <span>${total.toLocaleString()} บาท</span>
+                    </div>
+                </div>
+                <div class="table-actions">
+                    <button class="btn btn-success btn-sm" onclick="payTableOrder('${activeOrder.id}')" title="ชำระเงิน">
+                        <i class="fa-solid fa-money-bill-wave"></i> ชำระเงิน
+                    </button>
+                    <button class="btn btn-outline btn-sm" onclick="loadOrderForEditing('${activeOrder.id}')" title="สั่งเพิ่ม / แก้ไข">
+                        <i class="fa-solid fa-plus-minus"></i> สั่งเพิ่ม
+                    </button>
+                </div>
+            `;
+        } else {
+            card.className = 'table-card table-empty';
+            card.innerHTML = `
+                <div class="table-header">
+                    <div class="table-title text-muted"><i class="fa-solid fa-chair"></i> ${tableName}</div>
+                    <span class="table-status-badge badge-empty">ว่าง</span>
+                </div>
+                <div class="table-content" style="display: flex; align-items: center; justify-content: center; color: var(--color-text-muted); font-style: italic; min-height: 80px;">
+                    ไม่มีลูกค้า / โต๊ะว่าง
+                </div>
+                <div class="table-actions">
+                    <button class="btn btn-primary btn-sm" onclick="openTable('${tableName}')">
+                        <i class="fa-solid fa-cart-plus"></i> เปิดโต๊ะสั่งน้ำ
+                    </button>
+                </div>
+            `;
+        }
+        gridContainer.appendChild(card);
+    }
+    
+    // Render other pending orders (e.g. walkin or grab that are unpaid)
+    const otherContainer = document.getElementById('other-pending-container');
+    if (otherContainer) {
+        otherContainer.innerHTML = '';
+        
+        const otherPendingOrders = state.orders.filter(o => {
+            return !o.customerName.startsWith('โต๊ะ ') && o.status === 'pending_promo';
+        });
+        
+        if (otherPendingOrders.length === 0) {
+            otherContainer.innerHTML = `
+                <div style="grid-column: 1 / -1; padding: 2rem; text-align: center; color: var(--color-text-muted); font-style: italic; background: rgba(0,0,0,0.15); border: 1px dashed var(--border-glass); border-radius: var(--radius-md);">
+                    ไม่มีออเดอร์ค้างชำระอื่นๆ
+                </div>
+            `;
+        } else {
+            otherPendingOrders.forEach(order => {
+                const card = document.createElement('div');
+                card.className = 'table-card table-occupied';
+                
+                let itemsHtml = '';
+                for (const drinkId in order.items) {
+                    const drink = DRINKS.find(d => d.id === drinkId);
+                    if (drink) {
+                        itemsHtml += `
+                            <div class="table-bill-item">
+                                <span>${drink.nameTH}</span>
+                                <span>x${order.items[drinkId]}</span>
+                            </div>
+                        `;
+                    }
+                }
+                
+                const total = order.priceDetails ? order.priceDetails.total : 0;
+                
+                card.innerHTML = `
+                    <div class="table-header">
+                        <div class="table-title text-warning"><i class="fa-solid fa-receipt"></i> ${order.customerName}</div>
+                        <span class="table-status-badge badge-occupied">ค้างชำระ</span>
+                    </div>
+                    <div class="table-content">
+                        <div style="font-weight: 500; font-size: 0.8rem; color: var(--color-text-muted); margin-bottom: 0.25rem;">ช่องทาง: ${order.deliveryType === 'grab' ? 'Grab' : 'หน้าร้าน'} | วันที่: ${order.date} (${order.time})</div>
+                        <div class="table-bill-items">
+                            ${itemsHtml}
+                        </div>
+                        <div class="table-bill-total">
+                            <span>ยอดค้างชำระ:</span>
+                            <span>${total.toLocaleString()} บาท</span>
+                        </div>
+                    </div>
+                    <div class="table-actions">
+                        <button class="btn btn-success btn-sm" onclick="payTableOrder('${order.id}')">
+                            <i class="fa-solid fa-money-bill-wave"></i> ชำระเงิน
+                        </button>
+                        <button class="btn btn-outline btn-sm" onclick="loadOrderForEditing('${order.id}')">
+                            <i class="fa-solid fa-plus-minus"></i> สั่งเพิ่ม
+                        </button>
+                    </div>
+                `;
+                otherContainer.appendChild(card);
+            });
+        }
+    }
+}
+
+// Pay table order helper
+function payTableOrder(orderId) {
+    const order = state.orders.find(o => o.id === orderId);
+    if (!order) return;
+    
+    if (confirm(`คุณต้องการยืนยันการชำระเงินสำหรับ "${order.customerName}" ยอดรวม ${order.priceDetails.total} บาท ใช่หรือไม่?`)) {
+        order.status = 'paid';
+        order.updatedTime = new Date().toISOString();
+        
+        saveToLocalStorage();
+        
+        // Refresh everything
+        renderTables();
+        renderOrders();
+        renderAnalytics();
+        
+        alert(`ชำระเงินเรียบร้อยแล้ว!`);
+    }
+}
+
+// Open table helper
+function openTable(tableName) {
+    document.getElementById('customer-name').value = tableName;
+    document.getElementById('customer-display-name').value = '';
+    document.getElementById('delivery-type').value = 'walkin';
+    document.getElementById('order-status').value = 'pending_promo';
+    
+    // Clear cart since it's a new opening
+    state.cart = {};
+    renderDrinkGrid();
+    renderCart();
+    
+    // Update POS Header to show table opening mode
+    document.getElementById('pos-title').innerHTML = `<i class="fa-solid fa-cart-plus text-primary"></i> เปิดโต๊ะสั่งน้ำ: ${tableName}`;
+    
+    // Scroll to POS Form
+    document.querySelector('.pos-panel').scrollIntoView({ behavior: 'smooth' });
 }
 
 // RUN ON LOAD

@@ -2216,3 +2216,174 @@ body.admin-active .main-content {
         font-size: 1.25rem;
     }
 }
+
+/* ═══ TABLES GRID & CARDS ═══ */
+.tables-grid-wrapper {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.25rem;
+    margin-top: 1rem;
+    margin-bottom: 2rem;
+}
+
+.table-card {
+    border: 1px solid var(--border-glass);
+    border-radius: var(--radius-md);
+    background: var(--bg-card-glass);
+    padding: 1.25rem;
+    transition: all var(--transition-normal);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 220px;
+}
+
+.table-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: var(--color-text-muted);
+}
+
+.table-card.table-empty::before {
+    background: var(--color-text-muted);
+}
+
+.table-card.table-occupied::before {
+    background: var(--color-warning);
+}
+
+.table-card.table-occupied {
+    border-color: rgba(230, 126, 34, 0.35);
+    box-shadow: 0 4px 20px rgba(230, 126, 34, 0.05);
+}
+
+.table-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--border-hover);
+}
+
+.table-card.table-occupied:hover {
+    border-color: var(--color-warning);
+}
+
+.table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+
+.table-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    font-family: var(--font-heading);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.table-status-badge {
+    font-size: 0.75rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    font-weight: 500;
+}
+
+.badge-empty {
+    background: rgba(156, 148, 129, 0.1);
+    color: var(--color-text-muted);
+    border: 1px solid rgba(156, 148, 129, 0.2);
+}
+
+.badge-occupied {
+    background: var(--color-warning-glow);
+    color: var(--color-warning);
+    border: 1px solid rgba(230, 126, 34, 0.3);
+    animation: pulse-glow 2s infinite alternate;
+}
+
+@keyframes pulse-glow {
+    0% {
+        box-shadow: 0 0 5px rgba(230, 126, 34, 0.1);
+    }
+    100% {
+        box-shadow: 0 0 12px rgba(230, 126, 34, 0.3);
+    }
+}
+
+.table-content {
+    flex: 1;
+    margin-bottom: 1rem;
+    font-size: 0.85rem;
+}
+
+.table-bill-items {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    margin-top: 0.5rem;
+    max-height: 100px;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+.table-bill-item {
+    display: flex;
+    justify-content: space-between;
+    color: var(--color-text);
+    background: rgba(0,0,0,0.15);
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+}
+
+.table-bill-total {
+    margin-top: 0.75rem;
+    display: flex;
+    justify-content: space-between;
+    font-weight: 600;
+    border-top: 1px dashed var(--border-glass);
+    padding-top: 0.5rem;
+    color: var(--color-primary);
+    font-size: 0.95rem;
+}
+
+.table-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.table-actions .btn {
+    flex: 1;
+    padding: 0.5rem 0.25rem;
+    font-size: 0.8rem;
+}
+
+/* Additional general classes for payment status badges */
+.badge-paid {
+    background: var(--color-success-glow);
+    color: var(--color-success);
+    border: 1px solid rgba(46, 204, 113, 0.3);
+}
+
+.badge-pending {
+    background: var(--color-danger-glow);
+    color: var(--color-danger);
+    border: 1px solid rgba(192, 57, 43, 0.3);
+}
+
+.order-card-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.2rem 0.6rem;
+    border-radius: 50px;
+}

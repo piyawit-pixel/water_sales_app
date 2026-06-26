@@ -191,7 +191,8 @@
             <section class="logs-panel">
                 <!-- Navigation Tabs -->
                 <nav class="tab-navigation">
-                    <button class="tab-btn active" data-tab="orders-tab"><i class="fa-solid fa-receipt"></i> บันทึกออเดอร์</button>
+                    <button class="tab-btn active" data-tab="tables-tab"><i class="fa-solid fa-chair"></i> จัดการโต๊ะ</button>
+                    <button class="tab-btn" data-tab="orders-tab"><i class="fa-solid fa-receipt"></i> บันทึกออเดอร์</button>
                     <button class="tab-btn" data-tab="stock-tab"><i class="fa-solid fa-boxes-stacked"></i> สต็อกน้ำ</button>
                     <button class="tab-btn" data-tab="summary-tab"><i class="fa-solid fa-chart-line"></i> สรุปยอดขาย</button>
                     <button class="tab-btn" data-tab="admin-tab" id="tab-btn-admin" style="display: none;"><i class="fa-solid fa-user-gear"></i> จัดการพนักงาน</button>
@@ -200,8 +201,31 @@
                 <!-- TAB CONTENTS -->
                 <div class="tab-content-container">
                     
+                    <!-- 0. TABLES TAB -->
+                    <div class="tab-pane active" id="tables-tab">
+                        <div class="grab-manager-header">
+                            <div class="grab-title-desc">
+                                <h3><i class="fa-solid fa-chair text-primary"></i> สถานะและจัดการโต๊ะ</h3>
+                                <p>จัดการการเปิดโต๊ะ รายการเครื่องดื่มค้างชำระ และการชำระเงินของแต่ละโต๊ะ</p>
+                            </div>
+                        </div>
+                        <div class="tables-grid-wrapper" id="tables-grid-container">
+                            <!-- Tables load dynamically -->
+                        </div>
+                        
+                        <!-- Other unpaid bills (e.g. Grab or takeaway that are pending) -->
+                        <div class="other-pending-bills" style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px dashed var(--border-glass);">
+                            <h3 style="font-family: var(--font-heading); font-size: 1.1rem; margin-bottom: 0.75rem; color: var(--color-primary); display: flex; align-items: center; gap: 0.5rem;">
+                                <i class="fa-solid fa-receipt"></i> ออเดอร์ค้างชำระอื่นๆ (กลับบ้าน / Grab)
+                            </h3>
+                            <div class="tables-grid-wrapper" id="other-pending-container">
+                                <!-- Other pending orders load dynamically -->
+                            </div>
+                        </div>
+                    </div>
+                    
                     <!-- 1. ORDERS TAB -->
-                    <div class="tab-pane active" id="orders-tab">
+                    <div class="tab-pane" id="orders-tab">
                         <div class="filter-bar">
                             <div class="filter-group">
                                 <label for="filter-date"><i class="fa-solid fa-calendar"></i> ตัวกรองวันที่</label>
@@ -215,6 +239,14 @@
                             <div class="filter-group" id="custom-date-group" style="display: none;">
                                 <label for="filter-custom-date">เลือกวันที่</label>
                                 <input type="date" id="filter-custom-date">
+                            </div>
+                            <div class="filter-group">
+                                <label for="filter-payment-status"><i class="fa-solid fa-credit-card"></i> สถานะชำระเงิน</label>
+                                <select id="filter-payment-status">
+                                    <option value="all" selected>ทั้งหมด</option>
+                                    <option value="pending_promo">ยังไม่ชำระเงิน</option>
+                                    <option value="paid">ชำระเงินแล้ว</option>
+                                </select>
                             </div>
                             <div class="filter-group search-group">
                                 <label for="search-order-customer"><i class="fa-solid fa-user-tag"></i> ค้นหาชื่อลูกค้า</label>

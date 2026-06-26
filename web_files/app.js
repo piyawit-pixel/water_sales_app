@@ -1,22 +1,38 @@
 // DRINK DATABASE
 const DRINKS = [
-    { id: 'oishi', nameTH: 'โออิชิ', nameEN: 'Oishi', category: 'tea', color: '#8FA87B', colorRgb: '143, 168, 123', icon: 'fa-leaf' },
-    { id: 'grape', nameTH: 'องุ่นเคียวโฮ', nameEN: 'Kyoho Grape', category: 'fruit', color: '#9B6BA8', colorRgb: '155, 107, 168', icon: 'fa-wine-glass' },
-    { id: 'bitter', nameTH: 'เดิมขม', nameEN: 'Original Bitter', category: 'dark', color: '#7E8578', colorRgb: '126, 133, 120', icon: 'fa-whiskey-glass' },
-    { id: 'sweet', nameTH: 'เดิมหวาน', nameEN: 'Original Sweet', category: 'amber', color: '#DDB87B', colorRgb: '221, 184, 123', icon: 'fa-whiskey-glass' },
-    { id: 'honey-lemon', nameTH: 'น้ำผึ้งมะนาว', nameEN: 'Honey Lemon', category: 'yellow', color: '#E0C068', colorRgb: '224, 192, 104', icon: 'fa-lemon' },
-    { id: 'blueberry', nameTH: 'บลูเบอร์รี่', nameEN: 'Blueberry', category: 'fruit', color: '#6B8AB8', colorRgb: '107, 138, 184', icon: 'fa-martini-glass' },
-    { id: 'yogurt', nameTH: 'โยเกิร์ต', nameEN: 'Yogurt', category: 'yogurt', color: '#D2A0A8', colorRgb: '210, 160, 168', icon: 'fa-glass-water' },
-    { id: 'strawberry-yogurt', nameTH: 'โยเกิร์ตสตอเบอรี่', nameEN: 'Strawberry Yogurt', category: 'yogurt', color: '#D48A92', colorRgb: '212, 138, 146', icon: 'fa-glass-water' },
-    { id: 'strawberry', nameTH: 'สตอเบอรี่', nameEN: 'Strawberry', category: 'fruit', color: '#D96B6B', colorRgb: '217, 107, 107', icon: 'fa-wine-glass' },
-    { id: 'apple', nameTH: 'แอปเปิ้ล', nameEN: 'Apple', category: 'fruit', color: '#CE7B7B', colorRgb: '206, 123, 123', icon: 'fa-wine-glass' },
-    { id: 'greentea', nameTH: 'ชาเขียว', nameEN: 'Green Tea', category: 'tea', color: '#7CA682', colorRgb: '124, 166, 130', icon: 'fa-mug-hot' },
-    { id: 'taro', nameTH: 'เผือก', nameEN: 'Taro', category: 'yogurt', color: '#B0A2C7', colorRgb: '176, 162, 199', icon: 'fa-martini-glass-citrus' },
-    { id: 'cocoa', nameTH: 'โกโก้', nameEN: 'Cocoa', category: 'cocoa', color: '#9C7C60', colorRgb: '156, 124, 96', icon: 'fa-mug-hot' },
-    { id: 'watermelon', nameTH: 'แตงโม', nameEN: 'Watermelon', category: 'fruit', color: '#DF8A8E', colorRgb: '223, 138, 142', icon: 'fa-martini-glass' }
+    { id: 'oishi', nameTH: 'โออิชิ', nameEN: 'Oishi', category: 'tea', color: '#8FA87B', colorRgb: '143, 168, 123', icon: 'fa-leaf', capColor: 'น้ำเงิน' },
+    { id: 'grape', nameTH: 'องุ่นเคียวโฮ', nameEN: 'Kyoho Grape', category: 'fruit', color: '#A28AA8', colorRgb: '162, 138, 168', icon: 'fa-wine-glass', capColor: 'ขาว' },
+    { id: 'bitter', nameTH: 'เดิมขม', nameEN: 'Original Bitter', category: 'dark', color: '#7E8578', colorRgb: '126, 133, 120', icon: 'fa-mug-hot', capColor: 'ดำ' },
+    { id: 'sweet', nameTH: 'เดิมหวาน', nameEN: 'Original Sweet', category: 'amber', color: '#DDB87B', colorRgb: '221, 184, 123', icon: 'fa-cookie', capColor: 'แดง' },
+    { id: 'honey-lemon', nameTH: 'น้ำผึ้งมะนาว', nameEN: 'Honey Lemon', category: 'yellow', color: '#E0C068', colorRgb: '224, 192, 104', icon: 'fa-lemon', capColor: 'ม่วง' },
+    { id: 'blueberry', nameTH: 'บลูเบอร์รี่', nameEN: 'Blueberry', category: 'fruit', color: '#7B94B8', colorRgb: '123, 148, 184', icon: 'fa-seedling', capColor: 'ฟ้า' },
+    { id: 'yogurt', nameTH: 'โยเกิร์ต', nameEN: 'Yogurt', category: 'yogurt', color: '#D2A0A8', colorRgb: '210, 160, 168', icon: 'fa-cheese', capColor: 'เหลือง' },
+    { id: 'strawberry-yogurt', nameTH: 'โยเกิร์ตสตอเบอรี่', nameEN: 'Strawberry Yogurt', category: 'yogurt', color: '#D48A92', colorRgb: '212, 138, 146', icon: 'fa-ice-cream', capColor: 'ชมพู' },
+    { id: 'strawberry', nameTH: 'สตอเบอรี่', nameEN: 'Strawberry', category: 'fruit', color: '#D96B6B', colorRgb: '217, 107, 107', icon: 'fa-apple-whole', capColor: 'ฟ้า' },
+    { id: 'apple', nameTH: 'แอปเปิ้ล', nameEN: 'Apple', category: 'fruit', color: '#CE7B7B', colorRgb: '206, 123, 123', icon: 'fa-apple-whole', capColor: 'เหลือง' },
+    { id: 'greentea', nameTH: 'ชาเขียว', nameEN: 'Green Tea', category: 'tea', color: '#7CA682', colorRgb: '124, 166, 130', icon: 'fa-mug-hot', capColor: 'แดง' },
+    { id: 'taro', nameTH: 'เผือก', nameEN: 'Taro', category: 'yogurt', color: '#B0A2C7', colorRgb: '176, 162, 199', icon: 'fa-egg', capColor: 'ม่วง' },
+    { id: 'cocoa', nameTH: 'โกโก้', nameEN: 'Cocoa', category: 'cocoa', color: '#9C7C60', colorRgb: '156, 124, 96', icon: 'fa-mug-hot', capColor: 'แดง' },
+    { id: 'watermelon', nameTH: 'แตงโม', nameEN: 'Watermelon', category: 'fruit', color: '#DF8A8E', colorRgb: '223, 138, 142', icon: 'fa-lemon', capColor: 'ดำ' }
 ];
 
 const PRICE_PER_BOTTLE = 80;
+
+const CAP_COLORS_MAP = {
+    'ดำ': '#000000',
+    'แดง': '#ef4444',
+    'ม่วง': '#a855f7',
+    'เหลือง': '#facc15',
+    'ขาว': '#ffffff',
+    'ฟ้า': '#38bdf8',
+    'น้ำเงิน': '#2563eb',
+    'ชมพู': '#ec4899'
+};
+
+const DEFAULT_USERS = [
+    { username: 'admin', pin: '5678', role: 'admin' },
+    { username: 'พนักงาน', pin: '1234', role: 'staff' }
+];
 
 // STATE MANAGEMENT
 let state = {
@@ -28,11 +44,57 @@ let state = {
     tab: 'orders-tab',
     sheetUrl: '',
     autoSync: false,
-    stock: {} // drinkId -> quantity
+    stock: {}, // drinkId -> quantity
+    users: []
 };
 
 // LOAD INITIAL STATE FROM LOCAL STORAGE
 function init() {
+    // Initialize users list
+    const savedUsers = localStorage.getItem('juice_bar_users');
+    if (savedUsers) {
+        try {
+            state.users = JSON.parse(savedUsers);
+            if (!Array.isArray(state.users) || state.users.length === 0) {
+                state.users = [...DEFAULT_USERS];
+                localStorage.setItem('juice_bar_users', JSON.stringify(state.users));
+            } else {
+                // Migrate: Ensure all users have a role, and 'admin' is always admin
+                let migrated = false;
+                try {
+                    state.users = state.users
+                        .filter(u => u && typeof u === 'object' && u.username)
+                        .map(u => {
+                            let updatedUser = { ...u };
+                            const usernameLower = (updatedUser.username || '').toLowerCase();
+                            if (!updatedUser.role) {
+                                updatedUser.role = (usernameLower === 'admin') ? 'admin' : 'staff';
+                                migrated = true;
+                            }
+                            if (usernameLower === 'admin' && updatedUser.role !== 'admin') {
+                                updatedUser.role = 'admin';
+                                migrated = true;
+                            }
+                            return updatedUser;
+                        });
+                    if (migrated) {
+                        localStorage.setItem('juice_bar_users', JSON.stringify(state.users));
+                    }
+                } catch (migrationErr) {
+                    console.error("Migration error", migrationErr);
+                    state.users = [...DEFAULT_USERS];
+                    localStorage.setItem('juice_bar_users', JSON.stringify(state.users));
+                }
+            }
+        } catch (e) {
+            state.users = [...DEFAULT_USERS];
+            localStorage.setItem('juice_bar_users', JSON.stringify(state.users));
+        }
+    } else {
+        state.users = [...DEFAULT_USERS];
+        localStorage.setItem('juice_bar_users', JSON.stringify(state.users));
+    }
+
     const savedState = localStorage.getItem('juice_bar_tracker_state');
     if (savedState) {
         try {
@@ -80,16 +142,53 @@ function init() {
     // Bind UI elements & Listeners
     setupClock();
     setupEventListeners();
+    renderLoginUserDropdown();
+    checkLoginStatus();
     renderDrinkGrid();
     renderCart();
+    renderTables();
     renderOrders();
     renderGrabLogs();
     renderStock();
     renderAnalytics();
+    renderAdminUsersList();
     
     // Auto-pull from sheet on startup if URL is configured
     if (state.sheetUrl) {
         pullFromSheets(true);
+    }
+}
+
+// CHECK LOGIN STATUS
+function checkLoginStatus() {
+    const loggedIn = sessionStorage.getItem('baanphuan_logged_in') === 'true';
+    const loginContainer = document.getElementById('login-container');
+    const adminTabBtn = document.getElementById('tab-btn-admin');
+    if (loggedIn) {
+        if (loginContainer) loginContainer.classList.add('hidden');
+        const username = sessionStorage.getItem('baanphuan_username') || 'พนักงาน';
+        
+        // Lookup user in state.users to get the most up-to-date role and prevent session cache issues
+        const foundUser = state.users.find(u => u.username.toLowerCase() === username.toLowerCase());
+        const role = foundUser ? foundUser.role : (sessionStorage.getItem('baanphuan_role') || 'staff');
+        sessionStorage.setItem('baanphuan_role', role);
+        
+        document.getElementById('header-username').innerText = username;
+        document.getElementById('header-user-badge').style.display = 'flex';
+        document.getElementById('staff-name').value = username;
+        if (role === 'admin') {
+            if (adminTabBtn) adminTabBtn.style.display = 'flex';
+        } else {
+            if (adminTabBtn) adminTabBtn.style.display = 'none';
+            if (state.tab === 'admin-tab') {
+                switchTab('orders-tab');
+            }
+        }
+    } else {
+        if (loginContainer) loginContainer.classList.remove('hidden');
+        document.getElementById('header-user-badge').style.display = 'none';
+        if (adminTabBtn) adminTabBtn.style.display = 'none';
+        switchTab('orders-tab');
     }
 }
 
@@ -100,6 +199,15 @@ function saveToLocalStorage(skipSync = false) {
         grabPickups: state.grabPickups,
         stock: state.stock
     }));
+    
+    if (!skipSync && state.autoSync && state.sheetUrl) {
+        pushToSheets(true);
+    }
+}
+
+// SAVE USERS TO LOCAL STORAGE
+function saveUsersToLocalStorage(skipSync = false) {
+    localStorage.setItem('juice_bar_users', JSON.stringify(state.users));
     
     if (!skipSync && state.autoSync && state.sheetUrl) {
         pushToSheets(true);
@@ -185,11 +293,44 @@ function calculateBestPrice(quantity, isGrab = false) {
     };
 }
 
+// GET HUMAN READABLE PROMOTION DESCRIPTION
+function getPromotionDescription(pricing, isGrab = false) {
+    if (isGrab) return "Grab Delivery";
+    
+    const num7 = pricing.num7 || 0;
+    const num4 = pricing.num4 || 0;
+    const num1 = pricing.num1 || 0;
+    
+    let parts = [];
+    if (num7 > 0) {
+        parts.push(num7 === 1 ? "โปร 7" : `โปร 7 (x${num7})`);
+    }
+    if (num4 > 0) {
+        parts.push(num4 === 1 ? "โปร 4" : `โปร 4 (x${num4})`);
+    }
+    if (num1 > 0) {
+        parts.push(num1 === 1 ? "1 ขวด" : `${num1} ขวด`);
+    }
+    
+    if (parts.length === 0) return "-";
+    
+    // If it's only single bottles (1-3 bottles), show "เป็นขวด" instead of just "1 ขวด" or "2 ขวด"
+    if (num7 === 0 && num4 === 0) {
+        return `เป็นขวด (${num1} ขวด)`;
+    }
+    
+    return parts.join(" และ ");
+}
+
 // EVENT LISTENERS BINDING
 function setupEventListeners() {
     // Delivery channel switch
     const deliveryTypeSelect = document.getElementById('delivery-type');
     deliveryTypeSelect.addEventListener('change', (e) => {
+        const grabGroup = document.getElementById('grab-driver-group');
+        if (grabGroup) {
+            grabGroup.style.display = e.target.value === 'grab' ? 'block' : 'none';
+        }
         renderCart();
     });
 
@@ -226,6 +367,11 @@ function setupEventListeners() {
             deliveryTypeSelect.value = 'walkin';
         }
         
+        const grabGroup = document.getElementById('grab-driver-group');
+        if (grabGroup) {
+            grabGroup.style.display = deliveryTypeSelect.value === 'grab' ? 'block' : 'none';
+        }
+        
         // Re-render cart to update prices instantly
         renderCart();
         
@@ -249,26 +395,8 @@ function setupEventListeners() {
     const tabButtons = document.querySelectorAll('.tab-btn');
     tabButtons.forEach(btn => {
         btn.addEventListener('click', () => {
-            tabButtons.forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            
             const targetTab = btn.getAttribute('data-tab');
-            state.tab = targetTab;
-            
-            const panes = document.querySelectorAll('.tab-pane');
-            panes.forEach(pane => pane.classList.remove('active'));
-            document.getElementById(targetTab).classList.add('active');
-            
-            // Re-render corresponding tab
-            if (targetTab === 'orders-tab') {
-                renderOrders();
-            } else if (targetTab === 'grab-tab') {
-                renderGrabLogs();
-            } else if (targetTab === 'stock-tab') {
-                renderStock();
-            } else if (targetTab === 'summary-tab') {
-                renderAnalytics();
-            }
+            switchTab(targetTab);
         });
     });
 
@@ -285,6 +413,10 @@ function setupEventListeners() {
     });
 
     document.getElementById('filter-custom-date').addEventListener('change', () => {
+        renderOrders();
+    });
+
+    document.getElementById('filter-payment-status').addEventListener('change', () => {
         renderOrders();
     });
 
@@ -353,6 +485,11 @@ function setupEventListeners() {
         });
     }
 
+    const btnCopySummary = document.getElementById('btn-copy-summary');
+    if (btnCopySummary) {
+        btnCopySummary.addEventListener('click', copyDailySummaryToText);
+    }
+
     // Grab Manual Log Modal (safeguarded/disabled since tab is removed)
     const btnAddGrab = document.getElementById('btn-add-grab-manual');
     if (btnAddGrab) btnAddGrab.addEventListener('click', openGrabManualModal);
@@ -362,6 +499,207 @@ function setupEventListeners() {
     if (btnCancelGrab) btnCancelGrab.addEventListener('click', closeGrabManualModal);
     const grabManualForm = document.getElementById('grab-manual-form');
     if (grabManualForm) grabManualForm.addEventListener('submit', handleGrabManualSubmit);
+
+    // Login Screen Event Listeners
+    const loginForm = document.getElementById('login-form');
+    if (loginForm) {
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            submitLogin();
+        });
+    }
+
+    const btnLoginPullSheet = document.getElementById('btn-login-pull-sheet');
+    if (btnLoginPullSheet) {
+        btnLoginPullSheet.addEventListener('click', async () => {
+            let url = state.sheetUrl || '';
+            const newUrl = prompt("ระบุ Google Apps Script Web App URL:", url);
+            if (newUrl === null) return; // User cancelled
+            
+            const trimmedUrl = newUrl.trim();
+            if (!trimmedUrl) {
+                alert("กรุณาระบุ URL ที่ถูกต้อง");
+                return;
+            }
+            
+            state.sheetUrl = trimmedUrl;
+            saveToLocalStorage(true);
+            
+            const originalText = btnLoginPullSheet.innerHTML;
+            btnLoginPullSheet.disabled = true;
+            btnLoginPullSheet.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> กำลังซิงค์ข้อมูล...';
+            
+            try {
+                await pullFromSheets(true);
+                const userSummary = state.users.map(u => `${u.username} (${u.pin ? u.pin.length : 0} หลัก)`).join(", ");
+                alert("ซิงค์ข้อมูลผู้ใช้งานและยอดขายสำเร็จ!\n\nบัญชีพนักงานที่โหลดได้:\n" + userSummary);
+            } catch(e) {
+                alert("ซิงค์ข้อมูลล้มเหลว: " + e.message);
+            } finally {
+                btnLoginPullSheet.disabled = false;
+                btnLoginPullSheet.innerHTML = originalText;
+            }
+        });
+    }
+
+    const btnLogout = document.getElementById('btn-logout');
+    if (btnLogout) {
+        btnLogout.addEventListener('click', () => {
+            sessionStorage.removeItem('baanphuan_logged_in');
+            sessionStorage.removeItem('baanphuan_username');
+            sessionStorage.removeItem('baanphuan_role');
+            checkLoginStatus();
+        });
+    }
+
+    // Profile Edit Modal toggle and submission
+    const btnEditProfile = document.getElementById('btn-edit-profile');
+    const headerUsernameSpan = document.getElementById('header-username');
+    const btnCloseProfileModal = document.getElementById('btn-close-profile-modal');
+    const btnCancelProfileSave = document.getElementById('btn-cancel-profile-save');
+    const profileModal = document.getElementById('profile-modal');
+    const profileForm = document.getElementById('profile-edit-form');
+
+    const openProfileModal = () => {
+        const username = sessionStorage.getItem('baanphuan_username');
+        if (!username) return;
+        const foundUser = state.users.find(u => u.username.toLowerCase() === username.toLowerCase());
+        if (!foundUser) return;
+
+        document.getElementById('profile-username').value = foundUser.username;
+        document.getElementById('profile-pin').value = foundUser.pin;
+        profileModal.classList.add('active');
+    };
+
+    const closeProfileModal = () => {
+        profileModal.classList.remove('active');
+    };
+
+    if (btnEditProfile) btnEditProfile.addEventListener('click', openProfileModal);
+    if (headerUsernameSpan) headerUsernameSpan.addEventListener('click', openProfileModal);
+    if (btnCloseProfileModal) btnCloseProfileModal.addEventListener('click', closeProfileModal);
+    if (btnCancelProfileSave) btnCancelProfileSave.addEventListener('click', closeProfileModal);
+
+    if (profileForm) {
+        profileForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const newUsername = document.getElementById('profile-username').value.trim();
+            const newPin = document.getElementById('profile-pin').value.trim();
+            const oldUsername = sessionStorage.getItem('baanphuan_username');
+
+            if (newPin.length < 4 || newPin.length > 6 || isNaN(newPin)) {
+                alert('รหัสผ่าน PIN ต้องเป็นตัวเลข 4-6 หลักเท่านั้น');
+                return;
+            }
+
+            // Check duplicate name (excluding self)
+            if (newUsername.toLowerCase() !== oldUsername.toLowerCase()) {
+                if (state.users.some(u => u.username.toLowerCase() === newUsername.toLowerCase())) {
+                    alert('มีชื่อพนักงานคนนี้อยู่ในระบบแล้ว');
+                    return;
+                }
+            }
+
+            // Update user in state
+            const userIndex = state.users.findIndex(u => u.username.toLowerCase() === oldUsername.toLowerCase());
+            if (userIndex !== -1) {
+                const currentRole = state.users[userIndex].role;
+                state.users[userIndex] = { username: newUsername, pin: newPin, role: currentRole };
+                
+                // Save to localStorage
+                saveUsersToLocalStorage();
+                
+                // Update session storage
+                sessionStorage.setItem('baanphuan_username', newUsername);
+                
+                // Update last staff logging reference
+                const lastStaff = localStorage.getItem('juice_bar_last_staff');
+                if (lastStaff === oldUsername) {
+                    localStorage.setItem('juice_bar_last_staff', newUsername);
+                }
+
+                // Re-render dropdown & lists
+                renderLoginUserDropdown();
+                renderAdminUsersList();
+                checkLoginStatus();
+                closeProfileModal();
+                alert('บันทึกข้อมูลส่วนตัวสำเร็จ');
+            } else {
+                alert('ไม่พบผู้ใช้นี้ในระบบ');
+            }
+        });
+    }
+
+    // Admin Panel - Add/Edit User Form
+    const adminUserForm = document.getElementById('admin-user-form');
+    if (adminUserForm) {
+        adminUserForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const usernameInput = document.getElementById('admin-username');
+            const pinInput = document.getElementById('admin-pin');
+            const roleSelect = document.getElementById('admin-role');
+            const originalUsernameInput = document.getElementById('admin-edit-original-username');
+            
+            const username = usernameInput.value.trim();
+            const pin = pinInput.value.trim();
+            const role = roleSelect.value;
+            const originalUsername = originalUsernameInput.value;
+            
+            if (pin.length < 4 || pin.length > 6 || isNaN(pin)) {
+                alert('รหัสผ่าน PIN ต้องเป็นตัวเลข 4-6 หลักเท่านั้น');
+                return;
+            }
+            
+            if (originalUsername) {
+                // Editing existing user
+                const userIndex = state.users.findIndex(u => u.username.toLowerCase() === originalUsername.toLowerCase());
+                if (userIndex !== -1) {
+                    state.users[userIndex] = { username, pin, role };
+                }
+                originalUsernameInput.value = '';
+                document.getElementById('btn-admin-cancel-edit').style.display = 'none';
+            } else {
+                // Adding new user
+                if (state.users.some(u => u.username.toLowerCase() === username.toLowerCase())) {
+                    alert('มีชื่อพนักงานคนนี้อยู่ในระบบแล้ว');
+                    return;
+                }
+                state.users.push({ username, pin, role });
+            }
+            
+            // Save to localStorage
+            saveUsersToLocalStorage();
+            
+            // Reset form and re-render
+            usernameInput.value = '';
+            pinInput.value = '';
+            roleSelect.value = 'staff';
+            
+            renderLoginUserDropdown();
+            renderAdminUsersList();
+            
+            // Update current user info if they edited their own account
+            const currentLoggedIn = sessionStorage.getItem('baanphuan_username');
+            if (originalUsername && currentLoggedIn && originalUsername.toLowerCase() === currentLoggedIn.toLowerCase()) {
+                sessionStorage.setItem('baanphuan_username', username);
+                sessionStorage.setItem('baanphuan_role', role);
+                checkLoginStatus();
+            }
+            
+            alert('บันทึกข้อมูลสำเร็จ');
+        });
+    }
+
+    const btnAdminCancelEdit = document.getElementById('btn-admin-cancel-edit');
+    if (btnAdminCancelEdit) {
+        btnAdminCancelEdit.addEventListener('click', () => {
+            document.getElementById('admin-username').value = '';
+            document.getElementById('admin-pin').value = '';
+            document.getElementById('admin-role').value = 'staff';
+            document.getElementById('admin-edit-original-username').value = '';
+            btnAdminCancelEdit.style.display = 'none';
+        });
+    }
 }
 
 // CHECK IF CUSTOMER HAS EXISTING ORDERS TO SUGGEST APPENDING (Incremental ordering)
@@ -369,23 +707,43 @@ function checkCustomerPreviousOrders(custName) {
     const selectedDate = document.getElementById('order-date').value;
     
     // Find active orders for this customer on the selected date
-    const userOrders = state.orders.filter(o => o.customerName === custName && o.date === selectedDate);
-    if (userOrders.length === 0) return;
+    const userOrders = state.orders.filter(o => {
+        // Since customerName might contain the display name like "โต๊ะ 1 (ชื่อลูกค้า)", we match by prefix
+        return o.customerName === custName || o.customerName.startsWith(custName + ' (');
+    });
+    
+    if (userOrders.length === 0) {
+        if (custName.startsWith('โต๊ะ ')) {
+            document.getElementById('order-status').value = 'pending_promo';
+        }
+        return;
+    }
     
     // Sort by date/time (newest first)
     userOrders.sort((a,b) => new Date(b.createdTime) - new Date(a.createdTime));
     const latestOrder = userOrders[0];
     
-    // Prompt the user if they want to append to the latest order
-    const orderDateFormatted = new Date(latestOrder.createdTime).toLocaleDateString('th-TH');
-    const itemsCount = Object.values(latestOrder.items).reduce((a, b) => a + b, 0);
-    
-    const confirmAppend = confirm(
-        `พบออเดอร์เดิมของลูกค้า "${custName}" เมื่อวันที่ ${orderDateFormatted} (${itemsCount} ขวด, ${latestOrder.priceDetails.total} บาท)\n\nคุณต้องการ "เพิ่มสินค้าในบิลเดิม" เพื่อสะสมโปรโมชั่นใช่หรือไม่?`
-    );
-    
-    if (confirmAppend) {
-        loadOrderForEditing(latestOrder.id);
+    // Only suggest merging if the latest order is still unpaid (pending_promo)
+    if (latestOrder.status === 'pending_promo') {
+        const itemsCount = Object.values(latestOrder.items).reduce((a, b) => a + b, 0);
+        const confirmAppend = confirm(
+            `พบออเดอร์ค้างชำระของ "${latestOrder.customerName}" (${itemsCount} ขวด, ${latestOrder.priceDetails.total} บาท)\n\nคุณต้องการ "สั่งสินค้าเพิ่มในบิลเดิม" ใช่หรือไม่?`
+        );
+        
+        if (confirmAppend) {
+            loadOrderForEditing(latestOrder.id);
+        } else {
+            if (custName.startsWith('โต๊ะ ')) {
+                document.getElementById('order-status').value = 'pending_promo';
+            }
+        }
+    } else {
+        // If the latest order is already paid, a new session is started
+        if (custName.startsWith('โต๊ะ ')) {
+            document.getElementById('order-status').value = 'pending_promo';
+        } else {
+            document.getElementById('order-status').value = 'paid';
+        }
     }
 }
 
@@ -427,6 +785,10 @@ function renderDrinkGrid() {
             <div>
                 <span class="bev-name-th">${drink.nameTH}</span>
                 <span class="bev-name-en">${drink.nameEN}</span>
+                <span class="bev-cap-color" style="font-size: 0.7rem; color: var(--color-text-muted); display: inline-flex; align-items: center; justify-content: center; gap: 0.25rem; margin-top: 0.2rem; background: rgba(29, 78, 216, 0.05); padding: 0.1rem 0.5rem; border-radius: 50px; border: 1px solid var(--border-glass); user-select: none;">
+                    <i class="fa-solid fa-circle" style="color: ${CAP_COLORS_MAP[drink.capColor] || '#ccc'}; font-size: 0.6rem; filter: drop-shadow(0 0 2px ${CAP_COLORS_MAP[drink.capColor] || '#ccc'}); ${drink.capColor === 'ขาว' ? 'border: 1px solid #94a3b8; border-radius: 50%;' : ''}"></i>
+                    ฝา${drink.capColor}
+                </span>
                 ${stockLabel}
             </div>
             <div class="bev-controls">
@@ -503,7 +865,7 @@ function renderCart() {
                 <div class="cart-item-bullet" style="background-color: ${drink.color};"></div>
                 <div>
                     <span class="cart-item-name">${drink.nameTH}</span>
-                    <span class="bev-name-en">${drink.nameEN}</span>
+                    <span class="bev-name-en">${drink.nameEN} <span style="color: var(--color-primary); font-size: 0.75rem;">(ฝา${drink.capColor})</span></span>
                 </div>
             </div>
             <div class="cart-item-actions">
@@ -540,14 +902,23 @@ function renderCart() {
     }
     
     document.getElementById('calc-total').textContent = `${pricing.total} บาท`;
+    const promoDetailText = getPromotionDescription(pricing, isGrab);
+    const calcPromoDetailEl = document.getElementById('calc-promo-detail');
+    if (calcPromoDetailEl) {
+        calcPromoDetailEl.textContent = promoDetailText;
+    }
 }
 
 // SAVE ORDER OR UPDATE ORDER
 function saveOrder() {
-    const customerName = document.getElementById('customer-name').value.trim();
+    const tableVal = document.getElementById('customer-name').value.trim();
+    const customNameVal = document.getElementById('customer-display-name').value.trim();
+    const customerName = customNameVal ? `${tableVal} (${customNameVal})` : tableVal;
     const orderDate = document.getElementById('order-date').value;
     const deliveryType = document.getElementById('delivery-type').value;
-    const grabDriverName = '';
+    const grabDriverName = deliveryType === 'grab' ? document.getElementById('grab-driver-name').value.trim() : '';
+    const status = document.getElementById('order-status').value;
+    const paymentMethod = document.getElementById('payment-method').value;
     const staffName = document.getElementById('staff-name').value.trim();
     const orderRemark = document.getElementById('order-remark').value.trim();
     
@@ -604,6 +975,9 @@ function saveOrder() {
                 grabDriverName: deliveryType === 'grab' ? grabDriverName : '',
                 items: { ...state.cart },
                 priceDetails: pricing,
+                status: status,
+                paymentMethod: paymentMethod,
+                promotionDetail: getPromotionDescription(pricing, deliveryType === 'grab'),
                 staffName: staffName,
                 remark: orderRemark,
                 updatedTime: now.toISOString()
@@ -632,7 +1006,9 @@ function saveOrder() {
             grabDriverName: deliveryType === 'grab' ? grabDriverName : '',
             items: { ...state.cart },
             priceDetails: pricing,
-            status: 'paid', // defaults to paid
+            status: status,
+            paymentMethod: paymentMethod,
+            promotionDetail: getPromotionDescription(pricing, deliveryType === 'grab'),
             staffName: staffName,
             remark: orderRemark,
             createdTime: now.toISOString(),
@@ -653,6 +1029,7 @@ function saveOrder() {
     clearPOSForm();
     
     // Refresh UI
+    renderTables();
     renderOrders();
     renderGrabLogs();
     renderAnalytics();
@@ -701,10 +1078,26 @@ function loadOrderForEditing(orderId) {
     state.editingOrderId = order.id;
     state.cart = { ...order.items };
     
+    let tableName = order.customerName || '';
+    let nickName = '';
+    const match = tableName.match(/^(.+?)\s*\((.+?)\)$/);
+    if (match) {
+        tableName = match[1];
+        nickName = match[2];
+    }
+    
     // Fill inputs
-    document.getElementById('customer-name').value = order.customerName;
+    document.getElementById('customer-name').value = tableName;
+    document.getElementById('customer-display-name').value = nickName;
     document.getElementById('order-date').value = order.date;
     document.getElementById('delivery-type').value = order.deliveryType;
+    const grabGroup = document.getElementById('grab-driver-group');
+    if (grabGroup) {
+        grabGroup.style.display = order.deliveryType === 'grab' ? 'block' : 'none';
+    }
+    document.getElementById('grab-driver-name').value = order.grabDriverName || '';
+    document.getElementById('order-status').value = order.status || 'paid';
+    document.getElementById('payment-method').value = order.paymentMethod || 'scan';
     document.getElementById('staff-name').value = order.staffName || '';
     document.getElementById('order-remark').value = order.remark || '';
     
@@ -727,8 +1120,16 @@ function clearPOSForm() {
     state.cart = {};
     
     document.getElementById('customer-name').value = 'กลับบ้าน';
+    document.getElementById('customer-display-name').value = '';
     document.getElementById('order-date').value = getLocalDateString(new Date());
     document.getElementById('delivery-type').value = 'walkin';
+    const grabGroup = document.getElementById('grab-driver-group');
+    if (grabGroup) {
+        grabGroup.style.display = 'none';
+    }
+    document.getElementById('grab-driver-name').value = '';
+    document.getElementById('order-status').value = 'paid';
+    document.getElementById('payment-method').value = 'scan';
     document.getElementById('staff-name').value = localStorage.getItem('juice_bar_last_staff') || '';
     document.getElementById('order-remark').value = '';
     
@@ -764,7 +1165,14 @@ function renderOrders() {
         if (filterDateVal === 'yesterday' && order.date !== yesterdayStr) return false;
         if (filterDateVal === 'custom' && order.date !== filterCustomDate) return false;
         
-        // 2. Name Search
+        // 2. Payment Status Filter
+        const filterPaymentVal = document.getElementById('filter-payment-status').value;
+        if (filterPaymentVal !== 'all') {
+            const orderStatus = order.status || 'paid';
+            if (filterPaymentVal !== orderStatus) return false;
+        }
+        
+        // 3. Name Search
         if (searchCust && !order.customerName.toLowerCase().includes(searchCust)) return false;
         
         return true;
@@ -778,6 +1186,7 @@ function renderOrders() {
     let totalRevenue = 0;
     
     filteredOrders.forEach(o => {
+        if (o.status === 'pending_promo') return;
         const orderQty = o.items ? Object.values(o.items).reduce((sum, q) => sum + q, 0) : 0;
         totalQty += orderQty;
         const pricing = o.priceDetails || { total: 0, discount: 0 };
@@ -815,6 +1224,31 @@ function renderOrders() {
         } else {
             channelBadge = `<span class="badge badge-outline"><i class="fa-solid fa-paper-plane"></i> อื่นๆ</span>`;
         }
+
+        // Status Badge
+        const statusBadge = order.status === 'pending_promo' 
+            ? `<span class="badge" style="background-color: #ef4444; color: white;"><i class="fa-solid fa-hourglass-half"></i> ยังไม่ครบโปร</span>`
+            : `<span class="badge" style="background-color: #22c55e; color: white;"><i class="fa-solid fa-circle-check"></i> ครบโปร / จ่ายแล้ว</span>`;
+        
+        // Payment Badge
+        let paymentBadge = '';
+        if (order.paymentMethod === 'cash') {
+            paymentBadge = `<span class="badge" style="background-color: #0ea5e9; color: white;"><i class="fa-solid fa-money-bill-wave"></i> เงินสด</span>`;
+        } else if (order.paymentMethod === 'scan') {
+            paymentBadge = `<span class="badge" style="background-color: #6366f1; color: white;"><i class="fa-solid fa-qrcode"></i> โอน/สแกน</span>`;
+        } else {
+            paymentBadge = `<span class="badge badge-outline" style="border-color: #94a3b8; color: #64748b;"><i class="fa-solid fa-qrcode"></i> โอน/สแกน</span>`;
+        }
+        
+        // Promotion Detail Badge
+        let promoBadge = '';
+        if (order.promotionDetail) {
+            promoBadge = `<span class="badge" style="background-color: #f59e0b; color: white;"><i class="fa-solid fa-gift"></i> ${order.promotionDetail}</span>`;
+        } else {
+            const oldPricing = order.priceDetails || { num7: 0, num4: 0, num1: 0 };
+            const oldDetail = getPromotionDescription(oldPricing, order.deliveryType === 'grab');
+            promoBadge = `<span class="badge" style="background-color: #f59e0b; color: white;"><i class="fa-solid fa-gift"></i> ${oldDetail}</span>`;
+        }
         
         // Generate drink badges
         let drinkBadgesHTML = '';
@@ -822,8 +1256,8 @@ function renderOrders() {
             const drink = DRINKS.find(d => d.id === drinkId);
             if (drink) {
                 drinkBadgesHTML += `
-                    <div class="order-item-badge" style="--bev-color: ${drink.color};">
-                        <span>${drink.nameTH}</span>
+                    <div class="order-item-badge" style="--bev-color: ${drink.color};" title="ฝาสี${drink.capColor}">
+                        <span>${drink.nameTH} <span style="font-size: 0.7rem; opacity: 0.75; font-weight: normal;">(${drink.capColor})</span></span>
                         <span class="order-item-qty">x${order.items[drinkId]}</span>
                     </div>
                 `;
@@ -832,7 +1266,7 @@ function renderOrders() {
         
         const staffBadge = order.staffName ? `<span class="badge badge-outline"><i class="fa-solid fa-user-pen"></i> ผู้บันทึก: ${order.staffName}</span>` : '';
         const remarkHTML = order.remark ? `
-            <div class="order-remark-text" style="font-size: 0.8rem; color: var(--color-primary); margin-top: 0.5rem; font-style: italic; background: rgba(0,0,0,0.15); padding: 0.35rem 0.5rem; border-radius: 4px; border-left: 2px solid var(--color-primary); display: flex; align-items: center; gap: 0.4rem;">
+            <div class="order-remark-text" style="font-size: 0.8rem; color: var(--color-primary); margin-top: 0.5rem; font-style: italic; background: rgba(29, 78, 216, 0.05); padding: 0.35rem 0.5rem; border-radius: 4px; border-left: 2px solid var(--color-primary); display: flex; align-items: center; gap: 0.4rem;">
                 <i class="fa-regular fa-comment-dots"></i> หมายเหตุ: ${order.remark}
             </div>
         ` : '';
@@ -843,6 +1277,9 @@ function renderOrders() {
                     <h4 class="order-cust-name">${order.customerName}</h4>
                     <div style="margin-top: 0.25rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
                         ${channelBadge}
+                        ${statusBadge}
+                        ${paymentBadge}
+                        ${promoBadge}
                         ${staffBadge}
                     </div>
                 </div>
@@ -861,6 +1298,12 @@ function renderOrders() {
                     ${(order.priceDetails && order.priceDetails.discount > 0) ? `<span class="order-promo-saving"><i class="fa-solid fa-tags"></i> ประหยัดไป ${order.priceDetails.discount} บ.</span>` : ''}
                 </div>
                 <div class="order-actions">
+                    <button class="btn btn-outline btn-sm" onclick="toggleOrderStatus('${order.id}')" title="เปลี่ยนสถานะบิล">
+                        <i class="fa-solid fa-arrows-spin"></i> ${order.status === 'pending_promo' ? 'ทำเป็นครบโปร' : 'ทำเป็นยังไม่ครบ'}
+                    </button>
+                    <button class="btn btn-outline btn-sm" onclick="copyOrderToText('${order.id}')" title="คัดลอกข้อความบิล">
+                        <i class="fa-solid fa-copy"></i> คัดลอกบิล
+                    </button>
                     <button class="btn btn-outline btn-sm" onclick="loadOrderForEditing('${order.id}')" title="แก้ไขรายการ / ค่อยๆสั่งเพิ่มขวดเพื่อรวมโปร">
                         <i class="fa-solid fa-plus-minus"></i> เพิ่มของ / แก้ไข
                     </button>
@@ -893,6 +1336,7 @@ function deleteOrder(orderId) {
         state.grabPickups = state.grabPickups.filter(g => g.orderId !== orderId);
         
         saveToLocalStorage();
+        renderTables();
         renderOrders();
         renderGrabLogs();
         renderAnalytics();
@@ -1091,7 +1535,7 @@ function openGrabManualModal() {
             <span class="grab-drink-row-name">${drink.nameTH}</span>
             <div class="cart-qty-control">
                 <button type="button" class="cart-qty-btn modal-minus-btn" data-id="${drink.id}"><i class="fa-solid fa-minus"></i></button>
-                <input type="number" class="modal-drink-input" id="modal-qty-${drink.id}" value="0" min="0" style="width: 40px; text-align: center; border: none; background: transparent; color: white; font-weight: bold;" readonly>
+                <input type="number" class="modal-drink-input" id="modal-qty-${drink.id}" value="0" min="0" style="width: 40px; text-align: center; border: none; background: transparent; color: var(--color-text); font-weight: bold;" readonly>
                 <button type="button" class="cart-qty-btn modal-plus-btn" data-id="${drink.id}"><i class="fa-solid fa-plus"></i></button>
             </div>
         </div>
@@ -1205,10 +1649,18 @@ function renderAnalytics() {
     let filteredRevenue = 0;
     let filteredBottles = 0;
     let filteredDiscount = 0;
+    let filteredCommBottles = 0;
+    let filteredScanRevenue = 0;
+    let filteredCashRevenue = 0;
     
     let totalRevenue = 0;
     let totalBottles = 0;
     let totalDiscount = 0;
+    let totalCommBottles = 0;
+
+    const loggedInUsername = sessionStorage.getItem('baanphuan_username') || '';
+    const loggedInUser = state.users.find(u => u.username.toLowerCase() === loggedInUsername.toLowerCase());
+    const isLoggedInStaff = loggedInUser && loggedInUser.role === 'staff';
     
     // Popularity tracker (drinkId -> count)
     let popTracker = {};
@@ -1218,13 +1670,18 @@ function renderAnalytics() {
     let deliveryStats = { walkin: 0, grab: 0, other: 0 };
     
     state.orders.forEach(order => {
+        if (order.status === 'pending_promo') return;
         const orderQty = order.items ? Object.values(order.items).reduce((a, b) => a + b, 0) : 0;
         const pricing = order.priceDetails || { total: 0, discount: 0 };
+        const matchesStaff = isLoggedInStaff ? (order.staffName && order.staffName.toLowerCase() === loggedInUsername.toLowerCase()) : false;
         
         // Sum grand totals (always all-time)
         totalBottles += orderQty;
         totalRevenue += pricing.total || 0;
         totalDiscount += pricing.discount || 0;
+        if (order.deliveryType !== 'grab' && matchesStaff) {
+            totalCommBottles += orderQty;
+        }
         
         // Check if order matches date filter
         let matchesFilter = false;
@@ -1237,6 +1694,14 @@ function renderAnalytics() {
             filteredBottles += orderQty;
             filteredRevenue += pricing.total || 0;
             filteredDiscount += pricing.discount || 0;
+            if (order.paymentMethod === 'cash') {
+                filteredCashRevenue += pricing.total || 0;
+            } else {
+                filteredScanRevenue += pricing.total || 0;
+            }
+            if (order.deliveryType !== 'grab' && matchesStaff) {
+                filteredCommBottles += orderQty;
+            }
             
             // Channel stats (only for filtered dates)
             const type = order.deliveryType;
@@ -1277,18 +1742,53 @@ function renderAnalytics() {
         }
     });
     
+    // Set dynamic commission label
+    let targetCommText = 'ค่าคอมมิชชั่นวันนี้';
+    if (filterVal === 'yesterday') {
+        targetCommText = 'ค่าคอมมิชชั่นเมื่อวาน';
+    } else if (filterVal === 'custom') {
+        const dObj = new Date(customDateVal);
+        const formatThai = isNaN(dObj.getTime()) ? customDateVal : dObj.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' });
+        targetCommText = `ค่าคอมมิชชั่นวันที่ ${formatThai}`;
+    } else if (filterVal === 'all') {
+        targetCommText = 'ค่าคอมมิชชั่นทั้งหมด';
+    }
+    
+    const commTitleEl = document.getElementById('analytics-comm-title');
+    if (commTitleEl) {
+        commTitleEl.textContent = targetCommText;
+    }
+    
     // Update counters in DOM
     document.getElementById('analytics-today-revenue').textContent = `${filteredRevenue.toLocaleString()} บาท`;
     document.getElementById('analytics-today-bottles').textContent = `${filteredBottles} ขวด`;
+    const payDetailsEl = document.getElementById('analytics-today-payment-details');
+    if (payDetailsEl) {
+        payDetailsEl.textContent = `โอน/สแกน: ${filteredScanRevenue.toLocaleString()} บาท | เงินสด: ${filteredCashRevenue.toLocaleString()} บาท`;
+    }
     document.getElementById('analytics-total-revenue-all').textContent = `${totalRevenue.toLocaleString()} บาท`;
     document.getElementById('analytics-total-bottles-all').textContent = `${totalBottles} ขวด`;
     document.getElementById('analytics-total-discount').textContent = `${filteredDiscount.toLocaleString()} บาท`;
+    
+    const filteredCommVal = filteredCommBottles * 5;
+    const totalCommVal = totalCommBottles * 5;
+    document.getElementById('analytics-commission').textContent = `${filteredCommVal.toLocaleString()} บาท`;
+    document.getElementById('analytics-commission-sub').textContent = `คิดจาก ${filteredCommBottles} ขวด (สะสมทั้งหมด: ${totalCommVal.toLocaleString()} บาท)`;
+    
+    const commCard = document.getElementById('analytics-commission-card');
+    if (commCard) {
+        if (isLoggedInStaff) {
+            commCard.style.display = 'flex';
+        } else {
+            commCard.style.display = 'none';
+        }
+    }
     
     document.getElementById('stat-delivery-walkin').textContent = `${deliveryStats.walkin} บิล`;
     document.getElementById('stat-delivery-grab').textContent = `${deliveryStats.grab} บิล`;
     document.getElementById('stat-delivery-other').textContent = `${deliveryStats.other} บิล`;
     
-    // 2. RENDER POPULAR DRINKS (Top 5)
+    // 2. RENDER BEVERAGES SALES SUMMARY
     const sortedPopular = Object.keys(popTracker)
         .map(id => {
             const drink = DRINKS.find(d => d.id === id);
@@ -1298,20 +1798,18 @@ function renderAnalytics() {
                 qty: popTracker[id]
             };
         })
-        .filter(item => item.qty > 0)
         .sort((a, b) => b.qty - a.qty);
         
     const popularContainer = document.getElementById('popular-drinks-list');
     
-    if (sortedPopular.length === 0) {
+    const maxQty = sortedPopular.length > 0 ? sortedPopular[0].qty : 0;
+    
+    if (maxQty === 0) {
         popularContainer.innerHTML = `<div class="text-muted text-center py-4">ยังไม่มีข้อมูลยอดขายช่วงนี้</div>`;
         return;
     }
     
-    const maxQty = sortedPopular[0].qty; // For scale percentage
-    
-    const top5 = sortedPopular.slice(0, 5);
-    popularContainer.innerHTML = top5.map((item, idx) => {
+    popularContainer.innerHTML = sortedPopular.map((item, idx) => {
         const percentage = maxQty > 0 ? (item.qty / maxQty) * 100 : 0;
         return `
             <div class="ranking-item">
@@ -1336,7 +1834,7 @@ function exportData() {
     
     const now = new Date();
     const dateStr = getLocalDateString(now);
-    downloadAnchor.setAttribute("download", `juice_bar_backup_${dateStr}.json`);
+    downloadAnchor.setAttribute("download", `baan_phuan_backup_${dateStr}.json`);
     
     document.body.appendChild(downloadAnchor);
     downloadAnchor.click();
@@ -1361,6 +1859,7 @@ function importData(e) {
                 clearPOSForm();
                 
                 // Refresh UI
+                renderTables();
                 renderOrders();
                 renderGrabLogs();
                 renderAnalytics();
@@ -1385,6 +1884,7 @@ function clearAllSystemData() {
         saveToLocalStorage();
         
         clearPOSForm();
+        renderTables();
         renderOrders();
         renderGrabLogs();
         renderAnalytics();
@@ -1414,10 +1914,18 @@ async function pullFromSheets(isSilent = false) {
         if (!response.ok) throw new Error("HTTP Error: " + response.status);
         
         const data = await response.json();
-        if (data && (data.orders || data.grabPickups || data.stock)) {
+        if (data && (data.orders || data.grabPickups || data.stock || data.users)) {
             state.orders = data.orders || [];
             state.grabPickups = data.grabPickups || [];
             state.stock = data.stock || {};
+            
+            // Sync users if present
+            if (data.users && Array.isArray(data.users) && data.users.length > 0) {
+                state.users = data.users;
+                localStorage.setItem('juice_bar_users', JSON.stringify(state.users));
+                renderLoginUserDropdown();
+                renderAdminUsersList();
+            }
             
             // Ensure all drinks in database have a stock quantity (default to 20 if not set)
             DRINKS.forEach(drink => {
@@ -1430,6 +1938,7 @@ async function pullFromSheets(isSilent = false) {
             saveToLocalStorage(true);
             
             // Refresh POS UI
+            renderTables();
             renderOrders();
             renderGrabLogs();
             renderStock();
@@ -1441,13 +1950,14 @@ async function pullFromSheets(isSilent = false) {
                 console.log("Auto-pulled from Google Sheets successfully.");
             }
         } else {
-            if (!isSilent) alert("ไม่พบข้อมูล หรือรูปแบบข้อมูลในชีตไม่ถูกต้อง");
+            throw new Error("ไม่พบข้อมูล หรือรูปแบบข้อมูลในชีตไม่ถูกต้อง");
         }
     } catch (err) {
         console.error("Failed to pull from Google Sheets:", err);
         if (!isSilent) {
             alert("ดึงข้อมูลล้มเหลว: " + err.message + "\n\nกรุณาตรวจสอบว่า:\n1. ลิงก์ URL ถูกต้อง\n2. ตั้งค่า Deploy ใน Apps Script เป็นแบบ 'Anyone' (ทุกคน)\n3. บัญชีที่ใช้เปิดสิทธิ์เข้าถึงสาธารณะเรียบร้อยแล้ว");
         }
+        throw err;
     } finally {
         if (!isSilent) {
             pullBtn.disabled = false;
@@ -1471,14 +1981,22 @@ async function pushToSheets(isAuto = false) {
     }
     
     try {
-        const payload = JSON.stringify({
-            orders: state.orders,
-            grabPickups: state.grabPickups,
-            stock: state.stock
-        });
+        const payloadObj = {
+            action: 'save',
+            data: {
+                orders: state.orders,
+                grabPickups: state.grabPickups,
+                stock: state.stock,
+                users: state.users
+            }
+        };
         
-        const url = `${state.sheetUrl}?action=save&data=${encodeURIComponent(payload)}`;
-        const response = await fetch(url);
+        // Use POST method to bypass URL length limitation
+        const response = await fetch(state.sheetUrl, {
+            method: 'POST',
+            mode: 'cors',
+            body: JSON.stringify(payloadObj)
+        });
         if (!response.ok) throw new Error("HTTP Error: " + response.status);
         
         const result = await response.json();
@@ -1529,20 +2047,20 @@ function renderStock() {
                 <div style="display: flex; align-items: center; gap: 0.5rem;">
                     <div style="width: 10px; height: 10px; border-radius: 50%; background-color: ${drink.color};"></div>
                     <div style="text-align: left;">
-                        <strong style="color: #fff;">${drink.nameTH}</strong>
+                        <strong style="color: var(--color-text);">${drink.nameTH}</strong>
                         <div style="font-size: 0.75rem; color: var(--color-text-muted);">${drink.nameEN}</div>
                     </div>
                 </div>
             </td>
             <td style="text-align: center;">
-                <span id="stock-val-display-${drink.id}" style="font-size: 1.1rem; font-weight: 700; color: #fff;">${qty}</span>
+                <span id="stock-val-display-${drink.id}" style="font-size: 1.1rem; font-weight: 700; color: var(--color-text);">${qty}</span>
             </td>
             <td style="text-align: center;">${statusBadge}</td>
             <td>
                 <div class="stock-qty-control" style="display: flex; align-items: center; justify-content: center; gap: 0.35rem;">
                     <button class="btn btn-outline btn-sm" style="padding: 0.25rem 0.5rem;" onclick="adjustStockValue('${drink.id}', -5)">-5</button>
                     <button class="btn btn-outline btn-sm" style="padding: 0.25rem 0.5rem;" onclick="adjustStockValue('${drink.id}', -1)">-1</button>
-                    <input type="number" id="stock-input-${drink.id}" value="${qty}" min="0" style="width: 55px; text-align: center; font-weight: bold; background: rgba(0,0,0,0.2); border: 1px solid var(--border-glass); color: #fff; padding: 0.25rem 0.4rem; border-radius: var(--radius-sm);" onchange="updateStockFromInput('${drink.id}', this.value)">
+                    <input type="number" id="stock-input-${drink.id}" value="${qty}" min="0" style="width: 55px; text-align: center; font-weight: bold; background: rgba(255, 255, 255, 0.85); border: 1px solid var(--border-glass); color: var(--color-text); padding: 0.25rem 0.4rem; border-radius: var(--radius-sm);" onchange="updateStockFromInput('${drink.id}', this.value)">
                     <button class="btn btn-outline btn-sm" style="padding: 0.25rem 0.5rem;" onclick="adjustStockValue('${drink.id}', 1)">+1</button>
                     <button class="btn btn-outline btn-sm" style="padding: 0.25rem 0.5rem;" onclick="adjustStockValue('${drink.id}', 5)">+5</button>
                 </div>
@@ -1571,6 +2089,564 @@ function updateStockFromInput(drinkId, value) {
     saveToLocalStorage();
     renderStock();
     renderDrinkGrid();
+}
+
+// SWITCH TABS
+function switchTab(tabId) {
+    try {
+        const tabButtons = document.querySelectorAll('.tab-btn');
+        tabButtons.forEach(b => {
+            if (b.getAttribute('data-tab') === tabId) {
+                b.classList.add('active');
+            } else {
+                b.classList.remove('active');
+            }
+        });
+        
+        state.tab = tabId;
+        
+        const panes = document.querySelectorAll('.tab-pane');
+        panes.forEach(pane => {
+            if (pane.id === tabId) {
+                pane.classList.add('active');
+            } else {
+                pane.classList.remove('active');
+            }
+        });
+        
+        // Toggle full-width admin mode class
+        if (tabId === 'admin-tab') {
+            document.body.classList.add('admin-active');
+        } else {
+            document.body.classList.remove('admin-active');
+        }
+        
+        // Re-render corresponding tab
+        if (tabId === 'tables-tab') {
+            renderTables();
+        } else if (tabId === 'orders-tab') {
+            renderOrders();
+        } else if (tabId === 'stock-tab') {
+            renderStock();
+        } else if (tabId === 'summary-tab') {
+            renderAnalytics();
+        } else if (tabId === 'admin-tab') {
+            renderAdminUsersList();
+        }
+    } catch (e) {
+        console.error("Error in switchTab: ", e);
+    }
+}
+
+// INITIALIZE LOGIN USERNAME FIELD
+function renderLoginUserDropdown() {
+    const loginUsernameInput = document.getElementById('login-username');
+    if (!loginUsernameInput) return;
+    
+    const lastStaff = localStorage.getItem('juice_bar_last_staff') || '';
+    loginUsernameInput.value = lastStaff;
+    
+    const pinInput = document.getElementById('login-pin');
+    if (pinInput) pinInput.value = '';
+}
+
+// RENDER ADMIN USERS LIST TABLE
+function renderAdminUsersList() {
+    try {
+        const listContainer = document.getElementById('admin-users-list');
+        if (!listContainer) return;
+        
+        if (!state.users || !Array.isArray(state.users)) {
+            listContainer.innerHTML = `<tr><td colspan="5" class="text-center text-muted">เกิดข้อผิดพลาดในการโหลดข้อมูล</td></tr>`;
+            return;
+        }
+
+        if (state.users.length === 0) {
+            listContainer.innerHTML = `<tr><td colspan="5" class="text-center text-muted">ไม่มีข้อมูลพนักงาน</td></tr>`;
+            return;
+        }
+        
+        listContainer.innerHTML = state.users.map(user => {
+            if (!user) return '';
+            const roleText = user.role === 'admin' ? 'ผู้ดูแล (Admin)' : 'พนักงาน (Staff)';
+            const roleBadge = user.role === 'admin' ? 'badge-primary' : 'badge-outline';
+            const iconClass = user.role === 'admin' ? 'fa-user-shield text-primary' : 'fa-user text-muted';
+            
+            // Calculate commission for this user
+            let commHtml = '-';
+            if (user.role === 'staff') {
+                let userCommBottles = 0;
+                state.orders.forEach(order => {
+                    if (order.status === 'pending_promo') return;
+                    if (order.deliveryType === 'grab') return;
+                    if (order.staffName && order.staffName.toLowerCase() === user.username.toLowerCase()) {
+                        const orderQty = order.items ? Object.values(order.items).reduce((sum, q) => sum + q, 0) : 0;
+                        userCommBottles += orderQty;
+                    }
+                });
+                const userCommVal = userCommBottles * 5;
+                commHtml = `<strong class="text-success">${userCommVal.toLocaleString()} บาท</strong> (${userCommBottles} ขวด)`;
+            }
+            
+            return `
+                <tr>
+                    <td style="font-weight: 600; color: var(--color-text);">
+                        <i class="fa-solid ${iconClass}"></i> ${user.username || 'ไม่มีชื่อ'}
+                    </td>
+                    <td style="text-align: center;">
+                        <span class="badge ${roleBadge}">
+                            ${roleText}
+                        </span>
+                    </td>
+                    <td style="text-align: center; font-family: monospace; letter-spacing: 2px; color: var(--color-text);">
+                        •••• (PIN: ${user.pin || ''})
+                    </td>
+                    <td style="text-align: center; color: var(--color-text);">
+                        ${commHtml}
+                    </td>
+                    <td style="text-align: center;">
+                        <div style="display: flex; gap: 0.5rem; justify-content: center;">
+                            <button class="btn btn-outline btn-sm" style="padding: 0.25rem 0.5rem;" onclick="editAdminUser('${user.username || ''}')" title="แก้ไข">
+                                <i class="fa-solid fa-user-pen"></i>
+                            </button>
+                            <button class="btn btn-danger btn-sm" style="padding: 0.25rem 0.5rem; background: var(--color-danger);" onclick="deleteAdminUser('${user.username || ''}')" title="ลบ">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    } catch (e) {
+        console.error("Error in renderAdminUsersList: ", e);
+    }
+}
+
+// EDIT USER IN ADMIN PANEL
+function editAdminUser(username) {
+    const user = state.users.find(u => u.username.toLowerCase() === username.toLowerCase());
+    if (!user) return;
+    
+    document.getElementById('admin-username').value = user.username;
+    document.getElementById('admin-pin').value = user.pin;
+    document.getElementById('admin-role').value = user.role;
+    document.getElementById('admin-edit-original-username').value = user.username;
+    document.getElementById('btn-admin-cancel-edit').style.display = 'inline-block';
+    
+    // Scroll form into view on mobile
+    document.getElementById('admin-user-form').scrollIntoView({ behavior: 'smooth' });
+}
+
+// DELETE USER IN ADMIN PANEL
+function deleteAdminUser(username) {
+    const currentLoggedIn = sessionStorage.getItem('baanphuan_username');
+    if (username && currentLoggedIn && username.toLowerCase() === currentLoggedIn.toLowerCase()) {
+        alert('ไม่สามารถลบตัวเองได้ขณะกำลังล็อกอินใช้งาน');
+        return;
+    }
+    
+    // Prevent deleting the last admin
+    const userToDelete = state.users.find(u => u.username.toLowerCase() === username.toLowerCase());
+    if (userToDelete && userToDelete.role === 'admin') {
+        const adminCount = state.users.filter(u => u.role === 'admin').length;
+        if (adminCount <= 1) {
+            alert('ไม่สามารถลบได้ เนื่องจากต้องมีผู้ดูแลระบบ (Admin) อย่างน้อย 1 คน');
+            return;
+        }
+    }
+    
+    if (confirm(`คุณต้องการลบพนักงาน "${username}" ใช่หรือไม่?`)) {
+        state.users = state.users.filter(u => u.username.toLowerCase() !== username.toLowerCase());
+        saveUsersToLocalStorage();
+        renderLoginUserDropdown();
+        renderAdminUsersList();
+    }
+}
+// SUBMIT LOGIN AUTHENTICATION
+
+function submitLogin() {
+    const usernameInput = document.getElementById('login-username');
+    const pinInput = document.getElementById('login-pin');
+    if (!usernameInput || !pinInput) return;
+    
+    const username = usernameInput.value.trim();
+    const pin = pinInput.value.trim();
+    
+    // Find user in database (case-insensitive)
+    const foundUser = state.users.find(u => u.username.toLowerCase() === username.toLowerCase());
+    if (foundUser && foundUser.pin === pin) {
+        const correctUsername = foundUser.username;
+        sessionStorage.setItem('baanphuan_logged_in', 'true');
+        sessionStorage.setItem('baanphuan_username', correctUsername);
+        sessionStorage.setItem('baanphuan_role', foundUser.role);
+        localStorage.setItem('juice_bar_last_staff', correctUsername);
+        document.getElementById('login-error-msg').style.display = 'none';
+        pinInput.value = '';
+        checkLoginStatus();
+    } else {
+        const errorMsg = document.getElementById('login-error-msg');
+        errorMsg.style.display = 'flex';
+        errorMsg.style.animation = 'none';
+        errorMsg.offsetHeight; /* trigger reflow */
+        errorMsg.style.animation = 'shake 0.3s ease';
+        
+        // Clear pin on error
+        pinInput.value = '';
+        pinInput.focus();
+    }
+}
+
+// COPY TO CLIPBOARD HELPER
+function copyToClipboard(text, successMessage = "คัดลอกลงคลิปบอร์ดแล้ว!") {
+    navigator.clipboard.writeText(text).then(() => {
+        alert(successMessage);
+    }).catch(err => {
+        console.error("Failed to copy text: ", err);
+        // Fallback for older browsers
+        const tempTextArea = document.createElement("textarea");
+        tempTextArea.value = text;
+        document.body.appendChild(tempTextArea);
+        tempTextArea.select();
+        try {
+            document.execCommand("copy");
+            alert(successMessage);
+        } catch (e) {
+            alert("ไม่สามารถคัดลอกได้อัตโนมัติ กรุณาลองคัดลอกด้วยตนเอง");
+        }
+        document.body.removeChild(tempTextArea);
+    });
+}
+
+// COPY SINGLE ORDER TO FORMATTED TEXT
+function copyOrderToText(orderId) {
+    const order = state.orders.find(o => o.id === orderId);
+    if (!order) return;
+    
+    const deliveryName = order.deliveryType === 'grab' ? 'Grab Delivery' : (order.deliveryType === 'walkin' ? 'รับเอง/หน้าร้าน' : 'อื่นๆ');
+    const payMethodName = order.paymentMethod === 'cash' ? 'เงินสด' : 'เงินโอน / สแกน';
+    
+    let itemsText = '';
+    const drinkKeys = Object.keys(order.items);
+    drinkKeys.forEach(drinkId => {
+        const drink = DRINKS.find(d => d.id === drinkId);
+        if (drink) {
+            itemsText += `• ${drink.nameTH} (${drink.nameEN}) x${order.items[drinkId]} ขวด\n`;
+        }
+    });
+    
+    const isPendingPromo = order.status === 'pending_promo';
+    const totalQty = Object.values(order.items).reduce((a, b) => a + b, 0);
+    const netTotal = isPendingPromo ? 0 : (order.priceDetails ? order.priceDetails.total : 0);
+    const discountText = (!isPendingPromo && order.priceDetails && order.priceDetails.discount > 0) ? ` (ประหยัดโปรโมชั่นไป ${order.priceDetails.discount} บ.)` : '';
+    const pendingNote = isPendingPromo ? ' (ยังไม่ครบโปร)' : '';
+    const remarkText = order.remark ? `หมายเหตุ: ${order.remark}\n` : '';
+    const staffText = order.staffName ? `ผู้บันทึก: ${order.staffName}\n` : '';
+    
+    const receiptText = `📝 บิลร้านบ้านเพื่อน (BaanPhuan)
+---------------------------------
+วันที่: ${order.date} (${order.time})
+ลูกค้า: ${order.customerName}
+ช่องทาง: ${deliveryName}
+การชำระเงิน: ${payMethodName}
+${staffText}${remarkText}---------------------------------
+รายการเครื่องดื่ม:
+${itemsText}---------------------------------
+🥤 รวมทั้งหมด: ${totalQty} ขวด
+💰 ยอดชำระสุทธิ: ${netTotal} บาท${discountText}${pendingNote}`;
+
+    copyToClipboard(receiptText, "คัดลอกข้อความบิลเรียบร้อยแล้ว!");
+}
+
+// COPY DAILY SUMMARY TO FORMATTED TEXT
+// COPY DAILY SUMMARY TO FORMATTED TEXT
+function copyDailySummaryToText() {
+    const todayStr = getLocalDateString(new Date());
+    
+    let yesterdayDate = new Date();
+    yesterdayDate.setDate(yesterdayDate.getDate() - 1);
+    const yesterdayStr = getLocalDateString(yesterdayDate);
+    
+    // Get filter settings from Summary tab
+    const summaryFilterDate = document.getElementById('summary-filter-date');
+    const filterVal = summaryFilterDate ? summaryFilterDate.value : 'today';
+    const summaryFilterCustomDate = document.getElementById('summary-filter-custom-date');
+    const customDateVal = summaryFilterCustomDate ? summaryFilterCustomDate.value : todayStr;
+    
+    let targetDateText = 'วันนี้';
+    if (filterVal === 'yesterday') {
+        targetDateText = 'เมื่อวาน';
+    } else if (filterVal === 'custom') {
+        const dObj = new Date(customDateVal);
+        targetDateText = isNaN(dObj.getTime()) ? customDateVal : dObj.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' });
+    } else if (filterVal === 'all') {
+        targetDateText = 'ทั้งหมด (ทุกวัน)';
+    }
+
+    let filteredRevenue = 0;
+    let filteredBottles = 0;
+    let filteredScanRevenue = 0;
+    let filteredCashRevenue = 0;
+    let pendingPromoList = [];
+    
+    state.orders.forEach(order => {
+        const orderQty = order.items ? Object.values(order.items).reduce((a, b) => a + b, 0) : 0;
+        const pricing = order.priceDetails || { total: 0, discount: 0 };
+        
+        let matchesFilter = false;
+        if (filterVal === 'today' && order.date === todayStr) matchesFilter = true;
+        else if (filterVal === 'yesterday' && order.date === yesterdayStr) matchesFilter = true;
+        else if (filterVal === 'custom' && order.date === customDateVal) matchesFilter = true;
+        else if (filterVal === 'all') matchesFilter = true;
+        
+        if (matchesFilter) {
+            // Check if order is pending promotion
+            if (order.status === 'pending_promo') {
+                pendingPromoList.push({
+                    name: order.customerName,
+                    qty: orderQty,
+                    price: pricing.total || 0
+                });
+            } else {
+                filteredBottles += orderQty;
+                filteredRevenue += pricing.total || 0;
+                if (order.paymentMethod === 'cash') {
+                    filteredCashRevenue += pricing.total || 0;
+                } else {
+                    filteredScanRevenue += pricing.total || 0;
+                }
+            }
+        }
+    });
+    
+    // Generate text for pending promotion customers
+    let pendingText = '';
+    if (pendingPromoList.length === 0) {
+        pendingText = '- ไม่มีรายการค้างโปร\n';
+    } else {
+        pendingPromoList.forEach(item => {
+            let cleanName = item.name || '';
+            const match = cleanName.match(/\(([^)]+)\)/);
+            if (match) {
+                cleanName = match[1];
+            }
+            cleanName = cleanName.replace(/^คุณ\s*/, '').trim();
+            pendingText += `- ${cleanName}: ${item.qty} ขวด\n`;
+        });
+    }
+    
+    const summaryText = `📊 สรุปยอดขายร้านบ้านเพื่อน (BaanPhuan)
+ประจำ: ${targetDateText}
+---------------------------------
+🥤 ขายได้ทั้งหมด: ${filteredBottles} ขวด
+💰 ยอดขายรวม: ${filteredRevenue.toLocaleString()} บาท
+   • โอน/สแกน: ${filteredScanRevenue.toLocaleString()} บาท
+   • เงินสด: ${filteredCashRevenue.toLocaleString()} บาท
+---------------------------------
+⚠️ รายชื่อลูกค้าที่ยังไม่ครบโปร:
+${pendingText}---------------------------------`;
+
+    copyToClipboard(summaryText, `คัดลอกสรุปยอดขาย (${targetDateText}) เรียบร้อยแล้ว!`);
+}
+
+// TOGGLE ORDER PROMO STATUS
+function toggleOrderStatus(orderId) {
+    const order = state.orders.find(o => o.id === orderId);
+    if (!order) return;
+    
+    order.status = order.status === 'pending_promo' ? 'paid' : 'pending_promo';
+    saveToLocalStorage();
+    renderTables();
+    renderOrders();
+    renderAnalytics();
+}
+
+// RENDER TABLES GRID
+function renderTables() {
+    const gridContainer = document.getElementById('tables-grid-container');
+    if (!gridContainer) return;
+    
+    gridContainer.innerHTML = '';
+    
+    const totalTables = 8;
+    const todayStr = getLocalDateString(new Date());
+    
+    for (let i = 1; i <= totalTables; i++) {
+        const tableName = `โต๊ะ ${i}`;
+        
+        // Find if there is an active (pending/unpaid) order for this table today
+        const activeOrder = state.orders.find(o => {
+            return (o.customerName === tableName || o.customerName.startsWith(tableName + ' (')) && o.date === todayStr && o.status === 'pending_promo';
+        });
+        
+        const card = document.createElement('div');
+        
+        if (activeOrder) {
+            card.className = 'table-card table-occupied';
+            
+            // Calculate items list
+            let itemsHtml = '';
+            if (activeOrder.items) {
+                for (const drinkId in activeOrder.items) {
+                    const drink = DRINKS.find(d => d.id === drinkId);
+                    if (drink) {
+                        itemsHtml += `
+                            <div class="table-bill-item">
+                                <span>${drink.nameTH}</span>
+                                <span>x${activeOrder.items[drinkId]}</span>
+                            </div>
+                        `;
+                    }
+                }
+            }
+            
+            const total = activeOrder.priceDetails ? activeOrder.priceDetails.total : 0;
+            
+            card.innerHTML = `
+                <div class="table-header">
+                    <div class="table-title text-warning"><i class="fa-solid fa-chair"></i> ${activeOrder.customerName}</div>
+                    <span class="table-status-badge badge-occupied">มีลูกค้า / ค้างชำระ</span>
+                </div>
+                <div class="table-content">
+                    <div style="font-weight: 500; font-size: 0.8rem; color: var(--color-text-muted); margin-bottom: 0.25rem;">บิลเวลา: ${activeOrder.time}</div>
+                    <div class="table-bill-items">
+                        ${itemsHtml}
+                    </div>
+                    <div class="table-bill-total">
+                        <span>ยอดค้างชำระ:</span>
+                        <span>${total.toLocaleString()} บาท</span>
+                    </div>
+                </div>
+                <div class="table-actions">
+                    <button class="btn btn-success btn-sm" onclick="payTableOrder('${activeOrder.id}')" title="ชำระเงิน">
+                        <i class="fa-solid fa-money-bill-wave"></i> ชำระเงิน
+                    </button>
+                    <button class="btn btn-outline btn-sm" onclick="loadOrderForEditing('${activeOrder.id}')" title="สั่งเพิ่ม / แก้ไข">
+                        <i class="fa-solid fa-plus-minus"></i> สั่งเพิ่ม
+                    </button>
+                </div>
+            `;
+        } else {
+            card.className = 'table-card table-empty';
+            card.innerHTML = `
+                <div class="table-header">
+                    <div class="table-title text-muted"><i class="fa-solid fa-chair"></i> ${tableName}</div>
+                    <span class="table-status-badge badge-empty">ว่าง</span>
+                </div>
+                <div class="table-content" style="display: flex; align-items: center; justify-content: center; color: var(--color-text-muted); font-style: italic; min-height: 80px;">
+                    ไม่มีลูกค้า / โต๊ะว่าง
+                </div>
+                <div class="table-actions">
+                    <button class="btn btn-primary btn-sm" onclick="openTable('${tableName}')">
+                        <i class="fa-solid fa-cart-plus"></i> เปิดโต๊ะสั่งน้ำ
+                    </button>
+                </div>
+            `;
+        }
+        gridContainer.appendChild(card);
+    }
+    
+    // Render other pending orders (e.g. walkin or grab that are unpaid)
+    const otherContainer = document.getElementById('other-pending-container');
+    if (otherContainer) {
+        otherContainer.innerHTML = '';
+        
+        const otherPendingOrders = state.orders.filter(o => {
+            return !o.customerName.startsWith('โต๊ะ ') && o.status === 'pending_promo';
+        });
+        
+        if (otherPendingOrders.length === 0) {
+            otherContainer.innerHTML = `
+                <div style="grid-column: 1 / -1; padding: 2rem; text-align: center; color: var(--color-text-muted); font-style: italic; background: rgba(0,0,0,0.15); border: 1px dashed var(--border-glass); border-radius: var(--radius-md);">
+                    ไม่มีออเดอร์ค้างชำระอื่นๆ
+                </div>
+            `;
+        } else {
+            otherPendingOrders.forEach(order => {
+                const card = document.createElement('div');
+                card.className = 'table-card table-occupied';
+                
+                let itemsHtml = '';
+                for (const drinkId in order.items) {
+                    const drink = DRINKS.find(d => d.id === drinkId);
+                    if (drink) {
+                        itemsHtml += `
+                            <div class="table-bill-item">
+                                <span>${drink.nameTH}</span>
+                                <span>x${order.items[drinkId]}</span>
+                            </div>
+                        `;
+                    }
+                }
+                
+                const total = order.priceDetails ? order.priceDetails.total : 0;
+                
+                card.innerHTML = `
+                    <div class="table-header">
+                        <div class="table-title text-warning"><i class="fa-solid fa-receipt"></i> ${order.customerName}</div>
+                        <span class="table-status-badge badge-occupied">ค้างชำระ</span>
+                    </div>
+                    <div class="table-content">
+                        <div style="font-weight: 500; font-size: 0.8rem; color: var(--color-text-muted); margin-bottom: 0.25rem;">ช่องทาง: ${order.deliveryType === 'grab' ? 'Grab' : 'หน้าร้าน'} | วันที่: ${order.date} (${order.time})</div>
+                        <div class="table-bill-items">
+                            ${itemsHtml}
+                        </div>
+                        <div class="table-bill-total">
+                            <span>ยอดค้างชำระ:</span>
+                            <span>${total.toLocaleString()} บาท</span>
+                        </div>
+                    </div>
+                    <div class="table-actions">
+                        <button class="btn btn-success btn-sm" onclick="payTableOrder('${order.id}')">
+                            <i class="fa-solid fa-money-bill-wave"></i> ชำระเงิน
+                        </button>
+                        <button class="btn btn-outline btn-sm" onclick="loadOrderForEditing('${order.id}')">
+                            <i class="fa-solid fa-plus-minus"></i> สั่งเพิ่ม
+                        </button>
+                    </div>
+                `;
+                otherContainer.appendChild(card);
+            });
+        }
+    }
+}
+
+// Pay table order helper
+function payTableOrder(orderId) {
+    const order = state.orders.find(o => o.id === orderId);
+    if (!order) return;
+    
+    if (confirm(`คุณต้องการยืนยันการชำระเงินสำหรับ "${order.customerName}" ยอดรวม ${order.priceDetails.total} บาท ใช่หรือไม่?`)) {
+        order.status = 'paid';
+        order.updatedTime = new Date().toISOString();
+        
+        saveToLocalStorage();
+        
+        // Refresh everything
+        renderTables();
+        renderOrders();
+        renderAnalytics();
+        
+        alert(`ชำระเงินเรียบร้อยแล้ว!`);
+    }
+}
+
+// Open table helper
+function openTable(tableName) {
+    document.getElementById('customer-name').value = tableName;
+    document.getElementById('customer-display-name').value = '';
+    document.getElementById('delivery-type').value = 'walkin';
+    document.getElementById('order-status').value = 'pending_promo';
+    
+    // Clear cart since it's a new opening
+    state.cart = {};
+    renderDrinkGrid();
+    renderCart();
+    
+    // Update POS Header to show table opening mode
+    document.getElementById('pos-title').innerHTML = `<i class="fa-solid fa-cart-plus text-primary"></i> เปิดโต๊ะสั่งน้ำ: ${tableName}`;
+    
+    // Scroll to POS Form
+    document.querySelector('.pos-panel').scrollIntoView({ behavior: 'smooth' });
 }
 
 // RUN ON LOAD

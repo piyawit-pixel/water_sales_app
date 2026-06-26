@@ -2,8 +2,8 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bar Lounge Tracker - ระบบบันทึกยอดขายเครื่องดื่ม & Grab</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>บ้านเพื่อน (BaanPhuan) - ระบบบันทึกยอดขายน้ำและ Grab</title>
     <!-- Google Fonts: Prompt & Sarabun -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -11,20 +11,30 @@
     <!-- FontAwesome for beautiful icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Main Style Sheet -->
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css?v=17.0">
 </head>
 <body>
     <div class="app-container">
         <!-- TOP NAVBAR -->
         <header class="app-header">
             <div class="header-logo">
-                <div class="neon-icon"><i class="fa-solid fa-martini-glass-citrus"></i></div>
+                <div class="neon-icon"><i class="fa-solid fa-glass-water"></i></div>
                 <div class="brand-info">
-                    <h1>Bar Lounge Tracker</h1>
-                    <p>ระบบบันทึกยอดขาย & การจัดการโปรโมชั่นอัจฉริยะ</p>
+                    <h1>BaanPhuan</h1>
+                    <p>บ้านเพื่อน - ระบบบันทึกยอดขาย & การจัดการโปรโมชั่นอัจฉริยะ</p>
                 </div>
             </div>
             <div class="header-right">
+                <div class="user-badge" id="header-user-badge" style="display: none;">
+                    <i class="fa-solid fa-circle-user"></i>
+                    <span id="header-username" style="cursor: pointer;" title="คลิกเพื่อแก้ไขข้อมูลส่วนตัว">พนักงาน</span>
+                    <button id="btn-edit-profile" title="แก้ไขข้อมูลส่วนตัว" style="background: none; border: none; color: var(--color-primary); cursor: pointer; padding: 0.25rem; font-size: 0.9rem; transition: color var(--transition-fast); margin-left: 0.25rem; display: flex; align-items: center; justify-content: center;">
+                        <i class="fa-solid fa-user-gear"></i>
+                    </button>
+                    <button id="btn-logout" title="ออกจากระบบ">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                    </button>
+                </div>
                 <div class="live-clock">
                     <i class="fa-regular fa-clock"></i>
                     <span id="current-time">กำลังโหลด...</span>
@@ -36,10 +46,10 @@
         </header>
 
         <!-- BANNER DECORATION -->
-        <div class="app-banner" style="background-image: linear-gradient(180deg, rgba(10, 10, 15, 0.3) 0%, rgba(10, 10, 15, 0.95) 100%), url('assets/bar_lounge_banner.jpg');">
+        <div class="app-banner" style="background-image: linear-gradient(180deg, rgba(240, 244, 249, 0.2) 0%, rgba(240, 244, 249, 0.95) 100%), url('assets/blue_white_banner.jpg');">
             <div class="banner-content">
-                <h2><i class="fa-solid fa-champagne-glasses"></i> น้ำขวดละ 80 บาท</h2>
-                <p class="promo-badge"><i class="fa-solid fa-star-half-stroke"></i> ซื้อ 4 ขวด 300 บาท | ซื้อ 7 ขวด 500 บาท</p>
+                <h2 style="color: #0f172a; font-weight: 700;">น้ำขวดละ 80 บาท</h2>
+                <p class="promo-badge" style="background: linear-gradient(135deg, rgba(29, 78, 216, 0.85), rgba(2, 132, 199, 0.85)); box-shadow: 0 0 15px rgba(29, 78, 216, 0.2);"><i class="fa-solid fa-star-half-stroke"></i> ซื้อ 4 ขวด 300 บาท | ซื้อ 7 ขวด 500 บาท</p>
             </div>
         </div>
 
@@ -49,13 +59,13 @@
             <section class="pos-panel">
                 <div class="card glass-card">
                     <div class="card-header">
-                        <h2 id="pos-title"><i class="fa-solid fa-wine-bottle text-primary"></i> สั่งเครื่องดื่ม / บันทึกการขาย</h2>
+                        <h2 id="pos-title"><i class="fa-solid fa-cart-plus text-primary"></i> สั่งน้ำขวด / บันทึกการขาย</h2>
                         <span class="badge badge-outline" id="edit-indicator" style="display: none;">โหมดแก้ไขออเดอร์</span>
                     </div>
                     <div class="card-body">
                         <!-- Customer Info Form -->
                         <div class="form-row">
-                            <div class="form-group flex-2">
+                            <div class="form-group flex-1">
                                 <label for="customer-name"><i class="fa-solid fa-chair"></i> เลือกโต๊ะ / ช่องทาง</label>
                                 <select id="customer-name" required>
                                     <option value="กลับบ้าน">กลับบ้าน</option>
@@ -71,6 +81,10 @@
                                 </select>
                             </div>
                             <div class="form-group flex-1">
+                                <label for="customer-display-name"><i class="fa-solid fa-user-tag"></i> ชื่อลูกค้า (คนค้างโปร)</label>
+                                <input type="text" id="customer-display-name" placeholder="ระบุชื่อลูกค้า...">
+                            </div>
+                            <div class="form-group flex-1">
                                 <label for="order-date"><i class="fa-regular fa-calendar-days"></i> วันที่บิล</label>
                                 <input type="date" id="order-date">
                             </div>
@@ -82,8 +96,11 @@
                                 <select id="delivery-type">
                                     <option value="walkin">หน้าร้าน / รับเอง</option>
                                     <option value="grab">Grab Delivery</option>
-                                    <option value="other">ช่องทางอื่น</option>
                                 </select>
+                            </div>
+                            <div class="form-group flex-1" id="grab-driver-group" style="display: none;">
+                                <label for="grab-driver-name"><i class="fa-solid fa-helmet-safety"></i> ชื่อคนขับ Grab</label>
+                                <input type="text" id="grab-driver-name" placeholder="ระบุชื่อหรือรหัสคนขับ...">
                             </div>
                         </div>
 
@@ -91,6 +108,20 @@
                             <div class="form-group flex-1">
                                 <label for="staff-name"><i class="fa-solid fa-user-pen"></i> ผู้บันทึกบิล</label>
                                 <input type="text" id="staff-name" placeholder="ระบุชื่อคนเขียนบิล">
+                            </div>
+                            <div class="form-group flex-1">
+                                <label for="order-status"><i class="fa-solid fa-circle-info"></i> สถานะบิล</label>
+                                <select id="order-status">
+                                    <option value="paid" selected>ครบโปร / จ่ายแล้ว</option>
+                                    <option value="pending_promo">ยังไม่ครบโปร</option>
+                                </select>
+                            </div>
+                            <div class="form-group flex-1">
+                                <label for="payment-method"><i class="fa-solid fa-credit-card"></i> การชำระเงิน</label>
+                                <select id="payment-method">
+                                    <option value="scan" selected>เงินโอน / สแกน</option>
+                                    <option value="cash">เงินสด</option>
+                                </select>
                             </div>
                             <div class="form-group flex-1">
                                 <label for="order-remark"><i class="fa-regular fa-comment-dots"></i> หมายเหตุ</label>
@@ -109,7 +140,7 @@
 
                         <!-- Beverages Grid -->
                         <div class="beverage-section">
-                            <label><i class="fa-solid fa-wine-glass"></i> เลือกเครื่องดื่ม (ขวดละ 80.-)</label>
+                            <label><i class="fa-solid fa-bottle-water"></i> เลือกเครื่องดื่ม (ขวดละ 80.-)</label>
                             <div class="beverages-grid" id="beverages-container">
                                 <!-- Beverage Cards dynamically loaded here -->
                             </div>
@@ -136,6 +167,10 @@
                                     <span id="calc-discount">-0 บาท</span>
                                 </div>
                                 <hr class="divider">
+                                <div class="calc-row" id="calc-promo-detail-row" style="font-size: 0.85rem; color: var(--color-text-muted); margin-bottom: 0.25rem;">
+                                    <span><i class="fa-solid fa-gift"></i> รายละเอียดราคา</span>
+                                    <span id="calc-promo-detail">-</span>
+                                </div>
                                 <div class="calc-row total-row">
                                     <span>ยอดชำระสุทธิ</span>
                                     <span class="text-primary" id="calc-total">0 บาท</span>
@@ -156,16 +191,41 @@
             <section class="logs-panel">
                 <!-- Navigation Tabs -->
                 <nav class="tab-navigation">
-                    <button class="tab-btn active" data-tab="orders-tab"><i class="fa-solid fa-receipt"></i> บันทึกออเดอร์</button>
+                    <button class="tab-btn active" data-tab="tables-tab"><i class="fa-solid fa-chair"></i> จัดการโต๊ะ</button>
+                    <button class="tab-btn" data-tab="orders-tab"><i class="fa-solid fa-receipt"></i> บันทึกออเดอร์</button>
                     <button class="tab-btn" data-tab="stock-tab"><i class="fa-solid fa-boxes-stacked"></i> สต็อกน้ำ</button>
                     <button class="tab-btn" data-tab="summary-tab"><i class="fa-solid fa-chart-line"></i> สรุปยอดขาย</button>
+                    <button class="tab-btn" data-tab="admin-tab" id="tab-btn-admin" style="display: none;"><i class="fa-solid fa-user-gear"></i> จัดการพนักงาน</button>
                 </nav>
 
                 <!-- TAB CONTENTS -->
                 <div class="tab-content-container">
                     
+                    <!-- 0. TABLES TAB -->
+                    <div class="tab-pane active" id="tables-tab">
+                        <div class="grab-manager-header">
+                            <div class="grab-title-desc">
+                                <h3><i class="fa-solid fa-chair text-primary"></i> สถานะและจัดการโต๊ะ</h3>
+                                <p>จัดการการเปิดโต๊ะ รายการเครื่องดื่มค้างชำระ และการชำระเงินของแต่ละโต๊ะ</p>
+                            </div>
+                        </div>
+                        <div class="tables-grid-wrapper" id="tables-grid-container">
+                            <!-- Tables load dynamically -->
+                        </div>
+                        
+                        <!-- Other unpaid bills (e.g. Grab or takeaway that are pending) -->
+                        <div class="other-pending-bills" style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px dashed var(--border-glass);">
+                            <h3 style="font-family: var(--font-heading); font-size: 1.1rem; margin-bottom: 0.75rem; color: var(--color-primary); display: flex; align-items: center; gap: 0.5rem;">
+                                <i class="fa-solid fa-receipt"></i> ออเดอร์ค้างชำระอื่นๆ (กลับบ้าน / Grab)
+                            </h3>
+                            <div class="tables-grid-wrapper" id="other-pending-container">
+                                <!-- Other pending orders load dynamically -->
+                            </div>
+                        </div>
+                    </div>
+                    
                     <!-- 1. ORDERS TAB -->
-                    <div class="tab-pane active" id="orders-tab">
+                    <div class="tab-pane" id="orders-tab">
                         <div class="filter-bar">
                             <div class="filter-group">
                                 <label for="filter-date"><i class="fa-solid fa-calendar"></i> ตัวกรองวันที่</label>
@@ -179,6 +239,14 @@
                             <div class="filter-group" id="custom-date-group" style="display: none;">
                                 <label for="filter-custom-date">เลือกวันที่</label>
                                 <input type="date" id="filter-custom-date">
+                            </div>
+                            <div class="filter-group">
+                                <label for="filter-payment-status"><i class="fa-solid fa-credit-card"></i> สถานะชำระเงิน</label>
+                                <select id="filter-payment-status">
+                                    <option value="all" selected>ทั้งหมด</option>
+                                    <option value="pending_promo">ยังไม่ชำระเงิน</option>
+                                    <option value="paid">ชำระเงินแล้ว</option>
+                                </select>
                             </div>
                             <div class="filter-group search-group">
                                 <label for="search-order-customer"><i class="fa-solid fa-user-tag"></i> ค้นหาชื่อลูกค้า</label>
@@ -235,20 +303,23 @@
                     <!-- 4. SUMMARY & ANALYTICS TAB -->
                     <div class="tab-pane" id="summary-tab">
                         <!-- Date Filter for History Sales -->
-                        <div class="filter-bar" style="margin-bottom: 1.5rem;">
-                            <div class="filter-group">
-                                <label for="summary-filter-date"><i class="fa-solid fa-calendar"></i> ตัวกรองวันที่ย้อนหลัง</label>
-                                <select id="summary-filter-date">
-                                    <option value="today" selected>วันนี้</option>
-                                    <option value="yesterday">เมื่อวาน</option>
-                                    <option value="all">ทั้งหมด</option>
-                                    <option value="custom">ระบุเอง</option>
-                                </select>
+                        <div class="filter-bar" style="margin-bottom: 1.5rem; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1rem;">
+                            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                                <div class="filter-group">
+                                    <label for="summary-filter-date"><i class="fa-solid fa-calendar"></i> ตัวกรองวันที่ย้อนหลัง</label>
+                                    <select id="summary-filter-date">
+                                        <option value="today" selected>วันนี้</option>
+                                        <option value="yesterday">เมื่อวาน</option>
+                                        <option value="all">ทั้งหมด</option>
+                                        <option value="custom">ระบุเอง</option>
+                                    </select>
+                                </div>
+                                <div class="filter-group" id="summary-custom-date-group" style="display: none;">
+                                    <label for="summary-filter-custom-date">เลือกวันที่</label>
+                                    <input type="date" id="summary-filter-custom-date">
+                                </div>
                             </div>
-                            <div class="filter-group" id="summary-custom-date-group" style="display: none;">
-                                <label for="summary-filter-custom-date">เลือกวันที่</label>
-                                <input type="date" id="summary-filter-custom-date">
-                            </div>
+                            <button class="btn btn-outline" id="btn-copy-summary" style="padding: 0.65rem 1rem; font-size: 0.9rem; display: flex; align-items: center; gap: 0.5rem;"><i class="fa-solid fa-copy"></i> คัดลอกรายงานสรุปยอด</button>
                         </div>
 
                         <div class="analytics-grid">
@@ -260,6 +331,7 @@
                                 </div>
                                 <div class="analytics-card-value text-teal" id="analytics-today-revenue">0 บาท</div>
                                 <div class="analytics-card-sub" id="analytics-today-bottles">0 ขวด</div>
+                                <div class="analytics-card-sub" id="analytics-today-payment-details" style="font-size: 0.8rem; margin-top: 0.35rem; opacity: 0.85;">โอน/สแกน: 0 บาท | เงินสด: 0 บาท</div>
                             </div>
 
                             <div class="analytics-card card glass-card glow-purple">
@@ -279,13 +351,22 @@
                                 <div class="analytics-card-value text-warning" id="analytics-total-discount">0 บาท</div>
                                 <div class="analytics-card-sub">คิดเป็นโปรโมชั่นสะสม</div>
                             </div>
+
+                            <div class="analytics-card card glass-card glow-success" id="analytics-commission-card">
+                                <div class="analytics-card-header">
+                                    <span id="analytics-comm-title">ค่าคอมมิชชั่นช่วงนี้</span>
+                                    <i class="fa-solid fa-hand-holding-dollar text-success"></i>
+                                </div>
+                                <div class="analytics-card-value text-success" id="analytics-commission">0 บาท</div>
+                                <div class="analytics-card-sub" id="analytics-commission-sub">คิดจาก 0 ขวด (สะสมทั้งหมด: 0 บาท)</div>
+                            </div>
                         </div>
 
                         <!-- Popular Drinks & Grab Share -->
                         <div class="summary-details-grid">
                             <div class="card glass-card">
                                 <div class="card-header">
-                                    <h3><i class="fa-solid fa-ranking-star text-primary"></i> 5 อันดับน้ำขายดีที่สุด</h3>
+                                    <h3><i class="fa-solid fa-bottle-water text-primary"></i> ยอดขายแยกตามเมนูเครื่องดื่ม</h3>
                                 </div>
                                 <div class="card-body">
                                     <div class="ranking-list" id="popular-drinks-list">
@@ -313,6 +394,74 @@
                                             <span>ช่องทางอื่น</span>
                                             <span class="stat-num" id="stat-delivery-other">0 บิล</span>
                                         </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 5. ADMIN/USER MANAGEMENT TAB -->
+                    <div class="tab-pane" id="admin-tab">
+                        <div class="grab-manager-header">
+                            <div class="grab-title-desc">
+                                <h3><i class="fa-solid fa-user-gear text-primary"></i> จัดการข้อมูลพนักงานและสิทธิ์ผู้ใช้งาน</h3>
+                                <p>เพิ่ม ลบ หรือแก้ไขรหัสผ่านพนักงานที่เข้าใช้งานระบบบันทึกยอดขาย</p>
+                            </div>
+                        </div>
+
+                        <div class="admin-grid">
+                            <!-- Left Sub-panel: Add/Edit User Form -->
+                            <div class="card glass-card">
+                                <div class="card-header">
+                                    <h3 style="font-size: 1.1rem; color: var(--color-primary);"><i class="fa-solid fa-user-plus"></i> เพิ่ม/แก้ไขพนักงาน</h3>
+                                </div>
+                                <div class="card-body">
+                                    <form id="admin-user-form">
+                                        <input type="hidden" id="admin-edit-original-username">
+                                        <div class="form-group" style="margin-bottom: 1.25rem; display: flex; flex-direction: column; gap: 0.5rem;">
+                                            <label for="admin-username"><i class="fa-solid fa-user"></i> ชื่อพนักงาน</label>
+                                            <input type="text" id="admin-username" placeholder="ระบุชื่อพนักงาน..." required>
+                                        </div>
+                                        <div class="form-group" style="margin-bottom: 1.25rem; display: flex; flex-direction: column; gap: 0.5rem;">
+                                            <label for="admin-pin"><i class="fa-solid fa-lock"></i> รหัสผ่าน (PIN 4-6 หลัก)</label>
+                                            <input type="password" id="admin-pin" placeholder="ระบุรหัส PIN..." required>
+                                        </div>
+                                        <div class="form-group" style="margin-bottom: 1.5rem; display: flex; flex-direction: column; gap: 0.5rem;">
+                                            <label for="admin-role"><i class="fa-solid fa-shield-halved"></i> ระดับสิทธิ์</label>
+                                            <select id="admin-role">
+                                                <option value="staff" selected>พนักงาน (Staff)</option>
+                                                <option value="admin">ผู้ดูแลระบบ (Admin)</option>
+                                            </select>
+                                        </div>
+                                        <div style="display: flex; gap: 0.75rem;">
+                                            <button type="button" class="btn btn-outline btn-sm" id="btn-admin-cancel-edit" style="display: none;">ยกเลิก</button>
+                                            <button type="submit" class="btn btn-primary btn-sm flex-1" id="btn-admin-save-user"><i class="fa-solid fa-floppy-disk"></i> บันทึกข้อมูล</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <!-- Right Sub-panel: Users List Table -->
+                            <div class="card glass-card">
+                                <div class="card-header">
+                                    <h3 style="font-size: 1.1rem; color: var(--color-primary);"><i class="fa-solid fa-users"></i> รายชื่อพนักงานในระบบ</h3>
+                                </div>
+                                <div class="card-body" style="padding: 0;">
+                                    <div class="table-responsive">
+                                        <table class="data-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>ชื่อพนักงาน</th>
+                                                    <th style="text-align: center;">ระดับสิทธิ์</th>
+                                                    <th style="text-align: center;">รหัสผ่าน PIN</th>
+                                                    <th style="text-align: center;">ค่าคอมมิชชั่นสะสม</th>
+                                                    <th style="text-align: center;">จัดการ</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="admin-users-list">
+                                                <!-- Loaded dynamically -->
+                                            </tbody>
+                                        </table>
                                     </div>
                                 </div>
                             </div>
@@ -358,17 +507,17 @@
                     
                     <div class="form-group" style="margin-bottom: 1rem; display: flex; flex-direction: column; gap: 0.5rem;">
                         <label for="sheet-url-input" style="font-size: 0.85rem; color: var(--color-text); font-weight: 500;"><i class="fa-solid fa-globe text-primary"></i> Google Apps Script Web App URL</label>
-                        <input type="text" id="sheet-url-input" placeholder="วางลิงก์ Web App URL ที่นี่..." style="width: 100%; padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border-glass); background: rgba(15, 23, 42, 0.6); color: #fff; font-family: var(--font-body); font-size: 0.9rem; outline: none; transition: border var(--transition-fast);">
+                        <input type="text" id="sheet-url-input" placeholder="วางลิงก์ Web App URL ที่นี่..." style="width: 100%; padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border-glass); background: rgba(255, 255, 255, 0.85); color: var(--color-text); font-family: var(--font-body); font-size: 0.9rem; outline: none; transition: border var(--transition-fast);">
                     </div>
                     
-                    <div style="display: flex; gap: 0.75rem; margin-bottom: 1rem;">
+                    <div class="sheets-actions-wrapper" style="display: flex; gap: 0.75rem; margin-bottom: 1rem;">
                         <button class="btn btn-primary" id="btn-pull-sheet" style="flex: 1;"><i class="fa-solid fa-cloud-arrow-down"></i> ดึงจากชีต 📥</button>
                         <button class="btn btn-secondary" id="btn-push-sheet" style="flex: 1;"><i class="fa-solid fa-cloud-arrow-up"></i> บันทึกไปชีต 📤</button>
                     </div>
                     
-                    <div style="display: flex; align-items: center; gap: 0.5rem;">
-                        <input type="checkbox" id="auto-sync-checkbox" style="width: 18px; height: 18px; cursor: pointer; accent-color: var(--color-primary);">
-                        <label for="auto-sync-checkbox" style="font-size: 0.85rem; cursor: pointer; color: var(--color-text-muted); select-layout: none;">ซิงค์อัปเดตอัตโนมัติเมื่อทำรายการสั่งซื้อ/แก้ไขข้อมูล</label>
+                    <div style="display: flex; align-items: flex-start; gap: 0.5rem;">
+                        <input type="checkbox" id="auto-sync-checkbox" style="width: 18px; height: 18px; margin-top: 0.1rem; cursor: pointer; accent-color: var(--color-primary);">
+                        <label for="auto-sync-checkbox" style="font-size: 0.85rem; cursor: pointer; color: var(--color-text-muted); user-select: none; -webkit-user-select: none;">ซิงค์อัปเดตอัตโนมัติเมื่อทำรายการสั่งซื้อ/แก้ไขข้อมูล</label>
                     </div>
                 </div>
 
@@ -381,7 +530,69 @@
         </div>
     </div>
 
+    <!-- PROFILE EDIT MODAL -->
+    <div class="modal" id="profile-modal">
+        <div class="modal-content glass-card" style="max-width: 400px; padding: 2rem;">
+            <div class="modal-header">
+                <h2><i class="fa-solid fa-user-gear text-primary"></i> แก้ไขข้อมูลส่วนตัว</h2>
+                <button class="modal-close" id="btn-close-profile-modal">&times;</button>
+            </div>
+            <div class="modal-body" style="padding-top: 1rem;">
+                <form id="profile-edit-form">
+                    <div class="form-group" style="margin-bottom: 1.25rem; display: flex; flex-direction: column; gap: 0.5rem;">
+                        <label for="profile-username" style="font-size: 0.85rem; font-weight: 500; color: var(--color-text-muted);"><i class="fa-solid fa-user"></i> ชื่อเล่นพนักงาน</label>
+                        <input type="text" id="profile-username" placeholder="ระบุชื่อเล่นใหม่..." required style="width: 100%; padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border-glass); background: rgba(255, 255, 255, 0.85); color: var(--color-text); font-family: var(--font-body); font-size: 0.9rem; outline: none;">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 1.5rem; display: flex; flex-direction: column; gap: 0.5rem;">
+                        <label for="profile-pin" style="font-size: 0.85rem; font-weight: 500; color: var(--color-text-muted);"><i class="fa-solid fa-lock"></i> รหัสผ่านใหม่ (PIN 4-6 หลัก)</label>
+                        <input type="password" id="profile-pin" placeholder="ระบุรหัส PIN ใหม่..." required style="width: 100%; padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border-glass); background: rgba(255, 255, 255, 0.85); color: var(--color-text); font-family: var(--font-body); font-size: 0.9rem; outline: none;">
+                    </div>
+                    <div style="display: flex; gap: 0.75rem;">
+                        <button type="button" class="btn btn-outline btn-sm flex-1" id="btn-cancel-profile-save">ยกเลิก</button>
+                        <button type="submit" class="btn btn-primary btn-sm flex-1" id="btn-save-profile"><i class="fa-solid fa-floppy-disk"></i> บันทึกข้อมูล</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- LOGIN SCREEN -->
+    <div id="login-container" class="login-container">
+        <div class="login-card glass-card">
+            <div class="login-logo">
+                <i class="fa-solid fa-glass-water login-brand-icon"></i>
+                <h2>BaanPhuan</h2>
+                <p>บ้านเพื่อน - POS & Inventory System</p>
+            </div>
+             <form id="login-form">
+                 <div class="form-group" style="margin-bottom: 1.25rem; display: flex; flex-direction: column; gap: 0.5rem;">
+                     <label for="login-username" style="font-size: 0.85rem; font-weight: 500; color: var(--color-text-muted); display: flex; align-items: center; gap: 0.4rem;"><i class="fa-solid fa-user"></i> ชื่อผู้ใช้งาน / พนักงาน</label>
+                     <input type="text" id="login-username" placeholder="ระบุชื่อผู้ใช้งาน..." required style="width: 100%; padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border-glass); background: rgba(255, 255, 255, 0.85); color: var(--color-text); font-family: var(--font-body); font-size: 0.9rem; outline: none;">
+                 </div>
+                 
+                 <div class="form-group" style="margin-bottom: 1.5rem; display: flex; flex-direction: column; gap: 0.5rem;">
+                     <label for="login-pin" style="font-size: 0.85rem; font-weight: 500; color: var(--color-text-muted); display: flex; align-items: center; gap: 0.4rem;"><i class="fa-solid fa-lock"></i> รหัสผ่าน PIN (4-6 หลัก)</label>
+                     <input type="password" id="login-pin" inputmode="numeric" pattern="[0-9]*" maxlength="6" placeholder="กรอกรหัส PIN..." required style="width: 100%; padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border-glass); background: rgba(255, 255, 255, 0.85); color: var(--color-text); font-family: var(--font-body); font-size: 0.9rem; outline: none; letter-spacing: 0.5rem; text-align: center;">
+                 </div>
+
+                 <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.75rem; justify-content: center; font-size: 1rem; margin-bottom: 1rem;">
+                     <i class="fa-solid fa-right-to-bracket"></i> เข้าสู่ระบบ
+                 </button>
+
+                 <div style="text-align: center;">
+                     <button type="button" class="btn btn-outline btn-sm" id="btn-login-pull-sheet" style="width: 100%; justify-content: center; gap: 0.5rem;">
+                         <i class="fa-solid fa-cloud-arrow-down"></i> ดึงข้อมูลจากคลาวด์ (ซิงค์รหัสใหม่)
+                     </button>
+                 </div>
+
+                 <div id="login-error-msg" class="login-error-msg" style="display: none; margin-top: 1.25rem;">
+                     <i class="fa-solid fa-circle-exclamation"></i> รหัสผ่านไม่ถูกต้อง กรุณาลองใหม่
+                 </div>
+             </form>
+        </div>
+    </div>
+
     <!-- MAIN APP SCRIPT -->
-    <script src="app.js"></script>
+    <script src="app.js?v=17.0"></script>
 </body>
 </html>
