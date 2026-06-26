@@ -1560,6 +1560,10 @@ function renderAnalytics() {
     let totalBottles = 0;
     let totalDiscount = 0;
     let totalCommBottles = 0;
+
+    const loggedInUsername = sessionStorage.getItem('baanphuan_username') || '';
+    const loggedInUser = state.users.find(u => u.username.toLowerCase() === loggedInUsername.toLowerCase());
+    const isLoggedInStaff = loggedInUser && loggedInUser.role === 'staff';
     
     // Popularity tracker (drinkId -> count)
     let popTracker = {};
@@ -1572,12 +1576,13 @@ function renderAnalytics() {
         if (order.status === 'pending_promo') return;
         const orderQty = order.items ? Object.values(order.items).reduce((a, b) => a + b, 0) : 0;
         const pricing = order.priceDetails || { total: 0, discount: 0 };
+        const matchesStaff = isLoggedInStaff ? (order.staffName && order.staffName.toLowerCase() === loggedInUsername.toLowerCase()) : false;
         
         // Sum grand totals (always all-time)
         totalBottles += orderQty;
         totalRevenue += pricing.total || 0;
         totalDiscount += pricing.discount || 0;
-        if (order.deliveryType !== 'grab') {
+        if (order.deliveryType !== 'grab' && matchesStaff) {
             totalCommBottles += orderQty;
         }
         
@@ -1592,7 +1597,7 @@ function renderAnalytics() {
             filteredBottles += orderQty;
             filteredRevenue += pricing.total || 0;
             filteredDiscount += pricing.discount || 0;
-            if (order.deliveryType !== 'grab') {
+            if (order.deliveryType !== 'grab' && matchesStaff) {
                 filteredCommBottles += orderQty;
             }
             
@@ -1663,6 +1668,15 @@ function renderAnalytics() {
     const totalCommVal = totalCommBottles * 5;
     document.getElementById('analytics-commission').textContent = `${filteredCommVal.toLocaleString()} บาท`;
     document.getElementById('analytics-commission-sub').textContent = `คิดจาก ${filteredCommBottles} ขวด (สะสมทั้งหมด: ${totalCommVal.toLocaleString()} บาท)`;
+    
+    const commCard = document.getElementById('analytics-commission-card');
+    if (commCard) {
+        if (isLoggedInStaff) {
+            commCard.style.display = 'flex';
+        } else {
+            commCard.style.display = 'none';
+        }
+    }
     
     document.getElementById('stat-delivery-walkin').textContent = `${deliveryStats.walkin} บิล`;
     document.getElementById('stat-delivery-grab').textContent = `${deliveryStats.grab} บิล`;
@@ -2021,12 +2035,12 @@ function renderAdminUsersList() {
         if (!listContainer) return;
         
         if (!state.users || !Array.isArray(state.users)) {
-            listContainer.innerHTML = `<tr><td colspan="4" class="text-center text-muted">เกิดข้อผิดพลาดในการโหลดข้อมูล</td></tr>`;
+            listContainer.innerHTML = `<tr><td colspan="5" class="text-center text-muted">เกิดข้อผิดพลาดในการโหลดข้อมูล</td></tr>`;
             return;
         }
 
         if (state.users.length === 0) {
-            listContainer.innerHTML = `<tr><td colspan="4" class="text-center text-muted">ไม่มีข้อมูลพนักงาน</td></tr>`;
+            listContainer.innerHTML = `<tr><td colspan="5" class="text-center text-muted">ไม่มีข้อมูลพนักงาน</td></tr>`;
             return;
         }
         
@@ -2035,6 +2049,22 @@ function renderAdminUsersList() {
             const roleText = user.role === 'admin' ? 'ผู้ดูแล (Admin)' : 'พนักงาน (Staff)';
             const roleBadge = user.role === 'admin' ? 'badge-primary' : 'badge-outline';
             const iconClass = user.role === 'admin' ? 'fa-user-shield text-primary' : 'fa-user text-muted';
+            
+            // Calculate commission for this user
+            let commHtml = '-';
+            if (user.role === 'staff') {
+                let userCommBottles = 0;
+                state.orders.forEach(order => {
+                    if (order.status === 'pending_promo') return;
+                    if (order.deliveryType === 'grab') return;
+                    if (order.staffName && order.staffName.toLowerCase() === user.username.toLowerCase()) {
+                        const orderQty = order.items ? Object.values(order.items).reduce((sum, q) => sum + q, 0) : 0;
+                        userCommBottles += orderQty;
+                    }
+                });
+                const userCommVal = userCommBottles * 5;
+                commHtml = `<strong class="text-success">${userCommVal.toLocaleString()} บาท</strong> (${userCommBottles} ขวด)`;
+            }
             
             return `
                 <tr>
@@ -2048,6 +2078,9 @@ function renderAdminUsersList() {
                     </td>
                     <td style="text-align: center; font-family: monospace; letter-spacing: 2px; color: var(--color-text);">
                         •••• (PIN: ${user.pin || ''})
+                    </td>
+                    <td style="text-align: center; color: var(--color-text);">
+                        ${commHtml}
                     </td>
                     <td style="text-align: center;">
                         <div style="display: flex; gap: 0.5rem; justify-content: center;">
