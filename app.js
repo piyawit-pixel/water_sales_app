@@ -91,6 +91,7 @@ function init() {
     // Bind UI elements & Listeners
     setupClock();
     setupEventListeners();
+    checkLoginStatus();
     renderDrinkGrid();
     renderCart();
     renderOrders();
@@ -101,6 +102,22 @@ function init() {
     // Auto-pull from sheet on startup if URL is configured
     if (state.sheetUrl) {
         pullFromSheets(true);
+    }
+}
+
+// CHECK LOGIN STATUS
+function checkLoginStatus() {
+    const loggedIn = sessionStorage.getItem('baanphuan_logged_in') === 'true';
+    const loginContainer = document.getElementById('login-container');
+    if (loggedIn) {
+        if (loginContainer) loginContainer.classList.add('hidden');
+        const username = sessionStorage.getItem('baanphuan_username') || 'พนักงาน';
+        document.getElementById('header-username').innerText = username;
+        document.getElementById('header-user-badge').style.display = 'flex';
+        document.getElementById('staff-name').value = username;
+    } else {
+        if (loginContainer) loginContainer.classList.remove('hidden');
+        document.getElementById('header-user-badge').style.display = 'none';
     }
 }
 
@@ -373,6 +390,41 @@ function setupEventListeners() {
     if (btnCancelGrab) btnCancelGrab.addEventListener('click', closeGrabManualModal);
     const grabManualForm = document.getElementById('grab-manual-form');
     if (grabManualForm) grabManualForm.addEventListener('submit', handleGrabManualSubmit);
+
+    // Login Screen Event Listeners
+    const loginForm = document.getElementById('login-form');
+    if (loginForm) {
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const username = document.getElementById('login-username').value.trim();
+            const pin = document.getElementById('login-pin').value.trim();
+            
+            // Validate: default PIN is '1234'
+            if (pin === '1234') {
+                sessionStorage.setItem('baanphuan_logged_in', 'true');
+                sessionStorage.setItem('baanphuan_username', username);
+                localStorage.setItem('juice_bar_last_staff', username);
+                document.getElementById('login-error-msg').style.display = 'none';
+                document.getElementById('login-pin').value = '';
+                checkLoginStatus();
+            } else {
+                const errorMsg = document.getElementById('login-error-msg');
+                errorMsg.style.display = 'flex';
+                errorMsg.style.animation = 'none';
+                errorMsg.offsetHeight; /* trigger reflow */
+                errorMsg.style.animation = 'shake 0.3s ease';
+            }
+        });
+    }
+
+    const btnLogout = document.getElementById('btn-logout');
+    if (btnLogout) {
+        btnLogout.addEventListener('click', () => {
+            sessionStorage.removeItem('baanphuan_logged_in');
+            sessionStorage.removeItem('baanphuan_username');
+            checkLoginStatus();
+        });
+    }
 }
 
 // CHECK IF CUSTOMER HAS EXISTING ORDERS TO SUGGEST APPENDING (Incremental ordering)
