@@ -160,7 +160,7 @@ function checkLoginStatus() {
         const username = sessionStorage.getItem('baanphuan_username') || 'พนักงาน';
         
         // Lookup user in state.users to get the most up-to-date role and prevent session cache issues
-        const foundUser = state.users.find(u => u.username === username);
+        const foundUser = state.users.find(u => u.username.toLowerCase() === username.toLowerCase());
         const role = foundUser ? foundUser.role : (sessionStorage.getItem('baanphuan_role') || 'staff');
         sessionStorage.setItem('baanphuan_role', role);
         
@@ -508,7 +508,7 @@ function setupEventListeners() {
     const openProfileModal = () => {
         const username = sessionStorage.getItem('baanphuan_username');
         if (!username) return;
-        const foundUser = state.users.find(u => u.username === username);
+        const foundUser = state.users.find(u => u.username.toLowerCase() === username.toLowerCase());
         if (!foundUser) return;
 
         document.getElementById('profile-username').value = foundUser.username;
@@ -546,7 +546,7 @@ function setupEventListeners() {
             }
 
             // Update user in state
-            const userIndex = state.users.findIndex(u => u.username === oldUsername);
+            const userIndex = state.users.findIndex(u => u.username.toLowerCase() === oldUsername.toLowerCase());
             if (userIndex !== -1) {
                 const currentRole = state.users[userIndex].role;
                 state.users[userIndex] = { username: newUsername, pin: newPin, role: currentRole };
@@ -597,7 +597,7 @@ function setupEventListeners() {
             
             if (originalUsername) {
                 // Editing existing user
-                const userIndex = state.users.findIndex(u => u.username === originalUsername);
+                const userIndex = state.users.findIndex(u => u.username.toLowerCase() === originalUsername.toLowerCase());
                 if (userIndex !== -1) {
                     state.users[userIndex] = { username, pin, role };
                 }
@@ -1979,7 +1979,7 @@ function renderAdminUsersList() {
 
 // EDIT USER IN ADMIN PANEL
 function editAdminUser(username) {
-    const user = state.users.find(u => u.username === username);
+    const user = state.users.find(u => u.username.toLowerCase() === username.toLowerCase());
     if (!user) return;
     
     document.getElementById('admin-username').value = user.username;
@@ -2001,7 +2001,7 @@ function deleteAdminUser(username) {
     }
     
     // Prevent deleting the last admin
-    const userToDelete = state.users.find(u => u.username === username);
+    const userToDelete = state.users.find(u => u.username.toLowerCase() === username.toLowerCase());
     if (userToDelete && userToDelete.role === 'admin') {
         const adminCount = state.users.filter(u => u.role === 'admin').length;
         if (adminCount <= 1) {
@@ -2011,7 +2011,7 @@ function deleteAdminUser(username) {
     }
     
     if (confirm(`คุณต้องการลบพนักงาน "${username}" ใช่หรือไม่?`)) {
-        state.users = state.users.filter(u => u.username !== username);
+        state.users = state.users.filter(u => u.username.toLowerCase() !== username.toLowerCase());
         localStorage.setItem('juice_bar_users', JSON.stringify(state.users));
         renderLoginUserDropdown();
         renderAdminUsersList();
