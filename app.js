@@ -2186,7 +2186,11 @@ function deleteAdminUser(username) {
 
 // GET CURRENT SELECTED USER PIN LENGTH
 function getSelectedUserPinLength() {
-    return 6;
+    const loginUsernameInput = document.getElementById('login-username');
+    if (!loginUsernameInput) return 6;
+    const username = loginUsernameInput.value.trim().toLowerCase();
+    const foundUser = state.users.find(u => u.username.toLowerCase() === username);
+    return foundUser && foundUser.pin ? foundUser.pin.length : 6;
 }
 
 // HANDLE PIN BUTTON OR KEYBOARD INPUT
@@ -2197,6 +2201,18 @@ function handlePinInput(val) {
     } else if (state.tempPin.length < 6) {
         state.tempPin += val;
         updatePinDots();
+        
+        // Auto-submit ONLY if the entered PIN matches the actual user's PIN in the database
+        const loginUsernameInput = document.getElementById('login-username');
+        if (loginUsernameInput) {
+            const username = loginUsernameInput.value.trim().toLowerCase();
+            const foundUser = state.users.find(u => u.username.toLowerCase() === username);
+            if (foundUser && foundUser.pin && state.tempPin === foundUser.pin) {
+                setTimeout(() => {
+                    submitLogin();
+                }, 100);
+            }
+        }
     }
 }
 
@@ -2205,7 +2221,10 @@ function updatePinDots() {
     const container = document.querySelector('.pin-display-container');
     if (!container) return;
     
-    const pinLength = getSelectedUserPinLength();
+    let pinLength = getSelectedUserPinLength();
+    if (state.tempPin.length > pinLength) {
+        pinLength = state.tempPin.length;
+    }
     
     // Clear and build dots dynamically
     container.innerHTML = '';
