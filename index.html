@@ -361,14 +361,14 @@
                         <input type="text" id="sheet-url-input" placeholder="วางลิงก์ Web App URL ที่นี่..." style="width: 100%; padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border-glass); background: rgba(15, 23, 42, 0.6); color: #fff; font-family: var(--font-body); font-size: 0.9rem; outline: none; transition: border var(--transition-fast);">
                     </div>
                     
-                    <div style="display: flex; gap: 0.75rem; margin-bottom: 1rem;">
+                    <div class="sheets-actions-wrapper" style="display: flex; gap: 0.75rem; margin-bottom: 1rem;">
                         <button class="btn btn-primary" id="btn-pull-sheet" style="flex: 1;"><i class="fa-solid fa-cloud-arrow-down"></i> ดึงจากชีต 📥</button>
                         <button class="btn btn-secondary" id="btn-push-sheet" style="flex: 1;"><i class="fa-solid fa-cloud-arrow-up"></i> บันทึกไปชีต 📤</button>
                     </div>
                     
-                    <div style="display: flex; align-items: center; gap: 0.5rem;">
-                        <input type="checkbox" id="auto-sync-checkbox" style="width: 18px; height: 18px; cursor: pointer; accent-color: var(--color-primary);">
-                        <label for="auto-sync-checkbox" style="font-size: 0.85rem; cursor: pointer; color: var(--color-text-muted); select-layout: none;">ซิงค์อัปเดตอัตโนมัติเมื่อทำรายการสั่งซื้อ/แก้ไขข้อมูล</label>
+                    <div style="display: flex; align-items: flex-start; gap: 0.5rem;">
+                        <input type="checkbox" id="auto-sync-checkbox" style="width: 18px; height: 18px; margin-top: 0.1rem; cursor: pointer; accent-color: var(--color-primary);">
+                        <label for="auto-sync-checkbox" style="font-size: 0.85rem; cursor: pointer; color: var(--color-text-muted); user-select: none; -webkit-user-select: none;">ซิงค์อัปเดตอัตโนมัติเมื่อทำรายการสั่งซื้อ/แก้ไขข้อมูล</label>
                     </div>
                 </div>
 

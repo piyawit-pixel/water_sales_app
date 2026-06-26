@@ -1598,3 +1598,327 @@ select:focus {
     color: var(--color-primary);
     border-bottom: 2px solid rgba(34, 211, 238, 0.3);
 }
+
+/* ==========================================================================
+   RESPONSIVE DESIGN & MOBILE OVERRIDES
+   ========================================================================== */
+
+/* 1. Viewports below 1024px */
+@media (max-width: 1024px) {
+    .main-content {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+}
+
+/* 2. Viewports below 768px (Tablets & Mobile Landscape) */
+@media (max-width: 768px) {
+    body {
+        padding-bottom: 1.5rem;
+    }
+    
+    .app-container {
+        padding: 0 1rem;
+    }
+
+    .app-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1.25rem;
+        padding: 1.25rem 0;
+        margin-bottom: 1rem;
+    }
+
+    .header-logo {
+        justify-content: center;
+    }
+
+    .header-right {
+        justify-content: space-between;
+        width: 100%;
+        gap: 1rem;
+    }
+
+    .app-banner {
+        height: 140px;
+        padding: 1.25rem;
+        margin-bottom: 1.5rem;
+        border-radius: var(--radius-md);
+    }
+
+    .banner-content h2 {
+        font-size: 1.6rem;
+    }
+
+    .banner-content .promo-badge {
+        font-size: 0.85rem;
+        padding: 0.3rem 0.85rem;
+    }
+
+    .card-body {
+        padding: 1rem;
+    }
+    
+    .summary-details-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* 3. Viewports below 576px (Mobile Phones) */
+@media (max-width: 576px) {
+    .form-row {
+        flex-direction: column;
+        gap: 0.85rem;
+        margin-bottom: 1rem;
+    }
+
+    .form-group {
+        width: 100%;
+    }
+
+    .pos-actions {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .pos-actions .btn {
+        width: 100%;
+    }
+
+    .filter-bar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.75rem;
+        padding: 1rem;
+    }
+
+    .filter-group {
+        width: 100%;
+    }
+
+    .search-group {
+        min-width: 100%;
+    }
+
+    .orders-header-bar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+        padding: 0.75rem;
+    }
+
+    .quick-stats {
+        width: 100%;
+        justify-content: space-between;
+        gap: 0.5rem;
+        font-size: 0.8rem;
+    }
+
+    .data-table th, 
+    .data-table td {
+        padding: 0.75rem 0.5rem;
+        font-size: 0.8rem;
+    }
+
+    .data-table .btn {
+        padding: 0.35rem 0.6rem;
+        font-size: 0.75rem;
+    }
+
+    .backup-actions-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .sheets-actions-wrapper {
+        flex-direction: column !important;
+        gap: 0.5rem !important;
+    }
+
+    .sheets-actions-wrapper .btn {
+        width: 100%;
+    }
+    
+    .modal-content {
+        width: 95%;
+    }
+    
+    .modal-body {
+        padding: 1.25rem;
+    }
+    
+    .modal-header {
+        padding: 1rem 1.25rem;
+    }
+}
+
+/* 4. Viewports below 480px (Narrow Mobile Phones) */
+@media (max-width: 480px) {
+    .brand-info h1 {
+        font-size: 1.4rem;
+    }
+
+    .brand-info p {
+        font-size: 0.75rem;
+    }
+
+    .neon-icon {
+        width: 48px;
+        height: 48px;
+        font-size: 1.6rem;
+    }
+
+    .live-clock {
+        font-size: 0.85rem;
+        padding: 0.4rem 0.75rem;
+    }
+
+    .btn-sm {
+        padding: 0.4rem 0.75rem;
+        font-size: 0.8rem;
+    }
+
+    .beverages-grid {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        gap: 0.75rem;
+        padding: 0.75rem;
+    }
+
+    .bev-card {
+        min-height: 105px;
+        padding: 0.75rem 0.4rem;
+    }
+
+    .bev-icon {
+        font-size: 1.4rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .bev-name-th {
+        font-size: 0.8rem;
+    }
+
+    .bev-name-en {
+        font-size: 0.7rem;
+    }
+
+    .bev-controls {
+        margin-top: 0.5rem;
+        gap: 0.35rem;
+    }
+
+    .bev-btn {
+        width: 24px;
+        height: 24px;
+        font-size: 0.75rem;
+    }
+
+    .bev-card .badge-qty {
+        width: 22px;
+        height: 22px;
+        font-size: 0.75rem;
+        top: -6px;
+        right: -6px;
+    }
+
+    .cart-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+        padding: 0.75rem;
+    }
+
+    .cart-item-info {
+        width: 100%;
+    }
+
+    .cart-item-actions {
+        width: 100%;
+        justify-content: space-between;
+        border-top: 1px dashed rgba(255, 255, 255, 0.1);
+        padding-top: 0.5rem;
+        margin-top: 0.25rem;
+    }
+
+    .tab-navigation {
+        gap: 0.25rem;
+        padding: 0.25rem;
+        border-radius: var(--radius-sm);
+    }
+
+    .tab-btn {
+        padding: 0.5rem 0.25rem;
+        font-size: 0.75rem;
+        flex-direction: column;
+        gap: 0.2rem;
+    }
+
+    .tab-btn i {
+        font-size: 0.95rem;
+    }
+
+    .order-card {
+        padding: 0.85rem;
+    }
+
+    .order-card-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .order-meta-info {
+        align-items: flex-start;
+        width: 100%;
+    }
+
+    .order-details-grid {
+        padding: 0.5rem;
+        gap: 0.4rem;
+    }
+
+    .order-item-badge {
+        padding: 0.2rem 0.4rem;
+        font-size: 0.75rem;
+    }
+
+    .order-card-footer {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.85rem;
+    }
+
+    .order-price-info {
+        align-items: center;
+        text-align: center;
+    }
+
+    .order-actions {
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .order-actions .btn {
+        flex: 1;
+        font-size: 0.85rem;
+        padding: 0.5rem 0.75rem;
+    }
+
+    .analytics-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .analytics-card {
+        height: 110px;
+        padding: 0.85rem;
+    }
+
+    .analytics-card-value {
+        font-size: 1.6rem;
+    }
+
+    .ranking-bar-wrapper {
+        margin: 0 0.5rem;
+    }
+}
