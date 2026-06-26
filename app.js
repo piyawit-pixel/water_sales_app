@@ -510,6 +510,38 @@ function setupEventListeners() {
         loginUsernameInput.addEventListener('change', resetPinAndDots);
     }
 
+    const btnLoginPullSheet = document.getElementById('btn-login-pull-sheet');
+    if (btnLoginPullSheet) {
+        btnLoginPullSheet.addEventListener('click', async () => {
+            let url = state.sheetUrl || '';
+            const newUrl = prompt("ระบุ Google Apps Script Web App URL:", url);
+            if (newUrl === null) return; // User cancelled
+            
+            const trimmedUrl = newUrl.trim();
+            if (!trimmedUrl) {
+                alert("กรุณาระบุ URL ที่ถูกต้อง");
+                return;
+            }
+            
+            state.sheetUrl = trimmedUrl;
+            saveToLocalStorage(true);
+            
+            const originalText = btnLoginPullSheet.innerHTML;
+            btnLoginPullSheet.disabled = true;
+            btnLoginPullSheet.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> กำลังซิงค์ข้อมูล...';
+            
+            try {
+                await pullFromSheets(true);
+                alert("ซิงค์ข้อมูลผู้ใช้งานและยอดขายจาก Google Sheets สำเร็จเรียบร้อยแล้ว!");
+            } catch(e) {
+                alert("ซิงค์ข้อมูลล้มเหลว: " + e.message);
+            } finally {
+                btnLoginPullSheet.disabled = false;
+                btnLoginPullSheet.innerHTML = originalText;
+            }
+        });
+    }
+
     const btnLogout = document.getElementById('btn-logout');
     if (btnLogout) {
         btnLogout.addEventListener('click', () => {
