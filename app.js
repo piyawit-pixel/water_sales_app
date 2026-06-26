@@ -1102,6 +1102,7 @@ function renderOrders() {
     let totalRevenue = 0;
     
     filteredOrders.forEach(o => {
+        if (o.status === 'pending_promo') return;
         const orderQty = o.items ? Object.values(o.items).reduce((sum, q) => sum + q, 0) : 0;
         totalQty += orderQty;
         const pricing = o.priceDetails || { total: 0, discount: 0 };
@@ -1556,6 +1557,7 @@ function renderAnalytics() {
     let deliveryStats = { walkin: 0, grab: 0, other: 0 };
     
     state.orders.forEach(order => {
+        if (order.status === 'pending_promo') return;
         const orderQty = order.items ? Object.values(order.items).reduce((a, b) => a + b, 0) : 0;
         const pricing = order.priceDetails || { total: 0, discount: 0 };
         
