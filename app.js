@@ -1205,10 +1205,12 @@ function renderAnalytics() {
     let filteredRevenue = 0;
     let filteredBottles = 0;
     let filteredDiscount = 0;
+    let filteredCommBottles = 0;
     
     let totalRevenue = 0;
     let totalBottles = 0;
     let totalDiscount = 0;
+    let totalCommBottles = 0;
     
     // Popularity tracker (drinkId -> count)
     let popTracker = {};
@@ -1225,6 +1227,9 @@ function renderAnalytics() {
         totalBottles += orderQty;
         totalRevenue += pricing.total || 0;
         totalDiscount += pricing.discount || 0;
+        if (order.deliveryType !== 'grab') {
+            totalCommBottles += orderQty;
+        }
         
         // Check if order matches date filter
         let matchesFilter = false;
@@ -1237,6 +1242,9 @@ function renderAnalytics() {
             filteredBottles += orderQty;
             filteredRevenue += pricing.total || 0;
             filteredDiscount += pricing.discount || 0;
+            if (order.deliveryType !== 'grab') {
+                filteredCommBottles += orderQty;
+            }
             
             // Channel stats (only for filtered dates)
             const type = order.deliveryType;
@@ -1277,12 +1285,34 @@ function renderAnalytics() {
         }
     });
     
+    // Set dynamic commission label
+    let targetCommText = 'ค่าคอมมิชชั่นวันนี้';
+    if (filterVal === 'yesterday') {
+        targetCommText = 'ค่าคอมมิชชั่นเมื่อวาน';
+    } else if (filterVal === 'custom') {
+        const dObj = new Date(customDateVal);
+        const formatThai = isNaN(dObj.getTime()) ? customDateVal : dObj.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' });
+        targetCommText = `ค่าคอมมิชชั่นวันที่ ${formatThai}`;
+    } else if (filterVal === 'all') {
+        targetCommText = 'ค่าคอมมิชชั่นทั้งหมด';
+    }
+    
+    const commTitleEl = document.getElementById('analytics-comm-title');
+    if (commTitleEl) {
+        commTitleEl.textContent = targetCommText;
+    }
+    
     // Update counters in DOM
     document.getElementById('analytics-today-revenue').textContent = `${filteredRevenue.toLocaleString()} บาท`;
     document.getElementById('analytics-today-bottles').textContent = `${filteredBottles} ขวด`;
     document.getElementById('analytics-total-revenue-all').textContent = `${totalRevenue.toLocaleString()} บาท`;
     document.getElementById('analytics-total-bottles-all').textContent = `${totalBottles} ขวด`;
     document.getElementById('analytics-total-discount').textContent = `${filteredDiscount.toLocaleString()} บาท`;
+    
+    const filteredCommVal = filteredCommBottles * 5;
+    const totalCommVal = totalCommBottles * 5;
+    document.getElementById('analytics-commission').textContent = `${filteredCommVal.toLocaleString()} บาท`;
+    document.getElementById('analytics-commission-sub').textContent = `คิดจาก ${filteredCommBottles} ขวด (สะสมทั้งหมด: ${totalCommVal.toLocaleString()} บาท)`;
     
     document.getElementById('stat-delivery-walkin').textContent = `${deliveryStats.walkin} บิล`;
     document.getElementById('stat-delivery-grab').textContent = `${deliveryStats.grab} บิล`;
