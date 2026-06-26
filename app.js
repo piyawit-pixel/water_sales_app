@@ -1364,7 +1364,7 @@ function exportData() {
     
     const now = new Date();
     const dateStr = getLocalDateString(now);
-    downloadAnchor.setAttribute("download", `juice_bar_backup_${dateStr}.json`);
+    downloadAnchor.setAttribute("download", `baan_phuan_backup_${dateStr}.json`);
     
     document.body.appendChild(downloadAnchor);
     downloadAnchor.click();
