@@ -11,7 +11,7 @@
     <!-- FontAwesome for beautiful icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Main Style Sheet -->
-    <link rel="stylesheet" href="styles.css?v=17.0">
+    <link rel="stylesheet" href="styles.css?v=19.0">
 </head>
 <body>
     <div class="app-container">
@@ -63,71 +63,64 @@
                         <span class="badge badge-outline" id="edit-indicator" style="display: none;">โหมดแก้ไขออเดอร์</span>
                     </div>
                     <div class="card-body">
-                        <!-- Customer Info Form -->
+                        <!-- ─── ROW 1: โต๊ะ + ชื่อลูกค้า ─── -->
                         <div class="form-row">
                             <div class="form-group flex-1">
-                                <label for="customer-name"><i class="fa-solid fa-chair"></i> เลือกโต๊ะ / ช่องทาง</label>
-                                <select id="customer-name" required>
-                                    <option value="กลับบ้าน">กลับบ้าน</option>
-                                    <option value="Grab">Grab</option>
-                                    <option value="โต๊ะ 1">โต๊ะ 1</option>
-                                    <option value="โต๊ะ 2">โต๊ะ 2</option>
-                                    <option value="โต๊ะ 3">โต๊ะ 3</option>
-                                    <option value="โต๊ะ 4">โต๊ะ 4</option>
-                                    <option value="โต๊ะ 5">โต๊ะ 5</option>
-                                    <option value="โต๊ะ 6">โต๊ะ 6</option>
-                                    <option value="โต๊ะ 7">โต๊ะ 7</option>
-                                    <option value="โต๊ะ 8">โต๊ะ 8</option>
-                                </select>
-                            </div>
-                            <div class="form-group flex-1">
-                                <label for="customer-display-name"><i class="fa-solid fa-user-tag"></i> ชื่อลูกค้า (คนค้างโปร)</label>
-                                <input type="text" id="customer-display-name" placeholder="ระบุชื่อลูกค้า...">
-                            </div>
-                            <div class="form-group flex-1">
-                                <label for="order-date"><i class="fa-regular fa-calendar-days"></i> วันที่บิล</label>
-                                <input type="date" id="order-date">
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group flex-1">
-                                <label for="delivery-type"><i class="fa-solid fa-truck"></i> ช่องทางจำหน่าย</label>
-                                <select id="delivery-type">
-                                    <option value="walkin">หน้าร้าน / รับเอง</option>
-                                    <option value="grab">Grab Delivery</option>
-                                </select>
+                                <label for="customer-name"><i class="fa-solid fa-chair"></i> โต๊ะ / ช่องทาง</label>
+                                <div style="display: flex; gap: 0.5rem; width: 100%;">
+                                    <select id="customer-name" required style="flex: 1;">
+                                        <option value="กลับบ้าน">🛍️ กลับบ้าน</option>
+                                        <option value="Grab">🛵 Grab</option>
+                                        <option value="โต๊ะ 1">🪑 โต๊ะ 1</option>
+                                        <option value="โต๊ะ 2">🪑 โต๊ะ 2</option>
+                                        <option value="โต๊ะ 3">🪑 โต๊ะ 3</option>
+                                        <option value="โต๊ะ 4">🪑 โต๊ะ 4</option>
+                                        <option value="โต๊ะ 5">🪑 โต๊ะ 5</option>
+                                        <option value="โต๊ะ 6">🪑 โต๊ะ 6</option>
+                                        <option value="โต๊ะ 7">🪑 โต๊ะ 7</option>
+                                        <option value="โต๊ะ 8">🪑 โต๊ะ 8</option>
+                                    </select>
+                                    <button type="button" id="btn-cancel-table" class="btn btn-danger" style="display: none; padding: 0 1rem; height: 42px; border-radius: var(--radius-md); align-items: center; justify-content: center; gap: 0.4rem; white-space: nowrap;" title="ยกเลิกออเดอร์ทั้งหมดของโต๊ะนี้วันนี้">
+                                        <i class="fa-solid fa-ban"></i> ยกเลิกโต๊ะ
+                                    </button>
+                                </div>
                             </div>
                             <div class="form-group flex-1" id="grab-driver-group" style="display: none;">
                                 <label for="grab-driver-name"><i class="fa-solid fa-helmet-safety"></i> ชื่อคนขับ Grab</label>
                                 <input type="text" id="grab-driver-name" placeholder="ระบุชื่อหรือรหัสคนขับ...">
                             </div>
+                            <div class="form-group flex-1">
+                                <label for="customer-display-name"><i class="fa-solid fa-user-tag"></i> ชื่อลูกค้า (ถ้ามี)</label>
+                                <input type="text" id="customer-display-name" placeholder="ชื่อลูกค้า / ค้างโปร...">
+                            </div>
                         </div>
 
-                        <div class="form-row">
+                        <!-- ─── ROW 2: สถานะ + ชำระ + หมายเหตุ (compact) ─── -->
+                        <div class="form-row pos-meta-row">
                             <div class="form-group flex-1">
-                                <label for="staff-name"><i class="fa-solid fa-user-pen"></i> ผู้บันทึกบิล</label>
-                                <input type="text" id="staff-name" placeholder="ระบุชื่อคนเขียนบิล">
-                            </div>
-                            <div class="form-group flex-1">
-                                <label for="order-status"><i class="fa-solid fa-circle-info"></i> สถานะบิล</label>
+                                <label for="order-status"><i class="fa-solid fa-circle-dot"></i> สถานะบิล</label>
                                 <select id="order-status">
-                                    <option value="paid" selected>ครบโปร / จ่ายแล้ว</option>
-                                    <option value="pending_promo">ยังไม่ครบโปร</option>
+                                    <option value="paid" selected>✅ จ่ายแล้ว</option>
+                                    <option value="pending_promo">⏳ ยังไม่ครบโปร</option>
                                 </select>
                             </div>
                             <div class="form-group flex-1">
-                                <label for="payment-method"><i class="fa-solid fa-credit-card"></i> การชำระเงิน</label>
+                                <label for="payment-method"><i class="fa-solid fa-credit-card"></i> ชำระเงิน</label>
                                 <select id="payment-method">
-                                    <option value="scan" selected>เงินโอน / สแกน</option>
-                                    <option value="cash">เงินสด</option>
+                                    <option value="scan" selected>📱 โอน/สแกน</option>
+                                    <option value="cash">💵 เงินสด</option>
                                 </select>
                             </div>
                             <div class="form-group flex-1">
                                 <label for="order-remark"><i class="fa-regular fa-comment-dots"></i> หมายเหตุ</label>
-                                <input type="text" id="order-remark" placeholder="ระบุหมายเหตุ (ถ้ามี)">
+                                <input type="text" id="order-remark" placeholder="หมายเหตุ...">
                             </div>
                         </div>
+
+                        <!-- ─── Hidden fields (auto-filled) ─── -->
+                        <input type="hidden" id="delivery-type" value="walkin">
+                        <input type="hidden" id="staff-name" value="">
+                        <input type="hidden" id="order-date" value="">
 
                         <!-- Search Bar for Drinks -->
                         <div class="search-drinks-container">
@@ -203,20 +196,34 @@
                     
                     <!-- 0. TABLES TAB -->
                     <div class="tab-pane active" id="tables-tab">
-                        <div class="grab-manager-header">
-                            <div class="grab-title-desc">
-                                <h3><i class="fa-solid fa-chair text-primary"></i> สถานะและจัดการโต๊ะ</h3>
-                                <p>จัดการการเปิดโต๊ะ รายการเครื่องดื่มค้างชำระ และการชำระเงินของแต่ละโต๊ะ</p>
+                        <!-- Live Stats Bar -->
+                        <div class="tables-live-stats" id="tables-live-stats">
+                            <div class="live-stat-chip">
+                                <i class="fa-solid fa-chair"></i>
+                                <span>โต๊ะว่าง: <strong id="stat-tables-empty">–</strong></span>
+                            </div>
+                            <div class="live-stat-chip live-stat-occupied">
+                                <i class="fa-solid fa-users"></i>
+                                <span>มีลูกค้า: <strong id="stat-tables-occupied">–</strong></span>
+                            </div>
+                            <div class="live-stat-chip live-stat-revenue">
+                                <i class="fa-solid fa-coins"></i>
+                                <span>ค้างชำระรวม: <strong id="stat-tables-pending-total">0</strong> บาท</span>
+                            </div>
+                            <div class="live-stat-chip live-stat-today">
+                                <i class="fa-solid fa-receipt"></i>
+                                <span>ขายวันนี้: <strong id="stat-today-revenue">0</strong> บาท</span>
                             </div>
                         </div>
+
                         <div class="tables-grid-wrapper" id="tables-grid-container">
                             <!-- Tables load dynamically -->
                         </div>
                         
                         <!-- Other unpaid bills (e.g. Grab or takeaway that are pending) -->
-                        <div class="other-pending-bills" style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px dashed var(--border-glass);">
-                            <h3 style="font-family: var(--font-heading); font-size: 1.1rem; margin-bottom: 0.75rem; color: var(--color-primary); display: flex; align-items: center; gap: 0.5rem;">
-                                <i class="fa-solid fa-receipt"></i> ออเดอร์ค้างชำระอื่นๆ (กลับบ้าน / Grab)
+                        <div class="other-pending-bills" id="other-pending-section" style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px dashed var(--border-glass);">
+                            <h3 style="font-family: var(--font-heading); font-size: 1rem; margin-bottom: 0.75rem; color: var(--color-text-muted); display: flex; align-items: center; gap: 0.5rem;">
+                                <i class="fa-solid fa-receipt"></i> ออเดอร์ค้างชำระ (กลับบ้าน / Grab)
                             </h3>
                             <div class="tables-grid-wrapper" id="other-pending-container">
                                 <!-- Other pending orders load dynamically -->
@@ -593,6 +600,42 @@
     </div>
 
     <!-- MAIN APP SCRIPT -->
-    <script src="app.js?v=17.0"></script>
+    <!-- PAYMENT MODAL -->
+    <div class="modal" id="pay-modal">
+        <div class="modal-content glass-card pay-modal-card">
+            <div class="modal-header">
+                <h2><i class="fa-solid fa-money-bill-wave text-success"></i> ยืนยันการชำระเงิน</h2>
+                <button class="modal-close" id="btn-close-pay-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="pay-modal-info">
+                    <div class="pay-modal-table-name" id="pay-modal-table-name">โต๊ะ 1</div>
+                    <div class="pay-modal-items" id="pay-modal-items"></div>
+                    <div class="pay-modal-total" id="pay-modal-total-container">
+                        <span>ยอดชำระรวม</span>
+                        <span class="pay-modal-amount" id="pay-modal-amount">0 บาท</span>
+                    </div>
+                </div>
+                <div class="pay-modal-methods">
+                    <p style="font-size:0.85rem; color:var(--color-text-muted); margin-bottom:0.75rem;">เลือกวิธีชำระเงิน</p>
+                    <div class="pay-method-buttons">
+                        <button class="pay-method-btn" id="pay-method-scan" onclick="selectPayMethod('scan')">
+                            <i class="fa-solid fa-qrcode"></i>
+                            <span>โอน / สแกน</span>
+                        </button>
+                        <button class="pay-method-btn" id="pay-method-cash" onclick="selectPayMethod('cash')">
+                            <i class="fa-solid fa-money-bill-wave"></i>
+                            <span>เงินสด</span>
+                        </button>
+                    </div>
+                </div>
+                <button class="btn btn-success" id="btn-confirm-pay" style="width:100%; padding:0.9rem; font-size:1.05rem; justify-content:center; margin-top:1rem;" onclick="confirmPayment()">
+                    <i class="fa-solid fa-circle-check"></i> ยืนยันชำระเงิน
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js?v=19.0"></script>
 </body>
 </html>

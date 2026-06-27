@@ -41,7 +41,7 @@ let state = {
     editingOrderId: null,
     cart: {}, // drinkId -> quantity
     searchQuery: '',
-    tab: 'orders-tab',
+    tab: 'tables-tab',
     sheetUrl: '',
     autoSync: false,
     stock: {}, // drinkId -> quantity
@@ -181,14 +181,14 @@ function checkLoginStatus() {
         } else {
             if (adminTabBtn) adminTabBtn.style.display = 'none';
             if (state.tab === 'admin-tab') {
-                switchTab('orders-tab');
+                switchTab('tables-tab');
             }
         }
     } else {
         if (loginContainer) loginContainer.classList.remove('hidden');
         document.getElementById('header-user-badge').style.display = 'none';
         if (adminTabBtn) adminTabBtn.style.display = 'none';
-        switchTab('orders-tab');
+        switchTab('tables-tab');
     }
 }
 
@@ -359,17 +359,18 @@ function setupEventListeners() {
     const customerInput = document.getElementById('customer-name');
     customerInput.addEventListener('change', (e) => {
         const val = e.target.value;
-        const deliveryTypeSelect = document.getElementById('delivery-type');
-        
+        // Auto-set delivery type from customer name selection
+        const deliveryTypeInput = document.getElementById('delivery-type');
         if (val === 'Grab') {
-            deliveryTypeSelect.value = 'grab';
+            deliveryTypeInput.value = 'grab';
         } else {
-            deliveryTypeSelect.value = 'walkin';
+            deliveryTypeInput.value = 'walkin';
         }
         
+        // Show Grab driver field if Grab selected
         const grabGroup = document.getElementById('grab-driver-group');
         if (grabGroup) {
-            grabGroup.style.display = deliveryTypeSelect.value === 'grab' ? 'block' : 'none';
+            grabGroup.style.display = val === 'Grab' ? 'block' : 'none';
         }
         
         // Re-render cart to update prices instantly
@@ -379,7 +380,39 @@ function setupEventListeners() {
         if (val && val !== 'กลับบ้าน' && val !== 'Grab') {
             checkCustomerPreviousOrders(val);
         }
+
+        // Update cancel table button visibility
+        updateCancelTableButtonVisibility();
     });
+
+    // Date change handler for POS order date
+    const posOrderDateInput = document.getElementById('order-date');
+    if (posOrderDateInput) {
+        posOrderDateInput.addEventListener('change', () => {
+            updateCancelTableButtonVisibility();
+            renderTables();
+        });
+    }
+
+    // Cancel Table button listener
+    const cancelTableBtn = document.getElementById('btn-cancel-table');
+    if (cancelTableBtn) {
+        cancelTableBtn.addEventListener('click', () => {
+            const selectedVal = document.getElementById('customer-name').value;
+            const activeDate = document.getElementById('order-date').value;
+            if (selectedVal && selectedVal.startsWith('โต๊ะ ')) {
+                const activeOrder = state.orders.find(o => 
+                    (o.customerName === selectedVal || o.customerName.startsWith(selectedVal + ' (')) && 
+                    o.date === activeDate && !o.tableClosed
+                );
+                if (activeOrder) {
+                    deleteOrder(activeOrder.id);
+                } else {
+                    alert(`ไม่พบออเดอร์ค้างชำระ/กำลังใช้งานของ "${selectedVal}" ในวันที่เลือก`);
+                }
+            }
+        });
+    }
 
     // Clear POS Form button
     document.getElementById('btn-clear-form').addEventListener('click', () => {
@@ -440,6 +473,14 @@ function setupEventListeners() {
     document.getElementById('btn-close-backup-modal').addEventListener('click', () => {
         document.getElementById('backup-modal').classList.remove('active');
     });
+
+    // Payment Modal close
+    const closePayModal = document.getElementById('btn-close-pay-modal');
+    if (closePayModal) {
+        closePayModal.addEventListener('click', () => {
+            document.getElementById('pay-modal').classList.remove('active');
+        });
+    }
 
     document.getElementById('btn-export-data').addEventListener('click', exportData);
     
@@ -747,6 +788,20 @@ function checkCustomerPreviousOrders(custName) {
     }
 }
 
+// GET AVAILABLE STOCK (Accounting for order edit session)
+function getAvailableStock(drinkId) {
+    const stockQty = state.stock[drinkId] !== undefined ? state.stock[drinkId] : 20;
+    
+    // If we are currently editing an order, the items in that order should be considered "available" to be re-ordered
+    if (state.editingOrderId) {
+        const editingOrder = state.orders.find(o => o.id === state.editingOrderId);
+        if (editingOrder && editingOrder.items && editingOrder.items[drinkId]) {
+            return stockQty + editingOrder.items[drinkId];
+        }
+    }
+    return stockQty;
+}
+
 // RENDER BEVERAGES GRID
 function renderDrinkGrid() {
     const grid = document.getElementById('beverages-container');
@@ -765,18 +820,25 @@ function renderDrinkGrid() {
         const qtyInCart = state.cart[drink.id] || 0;
         const activeClass = qtyInCart > 0 ? 'active' : '';
         
-        const stockQty = state.stock[drink.id] !== undefined ? state.stock[drink.id] : 20;
+        const available = getAvailableStock(drink.id);
+        const remaining = Math.max(0, available - qtyInCart);
+        
         let stockLabel = '';
-        if (stockQty === 0) {
+        let cardStatusClass = '';
+        
+        if (available === 0) {
             stockLabel = `<span class="bev-stock text-danger" style="font-size: 0.75rem; font-weight: bold; display: block; margin-top: 0.15rem;">❌ หมด</span>`;
-        } else if (stockQty <= 5) {
-            stockLabel = `<span class="bev-stock text-warning" style="font-size: 0.75rem; font-weight: bold; display: block; margin-top: 0.15rem;">⚠️ เหลือ ${stockQty}</span>`;
+            cardStatusClass = 'out-of-stock';
+        } else if (remaining === 0) {
+            stockLabel = `<span class="bev-stock text-danger" style="font-size: 0.75rem; font-weight: bold; display: block; margin-top: 0.15rem;">❌ เต็มสต็อกแล้ว</span>`;
+        } else if (available <= 5) {
+            stockLabel = `<span class="bev-stock text-warning" style="font-size: 0.75rem; font-weight: bold; display: block; margin-top: 0.15rem;">⚠️ เหลือ ${available}</span>`;
         } else {
-            stockLabel = `<span class="bev-stock text-muted" style="font-size: 0.75rem; display: block; margin-top: 0.15rem;">สต็อก: ${stockQty}</span>`;
+            stockLabel = `<span class="bev-stock text-muted" style="font-size: 0.75rem; display: block; margin-top: 0.15rem;">สต็อก: ${available}</span>`;
         }
 
         const card = document.createElement('div');
-        card.className = `bev-card ${activeClass}`;
+        card.className = `bev-card ${activeClass} ${cardStatusClass}`;
         card.setAttribute('style', `--bev-color: ${drink.color}; --bev-color-rgb: ${drink.colorRgb};`);
         
         card.innerHTML = `
@@ -792,8 +854,8 @@ function renderDrinkGrid() {
                 ${stockLabel}
             </div>
             <div class="bev-controls">
-                <button type="button" class="bev-btn minus-btn" title="ลดจำนวน"><i class="fa-solid fa-minus"></i></button>
-                <button type="button" class="bev-btn plus-btn" title="เพิ่มจำนวน"><i class="fa-solid fa-plus"></i></button>
+                <button type="button" class="bev-btn minus-btn" title="ลดจำนวน" ${qtyInCart === 0 ? 'disabled' : ''}><i class="fa-solid fa-minus"></i></button>
+                <button type="button" class="bev-btn plus-btn" title="เพิ่มจำนวน" ${remaining === 0 ? 'disabled' : ''}><i class="fa-solid fa-plus"></i></button>
             </div>
         `;
         
@@ -810,6 +872,14 @@ function renderDrinkGrid() {
         
         // Clicking card anywhere else adds 1
         card.addEventListener('click', () => {
+            if (available === 0) {
+                alert("ขออภัย! สินค้านี้หมดชั่วคราว");
+                return;
+            }
+            if (remaining === 0) {
+                alert("ขออภัย! สินค้าในสต็อกไม่เพียงพอ");
+                return;
+            }
             changeCartQty(drink.id, 1);
         });
         
@@ -825,6 +895,11 @@ function changeCartQty(drinkId, delta) {
     if (newQty <= 0) {
         delete state.cart[drinkId];
     } else {
+        const available = getAvailableStock(drinkId);
+        if (newQty > available) {
+            alert("ขออภัย! สินค้าในสต็อกไม่เพียงพอ");
+            return;
+        }
         state.cart[drinkId] = newQty;
     }
     
@@ -914,6 +989,13 @@ function saveOrder() {
     const tableVal = document.getElementById('customer-name').value.trim();
     const customNameVal = document.getElementById('customer-display-name').value.trim();
     const customerName = customNameVal ? `${tableVal} (${customNameVal})` : tableVal;
+    
+    // Auto-fill hidden fields if empty
+    const staffInput = document.getElementById('staff-name');
+    if (!staffInput.value) staffInput.value = sessionStorage.getItem('baanphuan_username') || '';
+    const dateInput = document.getElementById('order-date');
+    if (!dateInput.value) dateInput.value = getLocalDateString(new Date());
+    
     const orderDate = document.getElementById('order-date').value;
     const deliveryType = document.getElementById('delivery-type').value;
     const grabDriverName = deliveryType === 'grab' ? document.getElementById('grab-driver-name').value.trim() : '';
@@ -922,6 +1004,7 @@ function saveOrder() {
     const staffName = document.getElementById('staff-name').value.trim();
     const orderRemark = document.getElementById('order-remark').value.trim();
     
+
     if (!customerName) {
         alert("กรุณาเลือกโต๊ะ / ช่องทาง");
         document.getElementById('customer-name').focus();
@@ -1011,6 +1094,8 @@ function saveOrder() {
             promotionDetail: getPromotionDescription(pricing, deliveryType === 'grab'),
             staffName: staffName,
             remark: orderRemark,
+            tableClosed: false,
+            previouslyPaid: status === 'paid' ? pricing.total : 0,
             createdTime: now.toISOString(),
             updatedTime: null
         };
@@ -1141,6 +1226,7 @@ function clearPOSForm() {
     
     renderDrinkGrid();
     renderCart();
+    updateCancelTableButtonVisibility();
 }
 
 // RENDER ALL ORDERS IN THE LOGS TAB
@@ -2453,7 +2539,13 @@ function toggleOrderStatus(orderId) {
     const order = state.orders.find(o => o.id === orderId);
     if (!order) return;
     
-    order.status = order.status === 'pending_promo' ? 'paid' : 'pending_promo';
+    if (order.status === 'pending_promo') {
+        order.status = 'paid';
+        order.previouslyPaid = order.priceDetails ? order.priceDetails.total : 0;
+    } else {
+        order.status = 'pending_promo';
+        // Keep previouslyPaid or leave it as is so continuing bill works
+    }
     saveToLocalStorage();
     renderTables();
     renderOrders();
@@ -2461,71 +2553,182 @@ function toggleOrderStatus(orderId) {
 }
 
 // RENDER TABLES GRID
+let _payingOrderId = null;
+let _payingMethod = 'scan';
+
 function renderTables() {
     const gridContainer = document.getElementById('tables-grid-container');
     if (!gridContainer) return;
     
     gridContainer.innerHTML = '';
     
+    // Auto-update cancel button visibility for the POS
+    updateCancelTableButtonVisibility();
+    
     const totalTables = 8;
     const todayStr = getLocalDateString(new Date());
+    
+    // ─── Update Live Stats ───
+    let occupiedCount = 0;  // pending (ค้างชำระ)
+    let paidSeatedCount = 0; // paid but still seated
+    let emptyCount = 0;
+    let pendingTotal = 0;
+    let todayRevenue = 0;
+    
+    state.orders.forEach(o => {
+        if (o.date === todayStr) {
+            if (o.status !== 'pending_promo') {
+                todayRevenue += (o.priceDetails ? o.priceDetails.total : 0);
+            } else {
+                // If order is reopened / pending promo, count what has been paid so far in today's revenue
+                todayRevenue += (o.previouslyPaid || 0);
+            }
+        }
+        if (o.status === 'pending_promo' && o.customerName && o.customerName.startsWith('โต๊ะ ')) {
+            const total = o.priceDetails ? o.priceDetails.total : 0;
+            const prevPaid = o.previouslyPaid || 0;
+            pendingTotal += Math.max(0, total - prevPaid);
+        }
+    });
+    
+    for (let i = 1; i <= totalTables; i++) {
+        const tableName = `โต๊ะ ${i}`;
+        const hasPending = state.orders.some(o =>
+            (o.customerName === tableName || o.customerName.startsWith(tableName + ' (')) &&
+            o.date === todayStr && o.status === 'pending_promo'
+        );
+        const hasPaid = !hasPending && state.orders.some(o =>
+            (o.customerName === tableName || o.customerName.startsWith(tableName + ' (')) &&
+            o.date === todayStr && o.status === 'paid' && !o.tableClosed
+        );
+        if (hasPending) occupiedCount++;
+        else if (hasPaid) paidSeatedCount++;
+        else emptyCount++;
+    }
+    
+    const elEmpty = document.getElementById('stat-tables-empty');
+    const elOccupied = document.getElementById('stat-tables-occupied');
+    const elPending = document.getElementById('stat-tables-pending-total');
+    const elToday = document.getElementById('stat-today-revenue');
+    if (elEmpty) elEmpty.textContent = emptyCount;
+    if (elOccupied) elOccupied.textContent = `${occupiedCount}ค้าง / ${paidSeatedCount}จ่ายแล้ว`;
+    if (elPending) elPending.textContent = pendingTotal.toLocaleString();
+    if (elToday) elToday.textContent = todayRevenue.toLocaleString();
     
     for (let i = 1; i <= totalTables; i++) {
         const tableName = `โต๊ะ ${i}`;
         
         // Find if there is an active (pending/unpaid) order for this table today
-        const activeOrder = state.orders.find(o => {
-            return (o.customerName === tableName || o.customerName.startsWith(tableName + ' (')) && o.date === todayStr && o.status === 'pending_promo';
-        });
+        // Find pending (unpaid) order for this table today
+        const pendingOrder = state.orders.find(o =>
+            (o.customerName === tableName || o.customerName.startsWith(tableName + ' (')) &&
+            o.date === todayStr && o.status === 'pending_promo'
+        );
+        // Find most recent paid order for this table today (only if no pending, not closed)
+        const paidOrder = !pendingOrder ? state.orders.find(o =>
+            (o.customerName === tableName || o.customerName.startsWith(tableName + ' (')) &&
+            o.date === todayStr && o.status === 'paid' && !o.tableClosed
+        ) : null;
         
         const card = document.createElement('div');
         
-        if (activeOrder) {
+        if (pendingOrder) {
+            // 🟡 STATE 1: มีคน + ยังไม่จ่าย
             card.className = 'table-card table-occupied';
-            
-            // Calculate items list
             let itemsHtml = '';
-            if (activeOrder.items) {
-                for (const drinkId in activeOrder.items) {
+            if (pendingOrder.items) {
+                for (const drinkId in pendingOrder.items) {
                     const drink = DRINKS.find(d => d.id === drinkId);
-                    if (drink) {
-                        itemsHtml += `
-                            <div class="table-bill-item">
-                                <span>${drink.nameTH}</span>
-                                <span>x${activeOrder.items[drinkId]}</span>
-                            </div>
-                        `;
-                    }
+                    if (drink) itemsHtml += `<div class="table-bill-item"><span>${drink.nameTH}</span><span>x${pendingOrder.items[drinkId]}</span></div>`;
                 }
             }
+            const total = pendingOrder.priceDetails ? pendingOrder.priceDetails.total : 0;
+            const prevPaid = pendingOrder.previouslyPaid || 0;
+            const remaining = Math.max(0, total - prevPaid);
             
-            const total = activeOrder.priceDetails ? activeOrder.priceDetails.total : 0;
+            let billTotalHtml = '';
+            if (prevPaid > 0) {
+                billTotalHtml = `
+                    <div style="font-size: 0.8rem; color: var(--color-text-muted); display: flex; justify-content: space-between; margin-bottom: 0.2rem;">
+                        <span>ยอดรวมบิล:</span><span>${total.toLocaleString()} บาท</span>
+                    </div>
+                    <div style="font-size: 0.8rem; color: var(--color-success); display: flex; justify-content: space-between; margin-bottom: 0.2rem;">
+                        <span>จ่ายแล้วก่อนหน้า:</span><span>${prevPaid.toLocaleString()} บาท</span>
+                    </div>
+                    <div class="table-bill-total" style="font-weight: 700; color: var(--color-warning); border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 0.3rem; margin-top: 0.3rem; display: flex; justify-content: space-between;">
+                        <span>ยอดจ่ายเพิ่ม:</span><span>${remaining.toLocaleString()} บาท</span>
+                    </div>
+                `;
+            } else {
+                billTotalHtml = `
+                    <div class="table-bill-total" style="display: flex; justify-content: space-between;"><span>ยอดค้างชำระ:</span><span>${total.toLocaleString()} บาท</span></div>
+                `;
+            }
             
             card.innerHTML = `
                 <div class="table-header">
-                    <div class="table-title text-warning"><i class="fa-solid fa-chair"></i> ${activeOrder.customerName}</div>
-                    <span class="table-status-badge badge-occupied">มีลูกค้า / ค้างชำระ</span>
+                    <div class="table-title text-warning"><i class="fa-solid fa-chair"></i> ${pendingOrder.customerName}</div>
+                    <span class="table-status-badge badge-occupied"><i class="fa-solid fa-hourglass-half"></i> ค้างชำระ</span>
                 </div>
                 <div class="table-content">
-                    <div style="font-weight: 500; font-size: 0.8rem; color: var(--color-text-muted); margin-bottom: 0.25rem;">บิลเวลา: ${activeOrder.time}</div>
-                    <div class="table-bill-items">
-                        ${itemsHtml}
-                    </div>
-                    <div class="table-bill-total">
-                        <span>ยอดค้างชำระ:</span>
-                        <span>${total.toLocaleString()} บาท</span>
-                    </div>
+                    <div style="font-size: 0.8rem; color: var(--color-text-muted); margin-bottom: 0.4rem;"><i class="fa-regular fa-clock"></i> บิลเวลา: ${pendingOrder.time}</div>
+                    <div class="table-bill-items">${itemsHtml}</div>
+                    ${billTotalHtml}
                 </div>
-                <div class="table-actions">
-                    <button class="btn btn-success btn-sm" onclick="payTableOrder('${activeOrder.id}')" title="ชำระเงิน">
+                <div class="table-actions" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                    <button class="btn btn-success btn-sm" onclick="payTableOrder('${pendingOrder.id}')" style="flex: 1.5; white-space: nowrap;">
                         <i class="fa-solid fa-money-bill-wave"></i> ชำระเงิน
                     </button>
-                    <button class="btn btn-outline btn-sm" onclick="loadOrderForEditing('${activeOrder.id}')" title="สั่งเพิ่ม / แก้ไข">
+                    <button class="btn btn-outline btn-sm" onclick="loadOrderForEditing('${pendingOrder.id}')" style="flex: 1; white-space: nowrap;">
                         <i class="fa-solid fa-plus-minus"></i> สั่งเพิ่ม
+                    </button>
+                    <button class="btn btn-danger btn-sm" onclick="deleteOrder('${pendingOrder.id}')" style="flex: 1; white-space: nowrap;" title="ยกเลิกโต๊ะ / ลบออเดอร์">
+                        <i class="fa-solid fa-trash-can"></i> ยกเลิกโต๊ะ
+                    </button>
+                </div>
+            `;
+        } else if (paidOrder) {
+            // 🟢 STATE 2: มีคนนั่ง + จ่ายแล้ว
+            card.className = 'table-card table-paid';
+            let itemsHtml = '';
+            if (paidOrder.items) {
+                for (const drinkId in paidOrder.items) {
+                    const drink = DRINKS.find(d => d.id === drinkId);
+                    if (drink) itemsHtml += `<div class="table-bill-item"><span>${drink.nameTH}</span><span>x${paidOrder.items[drinkId]}</span></div>`;
+                }
+            }
+            const total = paidOrder.priceDetails ? paidOrder.priceDetails.total : 0;
+            const payIcon = paidOrder.paymentMethod === 'cash' ? '💵' : '📱';
+            card.innerHTML = `
+                <div class="table-header">
+                    <div class="table-title text-success"><i class="fa-solid fa-chair"></i> ${paidOrder.customerName}</div>
+                    <span class="table-status-badge badge-paid-seated"><i class="fa-solid fa-circle-check"></i> จ่ายแล้ว</span>
+                </div>
+                <div class="table-content">
+                    <div style="font-size: 0.8rem; color: var(--color-text-muted); margin-bottom: 0.4rem;"><i class="fa-regular fa-clock"></i> บิลเวลา: ${paidOrder.time} &nbsp;${payIcon}</div>
+                    <div class="table-bill-items">${itemsHtml}</div>
+                    <div class="table-bill-total" style="color: var(--color-success);">
+                        <span>จ่ายแล้ว:</span>
+                        <span>${total.toLocaleString()} บาท ✓</span>
+                    </div>
+                    <div class="reopen-hint">
+                        <i class="fa-solid fa-circle-info"></i> ลูกค้ายังนั่งอยู่ — กด “ต่อบิลเดิม” เพื่อเพิ่มรายการและคำนวณโปรโมชั่นรวม
+                    </div>
+                </div>
+                <div class="table-actions table-actions-3">
+                    <button class="btn btn-warning btn-sm" onclick="reopenPaidOrder('${paidOrder.id}')" style="flex:2;">
+                        <i class="fa-solid fa-rotate-left"></i> ต่อบิลเดิม
+                    </button>
+                    <button class="btn btn-outline btn-sm" onclick="openTable('${tableName}')" style="flex:1.5;">
+                        <i class="fa-solid fa-cart-plus"></i> บิลใหม่
+                    </button>
+                    <button class="btn btn-secondary btn-sm" onclick="closeTableAfterPay('${tableName}')" style="flex:1.5;">
+                        <i class="fa-solid fa-right-from-bracket"></i> ปิดโต๊ะ
                     </button>
                 </div>
             `;
         } else {
+            // ⚪ STATE 3: ว่าง
             card.className = 'table-card table-empty';
             card.innerHTML = `
                 <div class="table-header">
@@ -2533,17 +2736,18 @@ function renderTables() {
                     <span class="table-status-badge badge-empty">ว่าง</span>
                 </div>
                 <div class="table-content" style="display: flex; align-items: center; justify-content: center; color: var(--color-text-muted); font-style: italic; min-height: 80px;">
-                    ไม่มีลูกค้า / โต๊ะว่าง
+                    โต๊ะว่าง / พร้อมรับลูกค้า
                 </div>
                 <div class="table-actions">
                     <button class="btn btn-primary btn-sm" onclick="openTable('${tableName}')">
-                        <i class="fa-solid fa-cart-plus"></i> เปิดโต๊ะสั่งน้ำ
+                        <i class="fa-solid fa-cart-plus"></i> เปิดโต๊ะ
                     </button>
                 </div>
             `;
         }
         gridContainer.appendChild(card);
     }
+
     
     // Render other pending orders (e.g. walkin or grab that are unpaid)
     const otherContainer = document.getElementById('other-pending-container');
@@ -2595,12 +2799,15 @@ function renderTables() {
                             <span>${total.toLocaleString()} บาท</span>
                         </div>
                     </div>
-                    <div class="table-actions">
-                        <button class="btn btn-success btn-sm" onclick="payTableOrder('${order.id}')">
+                    <div class="table-actions" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                        <button class="btn btn-success btn-sm" onclick="payTableOrder('${order.id}')" style="flex: 1.5; white-space: nowrap;">
                             <i class="fa-solid fa-money-bill-wave"></i> ชำระเงิน
                         </button>
-                        <button class="btn btn-outline btn-sm" onclick="loadOrderForEditing('${order.id}')">
+                        <button class="btn btn-outline btn-sm" onclick="loadOrderForEditing('${order.id}')" style="flex: 1; white-space: nowrap;">
                             <i class="fa-solid fa-plus-minus"></i> สั่งเพิ่ม
+                        </button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteOrder('${order.id}')" style="flex: 1; white-space: nowrap;" title="ยกเลิกออเดอร์ / ลบออเดอร์">
+                            <i class="fa-solid fa-trash-can"></i> ยกเลิก
                         </button>
                     </div>
                 `;
@@ -2610,31 +2817,166 @@ function renderTables() {
     }
 }
 
-// Pay table order helper
+// Open pay modal (replaces browser confirm)
 function payTableOrder(orderId) {
     const order = state.orders.find(o => o.id === orderId);
     if (!order) return;
+    openPayModal(orderId);
+}
+
+function openPayModal(orderId) {
+    const order = state.orders.find(o => o.id === orderId);
+    if (!order) return;
     
-    if (confirm(`คุณต้องการยืนยันการชำระเงินสำหรับ "${order.customerName}" ยอดรวม ${order.priceDetails.total} บาท ใช่หรือไม่?`)) {
-        order.status = 'paid';
-        order.updatedTime = new Date().toISOString();
-        
-        saveToLocalStorage();
-        
-        // Refresh everything
-        renderTables();
-        renderOrders();
-        renderAnalytics();
-        
-        alert(`ชำระเงินเรียบร้อยแล้ว!`);
+    _payingOrderId = orderId;
+    _payingMethod = 'scan';
+    
+    // Fill modal info
+    document.getElementById('pay-modal-table-name').textContent = order.customerName;
+    
+    // Build items list
+    let itemsHtml = '';
+    if (order.items) {
+        for (const drinkId in order.items) {
+            const drink = DRINKS.find(d => d.id === drinkId);
+            if (drink) {
+                itemsHtml += `<div class="pay-modal-item"><span>${drink.nameTH}</span><span>x${order.items[drinkId]}</span></div>`;
+            }
+        }
     }
+    document.getElementById('pay-modal-items').innerHTML = itemsHtml;
+    
+    const total = order.priceDetails ? order.priceDetails.total : 0;
+    const prevPaid = order.previouslyPaid || 0;
+    const remaining = Math.max(0, total - prevPaid);
+    
+    const totalContainer = document.getElementById('pay-modal-total-container');
+    if (prevPaid > 0) {
+        totalContainer.style.flexDirection = 'column';
+        totalContainer.style.alignItems = 'stretch';
+        totalContainer.innerHTML = `
+            <div style="display: flex; justify-content: space-between; font-size: 0.9rem; color: var(--color-text-muted); margin-bottom: 0.25rem; width: 100%;">
+                <span>ยอดรวมบิลนี้:</span>
+                <span>${total.toLocaleString()} บาท</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 0.9rem; color: var(--color-success); margin-bottom: 0.25rem; width: 100%;">
+                <span>ชำระเงินแล้วก่อนหน้า:</span>
+                <span>-${prevPaid.toLocaleString()} บาท</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; border-top: 1px dashed rgba(255,255,255,0.15); padding-top: 0.4rem; font-size: 1.1rem; font-weight: 800; color: var(--color-warning); width: 100%; align-items: center;">
+                <span>ยอดชำระเพิ่ม:</span>
+                <span class="pay-modal-amount" style="color: var(--color-warning); font-size: 1.6rem;">${remaining.toLocaleString()} บาท</span>
+            </div>
+        `;
+    } else {
+        totalContainer.style.flexDirection = 'row';
+        totalContainer.style.alignItems = 'center';
+        totalContainer.innerHTML = `
+            <span>ยอดชำระรวม</span>
+            <span class="pay-modal-amount" id="pay-modal-amount">${total.toLocaleString()} บาท</span>
+        `;
+    }
+    
+    // Reset method buttons
+    document.querySelectorAll('.pay-method-btn').forEach(b => b.classList.remove('selected'));
+    document.getElementById('pay-method-scan').classList.add('selected');
+    
+    document.getElementById('pay-modal').classList.add('active');
+}
+
+function selectPayMethod(method) {
+    _payingMethod = method;
+    document.querySelectorAll('.pay-method-btn').forEach(b => b.classList.remove('selected'));
+    const btn = document.getElementById(`pay-method-${method}`);
+    if (btn) btn.classList.add('selected');
+}
+
+function confirmPayment() {
+    if (!_payingOrderId) return;
+    
+    const order = state.orders.find(o => o.id === _payingOrderId);
+    if (!order) return;
+    
+    order.status = 'paid';
+    order.paymentMethod = _payingMethod;
+    order.previouslyPaid = order.priceDetails ? order.priceDetails.total : 0;
+    order.updatedTime = new Date().toISOString();
+    
+    saveToLocalStorage();
+    
+    document.getElementById('pay-modal').classList.remove('active');
+    _payingOrderId = null;
+    
+    // Refresh
+    renderTables();
+    renderOrders();
+    renderAnalytics();
+}
+
+// Reopen a paid order back to pending so more items can be added (for promo completion)
+function reopenPaidOrder(orderId) {
+    const order = state.orders.find(o => o.id === orderId);
+    if (!order) return;
+    
+    // Revert status back to pending
+    order.status = 'pending_promo';
+    order.tableClosed = false;
+    order.updatedTime = new Date().toISOString();
+    
+    saveToLocalStorage();
+    
+    // Load into POS form for editing (loads existing items into cart)
+    loadOrderForEditing(orderId);
+    
+    // Count existing bottles to show in UI
+    const existingQty = Object.values(order.items || {}).reduce((a, b) => a + b, 0);
+    
+    // Override title and save button for clarity
+    document.getElementById('pos-title').innerHTML =
+        '<i class="fa-solid fa-rotate-left text-warning"></i> ' +
+        'ต่อบิล: ' + order.customerName +
+        ' <span style="font-size:0.8rem;color:var(--color-warning);font-weight:500;">— เดิม ' + existingQty + ' ขวด, เพิ่มได้เลย</span>';
+    document.getElementById('order-status').value = 'pending_promo';
+    document.getElementById('btn-save-order').innerHTML =
+        '<i class="fa-solid fa-rotate-left"></i> บันทึกบิลต่อเนื่อง';
+    
+    // Refresh tables view
+    renderTables();
+    renderOrders();
+    
+    // Scroll to POS
+    const posPanel = document.querySelector('.pos-panel');
+    if (posPanel) posPanel.scrollIntoView({ behavior: 'smooth' });
+}
+
+// Close table after payment
+function closeTableAfterPay(tableName) {
+    const todayStr = getLocalDateString(new Date());
+    // Find the latest paid order for this table today and mark it as 'closed'
+    const paidOrders = state.orders.filter(o =>
+        (o.customerName === tableName || o.customerName.startsWith(tableName + ' (')) &&
+        o.date === todayStr && o.status === 'paid'
+    );
+    paidOrders.forEach(o => { o.tableClosed = true; });
+    saveToLocalStorage();
+    renderTables();
+    renderOrders();
 }
 
 // Open table helper
 function openTable(tableName) {
     document.getElementById('customer-name').value = tableName;
     document.getElementById('customer-display-name').value = '';
-    document.getElementById('delivery-type').value = 'walkin';
+    // Auto-set delivery type hidden field
+    const deliveryInput = document.getElementById('delivery-type');
+    if (deliveryInput) deliveryInput.value = 'walkin';
+    // Auto-set staff from session
+    const staffInput = document.getElementById('staff-name');
+    if (staffInput) staffInput.value = sessionStorage.getItem('baanphuan_username') || '';
+    // Auto-set date to today
+    const dateInput = document.getElementById('order-date');
+    if (dateInput) dateInput.value = getLocalDateString(new Date());
+    
     document.getElementById('order-status').value = 'pending_promo';
     
     // Clear cart since it's a new opening
@@ -2643,10 +2985,35 @@ function openTable(tableName) {
     renderCart();
     
     // Update POS Header to show table opening mode
-    document.getElementById('pos-title').innerHTML = `<i class="fa-solid fa-cart-plus text-primary"></i> เปิดโต๊ะสั่งน้ำ: ${tableName}`;
+    document.getElementById('pos-title').innerHTML = `<i class="fa-solid fa-cart-plus text-primary"></i> เปิดโต๊ะ: ${tableName}`;
     
     // Scroll to POS Form
     document.querySelector('.pos-panel').scrollIntoView({ behavior: 'smooth' });
+}
+
+// UPDATE CANCEL TABLE BUTTON VISIBILITY
+function updateCancelTableButtonVisibility() {
+    const customerSelect = document.getElementById('customer-name');
+    const cancelBtn = document.getElementById('btn-cancel-table');
+    if (!customerSelect || !cancelBtn) return;
+    
+    const selectedVal = customerSelect.value;
+    const activeDate = document.getElementById('order-date').value;
+    
+    const isTable = selectedVal && selectedVal.startsWith('โต๊ะ ');
+    if (isTable) {
+        // Check if there are orders for this table on this date
+        const tableOrders = state.orders.filter(o => 
+            (o.customerName === selectedVal || o.customerName.startsWith(selectedVal + ' (')) && 
+            o.date === activeDate && !o.tableClosed
+        );
+        if (tableOrders.length > 0) {
+            cancelBtn.style.display = 'inline-flex';
+            return;
+        }
+    }
+    
+    cancelBtn.style.display = 'none';
 }
 
 // RUN ON LOAD

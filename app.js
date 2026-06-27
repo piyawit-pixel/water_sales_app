@@ -380,7 +380,39 @@ function setupEventListeners() {
         if (val && val !== 'กลับบ้าน' && val !== 'Grab') {
             checkCustomerPreviousOrders(val);
         }
+
+        // Update cancel table button visibility
+        updateCancelTableButtonVisibility();
     });
+
+    // Date change handler for POS order date
+    const posOrderDateInput = document.getElementById('order-date');
+    if (posOrderDateInput) {
+        posOrderDateInput.addEventListener('change', () => {
+            updateCancelTableButtonVisibility();
+            renderTables();
+        });
+    }
+
+    // Cancel Table button listener
+    const cancelTableBtn = document.getElementById('btn-cancel-table');
+    if (cancelTableBtn) {
+        cancelTableBtn.addEventListener('click', () => {
+            const selectedVal = document.getElementById('customer-name').value;
+            const activeDate = document.getElementById('order-date').value;
+            if (selectedVal && selectedVal.startsWith('โต๊ะ ')) {
+                const activeOrder = state.orders.find(o => 
+                    (o.customerName === selectedVal || o.customerName.startsWith(selectedVal + ' (')) && 
+                    o.date === activeDate && !o.tableClosed
+                );
+                if (activeOrder) {
+                    deleteOrder(activeOrder.id);
+                } else {
+                    alert(`ไม่พบออเดอร์ค้างชำระ/กำลังใช้งานของ "${selectedVal}" ในวันที่เลือก`);
+                }
+            }
+        });
+    }
 
     // Clear POS Form button
     document.getElementById('btn-clear-form').addEventListener('click', () => {
@@ -1194,6 +1226,7 @@ function clearPOSForm() {
     
     renderDrinkGrid();
     renderCart();
+    updateCancelTableButtonVisibility();
 }
 
 // RENDER ALL ORDERS IN THE LOGS TAB
@@ -2529,6 +2562,9 @@ function renderTables() {
     
     gridContainer.innerHTML = '';
     
+    // Auto-update cancel button visibility for the POS
+    updateCancelTableButtonVisibility();
+    
     const totalTables = 8;
     const todayStr = getLocalDateString(new Date());
     
@@ -2639,12 +2675,15 @@ function renderTables() {
                     <div class="table-bill-items">${itemsHtml}</div>
                     ${billTotalHtml}
                 </div>
-                <div class="table-actions">
-                    <button class="btn btn-success btn-sm" onclick="payTableOrder('${pendingOrder.id}')">
+                <div class="table-actions" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                    <button class="btn btn-success btn-sm" onclick="payTableOrder('${pendingOrder.id}')" style="flex: 1.5; white-space: nowrap;">
                         <i class="fa-solid fa-money-bill-wave"></i> ชำระเงิน
                     </button>
-                    <button class="btn btn-outline btn-sm" onclick="loadOrderForEditing('${pendingOrder.id}')">
+                    <button class="btn btn-outline btn-sm" onclick="loadOrderForEditing('${pendingOrder.id}')" style="flex: 1; white-space: nowrap;">
                         <i class="fa-solid fa-plus-minus"></i> สั่งเพิ่ม
+                    </button>
+                    <button class="btn btn-danger btn-sm" onclick="deleteOrder('${pendingOrder.id}')" style="flex: 1; white-space: nowrap;" title="ยกเลิกโต๊ะ / ลบออเดอร์">
+                        <i class="fa-solid fa-trash-can"></i> ยกเลิกโต๊ะ
                     </button>
                 </div>
             `;
@@ -2760,12 +2799,15 @@ function renderTables() {
                             <span>${total.toLocaleString()} บาท</span>
                         </div>
                     </div>
-                    <div class="table-actions">
-                        <button class="btn btn-success btn-sm" onclick="payTableOrder('${order.id}')">
+                    <div class="table-actions" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                        <button class="btn btn-success btn-sm" onclick="payTableOrder('${order.id}')" style="flex: 1.5; white-space: nowrap;">
                             <i class="fa-solid fa-money-bill-wave"></i> ชำระเงิน
                         </button>
-                        <button class="btn btn-outline btn-sm" onclick="loadOrderForEditing('${order.id}')">
+                        <button class="btn btn-outline btn-sm" onclick="loadOrderForEditing('${order.id}')" style="flex: 1; white-space: nowrap;">
                             <i class="fa-solid fa-plus-minus"></i> สั่งเพิ่ม
+                        </button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteOrder('${order.id}')" style="flex: 1; white-space: nowrap;" title="ยกเลิกออเดอร์ / ลบออเดอร์">
+                            <i class="fa-solid fa-trash-can"></i> ยกเลิก
                         </button>
                     </div>
                 `;
@@ -2947,6 +2989,31 @@ function openTable(tableName) {
     
     // Scroll to POS Form
     document.querySelector('.pos-panel').scrollIntoView({ behavior: 'smooth' });
+}
+
+// UPDATE CANCEL TABLE BUTTON VISIBILITY
+function updateCancelTableButtonVisibility() {
+    const customerSelect = document.getElementById('customer-name');
+    const cancelBtn = document.getElementById('btn-cancel-table');
+    if (!customerSelect || !cancelBtn) return;
+    
+    const selectedVal = customerSelect.value;
+    const activeDate = document.getElementById('order-date').value;
+    
+    const isTable = selectedVal && selectedVal.startsWith('โต๊ะ ');
+    if (isTable) {
+        // Check if there are orders for this table on this date
+        const tableOrders = state.orders.filter(o => 
+            (o.customerName === selectedVal || o.customerName.startsWith(selectedVal + ' (')) && 
+            o.date === activeDate && !o.tableClosed
+        );
+        if (tableOrders.length > 0) {
+            cancelBtn.style.display = 'inline-flex';
+            return;
+        }
+    }
+    
+    cancelBtn.style.display = 'none';
 }
 
 // RUN ON LOAD
