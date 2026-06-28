@@ -133,7 +133,7 @@ function saveData(ss, payload) {
       }
       var subtotal = total + discount;
       
-      var pm = o.paymentMethod === 'cash' ? 'เงินสด' : 'เงินโอน / สแกน';
+      var pm = o.paymentMethod === 'cash' ? 'เงินสด' : (o.paymentMethod === 'unpaid' ? 'ยังไม่จ่าย' : 'เงินโอน / สแกน');
       
       return [
         o.id || "",

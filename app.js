@@ -1322,6 +1322,8 @@ function renderOrders() {
             paymentBadge = `<span class="badge" style="background-color: #0ea5e9; color: white;"><i class="fa-solid fa-money-bill-wave"></i> เงินสด</span>`;
         } else if (order.paymentMethod === 'scan') {
             paymentBadge = `<span class="badge" style="background-color: #6366f1; color: white;"><i class="fa-solid fa-qrcode"></i> โอน/สแกน</span>`;
+        } else if (order.paymentMethod === 'unpaid') {
+            paymentBadge = `<span class="badge" style="background-color: #ef4444; color: white;"><i class="fa-solid fa-circle-xmark"></i> ยังไม่จ่าย</span>`;
         } else {
             paymentBadge = `<span class="badge badge-outline" style="border-color: #94a3b8; color: #64748b;"><i class="fa-solid fa-qrcode"></i> โอน/สแกน</span>`;
         }
@@ -1738,6 +1740,7 @@ function renderAnalytics() {
     let filteredCommBottles = 0;
     let filteredScanRevenue = 0;
     let filteredCashRevenue = 0;
+    let filteredUnpaidRevenue = 0;
     
     let totalRevenue = 0;
     let totalBottles = 0;
@@ -1782,8 +1785,10 @@ function renderAnalytics() {
             filteredDiscount += pricing.discount || 0;
             if (order.paymentMethod === 'cash') {
                 filteredCashRevenue += pricing.total || 0;
-            } else {
+            } else if (order.paymentMethod === 'scan') {
                 filteredScanRevenue += pricing.total || 0;
+            } else if (order.paymentMethod === 'unpaid') {
+                filteredUnpaidRevenue += pricing.total || 0;
             }
             if (order.deliveryType !== 'grab' && matchesStaff) {
                 filteredCommBottles += orderQty;
@@ -1850,7 +1855,8 @@ function renderAnalytics() {
     document.getElementById('analytics-today-bottles').textContent = `${filteredBottles} ขวด`;
     const payDetailsEl = document.getElementById('analytics-today-payment-details');
     if (payDetailsEl) {
-        payDetailsEl.textContent = `โอน/สแกน: ${filteredScanRevenue.toLocaleString()} บาท | เงินสด: ${filteredCashRevenue.toLocaleString()} บาท`;
+        payDetailsEl.textContent = `โอน/สแกน: ${filteredScanRevenue.toLocaleString()} บาท | เงินสด: ${filteredCashRevenue.toLocaleString()} บาท` + 
+            (filteredUnpaidRevenue > 0 ? ` | ยังไม่จ่าย: ${filteredUnpaidRevenue.toLocaleString()} บาท` : '');
     }
     document.getElementById('analytics-total-revenue-all').textContent = `${totalRevenue.toLocaleString()} บาท`;
     document.getElementById('analytics-total-bottles-all').textContent = `${totalBottles} ขวด`;
@@ -2409,7 +2415,7 @@ function copyOrderToText(orderId) {
     if (!order) return;
     
     const deliveryName = order.deliveryType === 'grab' ? 'Grab Delivery' : (order.deliveryType === 'walkin' ? 'รับเอง/หน้าร้าน' : 'อื่นๆ');
-    const payMethodName = order.paymentMethod === 'cash' ? 'เงินสด' : 'เงินโอน / สแกน';
+    const payMethodName = order.paymentMethod === 'cash' ? 'เงินสด' : (order.paymentMethod === 'unpaid' ? 'ยังไม่จ่าย' : 'เงินโอน / สแกน');
     
     let itemsText = '';
     const drinkKeys = Object.keys(order.items);
@@ -2472,6 +2478,7 @@ function copyDailySummaryToText() {
     let filteredBottles = 0;
     let filteredScanRevenue = 0;
     let filteredCashRevenue = 0;
+    let filteredUnpaidRevenue = 0;
     let pendingPromoList = [];
     
     state.orders.forEach(order => {
@@ -2497,8 +2504,10 @@ function copyDailySummaryToText() {
                 filteredRevenue += pricing.total || 0;
                 if (order.paymentMethod === 'cash') {
                     filteredCashRevenue += pricing.total || 0;
-                } else {
+                } else if (order.paymentMethod === 'scan') {
                     filteredScanRevenue += pricing.total || 0;
+                } else if (order.paymentMethod === 'unpaid') {
+                    filteredUnpaidRevenue += pricing.total || 0;
                 }
             }
         }
@@ -2526,7 +2535,8 @@ function copyDailySummaryToText() {
 🥤 ขายได้ทั้งหมด: ${filteredBottles} ขวด
 💰 ยอดขายรวม: ${filteredRevenue.toLocaleString()} บาท
    • โอน/สแกน: ${filteredScanRevenue.toLocaleString()} บาท
-   • เงินสด: ${filteredCashRevenue.toLocaleString()} บาท
+   • เงินสด: ${filteredCashRevenue.toLocaleString()} บาท` + 
+   (filteredUnpaidRevenue > 0 ? `\n   • ยังไม่จ่าย: ${filteredUnpaidRevenue.toLocaleString()} บาท` : '') + `
 ---------------------------------
 ⚠️ รายชื่อลูกค้าที่ยังไม่ครบโปร:
 ${pendingText}---------------------------------`;
