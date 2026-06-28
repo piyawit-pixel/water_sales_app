@@ -765,7 +765,7 @@ function checkCustomerPreviousOrders(custName) {
     const latestOrder = userOrders[0];
     
     // Only suggest merging if the latest order is still unpaid (pending_promo)
-    if (latestOrder.status === 'pending_promo') {
+    if (latestOrder.status === 'pending_promo' || latestOrder.status === 'unpaid') {
         const itemsCount = Object.values(latestOrder.items).reduce((a, b) => a + b, 0);
         const confirmAppend = confirm(
             `พบออเดอร์ค้างชำระของ "${latestOrder.customerName}" (${itemsCount} ขวด, ${latestOrder.priceDetails.total} บาท)\n\nคุณต้องการ "สั่งสินค้าเพิ่มในบิลเดิม" ใช่หรือไม่?`
@@ -1272,7 +1272,7 @@ function renderOrders() {
     let totalRevenue = 0;
     
     filteredOrders.forEach(o => {
-        if (o.status === 'pending_promo') return;
+        if (o.status === 'pending_promo' || o.status === 'unpaid') return;
         const orderQty = o.items ? Object.values(o.items).reduce((sum, q) => sum + q, 0) : 0;
         totalQty += orderQty;
         const pricing = o.priceDetails || { total: 0, discount: 0 };
@@ -1312,9 +1312,14 @@ function renderOrders() {
         }
 
         // Status Badge
-        const statusBadge = order.status === 'pending_promo' 
-            ? `<span class="badge" style="background-color: #ef4444; color: white;"><i class="fa-solid fa-hourglass-half"></i> ยังไม่ครบโปร</span>`
-            : `<span class="badge" style="background-color: #22c55e; color: white;"><i class="fa-solid fa-circle-check"></i> ครบโปร / จ่ายแล้ว</span>`;
+        let statusBadge = '';
+        if (order.status === 'pending_promo') {
+            statusBadge = `<span class="badge" style="background-color: #ef4444; color: white;"><i class="fa-solid fa-hourglass-half"></i> ยังไม่ครบโปร</span>`;
+        } else if (order.status === 'unpaid') {
+            statusBadge = `<span class="badge" style="background-color: #f43f5e; color: white;"><i class="fa-solid fa-circle-xmark"></i> ยังไม่จ่าย</span>`;
+        } else {
+            statusBadge = `<span class="badge" style="background-color: #22c55e; color: white;"><i class="fa-solid fa-circle-check"></i> ครบโปร / จ่ายแล้ว</span>`;
+        }
         
         // Payment Badge
         let paymentBadge = '';
@@ -1387,7 +1392,7 @@ function renderOrders() {
                 </div>
                 <div class="order-actions">
                     <button class="btn btn-outline btn-sm" onclick="toggleOrderStatus('${order.id}')" title="เปลี่ยนสถานะบิล">
-                        <i class="fa-solid fa-arrows-spin"></i> ${order.status === 'pending_promo' ? 'ทำเป็นครบโปร' : 'ทำเป็นยังไม่ครบ'}
+                        <i class="fa-solid fa-arrows-spin"></i> ${(order.status === 'pending_promo' || order.status === 'unpaid') ? 'ทำเป็นจ่ายแล้ว' : 'ทำเป็นยังไม่จ่าย'}
                     </button>
                     <button class="btn btn-outline btn-sm" onclick="copyOrderToText('${order.id}')" title="คัดลอกข้อความบิล">
                         <i class="fa-solid fa-copy"></i> คัดลอกบิล
@@ -1759,7 +1764,7 @@ function renderAnalytics() {
     let deliveryStats = { walkin: 0, grab: 0, other: 0 };
     
     state.orders.forEach(order => {
-        if (order.status === 'pending_promo') return;
+        if (order.status === 'pending_promo' || order.status === 'unpaid') return;
         const orderQty = order.items ? Object.values(order.items).reduce((a, b) => a + b, 0) : 0;
         const pricing = order.priceDetails || { total: 0, discount: 0 };
         const matchesStaff = isLoggedInStaff ? (order.staffName && order.staffName.toLowerCase() === loggedInUsername.toLowerCase()) : false;
@@ -2269,7 +2274,7 @@ function renderAdminUsersList() {
             if (user.role === 'staff') {
                 let userCommBottles = 0;
                 state.orders.forEach(order => {
-                    if (order.status === 'pending_promo') return;
+                    if (order.status === 'pending_promo' || order.status === 'unpaid') return;
                     if (order.deliveryType === 'grab') return;
                     if (order.staffName && order.staffName.toLowerCase() === user.username.toLowerCase()) {
                         const orderQty = order.items ? Object.values(order.items).reduce((sum, q) => sum + q, 0) : 0;
@@ -2427,10 +2432,11 @@ function copyOrderToText(orderId) {
     });
     
     const isPendingPromo = order.status === 'pending_promo';
+    const isUnpaid = order.status === 'unpaid';
     const totalQty = Object.values(order.items).reduce((a, b) => a + b, 0);
     const netTotal = isPendingPromo ? 0 : (order.priceDetails ? order.priceDetails.total : 0);
     const discountText = (!isPendingPromo && order.priceDetails && order.priceDetails.discount > 0) ? ` (ประหยัดโปรโมชั่นไป ${order.priceDetails.discount} บ.)` : '';
-    const pendingNote = isPendingPromo ? ' (ยังไม่ครบโปร)' : '';
+    const pendingNote = isPendingPromo ? ' (ยังไม่ครบโปร)' : (isUnpaid ? ' (ยังไม่จ่ายเงิน)' : '');
     const remarkText = order.remark ? `หมายเหตุ: ${order.remark}\n` : '';
     const staffText = order.staffName ? `ผู้บันทึก: ${order.staffName}\n` : '';
     
@@ -2549,12 +2555,14 @@ function toggleOrderStatus(orderId) {
     const order = state.orders.find(o => o.id === orderId);
     if (!order) return;
     
-    if (order.status === 'pending_promo') {
+    if (order.status === 'pending_promo' || order.status === 'unpaid') {
         order.status = 'paid';
         order.previouslyPaid = order.priceDetails ? order.priceDetails.total : 0;
+        if (order.paymentMethod === 'unpaid') {
+            order.paymentMethod = 'scan';
+        }
     } else {
-        order.status = 'pending_promo';
-        // Keep previouslyPaid or leave it as is so continuing bill works
+        order.status = 'unpaid';
     }
     saveToLocalStorage();
     renderTables();
@@ -2594,7 +2602,7 @@ function renderTables() {
                 todayRevenue += (o.previouslyPaid || 0);
             }
         }
-        if (o.status === 'pending_promo' && o.customerName && o.customerName.startsWith('โต๊ะ ')) {
+        if ((o.status === 'pending_promo' || o.status === 'unpaid') && o.customerName && o.customerName.startsWith('โต๊ะ ')) {
             const total = o.priceDetails ? o.priceDetails.total : 0;
             const prevPaid = o.previouslyPaid || 0;
             pendingTotal += Math.max(0, total - prevPaid);
@@ -2605,7 +2613,7 @@ function renderTables() {
         const tableName = `โต๊ะ ${i}`;
         const hasPending = state.orders.some(o =>
             (o.customerName === tableName || o.customerName.startsWith(tableName + ' (')) &&
-            o.date === todayStr && o.status === 'pending_promo'
+            o.date === todayStr && (o.status === 'pending_promo' || o.status === 'unpaid')
         );
         const hasPaid = !hasPending && state.orders.some(o =>
             (o.customerName === tableName || o.customerName.startsWith(tableName + ' (')) &&
@@ -2632,7 +2640,7 @@ function renderTables() {
         // Find pending (unpaid) order for this table today
         const pendingOrder = state.orders.find(o =>
             (o.customerName === tableName || o.customerName.startsWith(tableName + ' (')) &&
-            o.date === todayStr && o.status === 'pending_promo'
+            o.date === todayStr && (o.status === 'pending_promo' || o.status === 'unpaid')
         );
         // Find most recent paid order for this table today (only if no pending, not closed)
         const paidOrder = !pendingOrder ? state.orders.find(o =>
@@ -2765,7 +2773,7 @@ function renderTables() {
         otherContainer.innerHTML = '';
         
         const otherPendingOrders = state.orders.filter(o => {
-            return !o.customerName.startsWith('โต๊ะ ') && o.status === 'pending_promo';
+            return !o.customerName.startsWith('โต๊ะ ') && (o.status === 'pending_promo' || o.status === 'unpaid');
         });
         
         if (otherPendingOrders.length === 0) {

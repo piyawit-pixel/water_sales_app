@@ -132,8 +132,12 @@ function saveData(ss, payload) {
         total = o.priceDetails.total || 0;
       }
       var subtotal = total + discount;
-      
       var pm = o.paymentMethod === 'cash' ? 'เงินสด' : (o.paymentMethod === 'unpaid' ? 'ยังไม่จ่าย' : 'เงินโอน / สแกน');
+      
+      var statusText = o.status || "";
+      if (o.status === 'paid') statusText = 'จ่ายแล้ว';
+      else if (o.status === 'pending_promo') statusText = 'ยังไม่ครบโปร';
+      else if (o.status === 'unpaid') statusText = 'ยังไม่จ่าย';
       
       return [
         o.id || "",
@@ -146,7 +150,7 @@ function saveData(ss, payload) {
         subtotal,
         discount,
         total,
-        o.status || "",
+        statusText,
         o.createdTime || "",
         o.updatedTime || "",
         o.staffName || "",
