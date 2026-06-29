@@ -1955,10 +1955,11 @@ select:focus {
                 radial-gradient(circle at 85% 30%, rgba(2, 132, 199, 0.08), transparent 45%),
                 #f4f6fa;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
     z-index: 9999;
     padding: 1.5rem;
+    overflow-y: auto;
     transition: opacity 0.4s ease, visibility 0.4s ease;
 }
 
@@ -2752,6 +2753,37 @@ body.admin-active .main-content {
 .customer-drink-stock-badge.out-of-stock {
     background: rgba(239, 68, 68, 0.1);
     color: var(--color-danger);
+}
+
+/* CUSTOMER PUBLIC CONTAINER IN LOGIN SCREEN */
+.customer-public-layout {
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 2rem;
+    align-items: start;
+    padding: 1rem 0;
+}
+
+.customer-main-content {
+    flex: 1;
+}
+
+.login-sidebar {
+    position: sticky;
+    top: 1rem;
+}
+
+@media (max-width: 1024px) {
+    .customer-public-layout {
+        grid-template-columns: 1fr;
+    }
+    .login-sidebar {
+        position: relative;
+        top: 0;
+    }
 }
 
 

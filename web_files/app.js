@@ -202,6 +202,14 @@ function checkLoginStatus() {
         
         document.getElementById('header-user-badge').style.display = 'none';
         if (adminTabBtn) adminTabBtn.style.display = 'none';
+        
+        // Render customer view inside login container
+        renderCustomerView();
+        const resultsEl = document.getElementById('customer-search-results');
+        if (resultsEl) resultsEl.innerHTML = '<div class="text-center text-muted py-4">พิมพ์ชื่อเล่นหรือเลขโต๊ะของคุณด้านบนเพื่อตรวจสอบรายการค้างดื่ม/ค้างจ่ายเงิน</div>';
+        const searchInput = document.getElementById('customer-search-input');
+        if (searchInput) searchInput.value = '';
+        
         switchTab('tables-tab');
     }
 }
@@ -2315,8 +2323,6 @@ function switchTab(tabId) {
             renderOrders();
         } else if (tabId === 'promo-tab') {
             renderPromoTab();
-        } else if (tabId === 'customer-tab') {
-            renderCustomerView();
         } else if (tabId === 'stock-tab') {
             renderStock();
         } else if (tabId === 'summary-tab') {

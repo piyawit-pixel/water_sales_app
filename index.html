@@ -189,7 +189,6 @@
                     <button class="tab-btn active" data-tab="tables-tab"><i class="fa-solid fa-chair"></i> จัดการโต๊ะ</button>
                     <button class="tab-btn" data-tab="orders-tab"><i class="fa-solid fa-receipt"></i> บันทึกออเดอร์</button>
                     <button class="tab-btn" data-tab="promo-tab" id="tab-btn-promo"><i class="fa-solid fa-hourglass-half"></i> ค้างโปร/ค้างจ่าย</button>
-                    <button class="tab-btn" data-tab="customer-tab" id="tab-btn-customer"><i class="fa-solid fa-desktop"></i> หน้าจอลูกค้า</button>
                     <button class="tab-btn" data-tab="stock-tab"><i class="fa-solid fa-boxes-stacked"></i> สต็อกน้ำ</button>
                     <button class="tab-btn" data-tab="summary-tab"><i class="fa-solid fa-chart-line"></i> สรุปยอดขาย</button>
                     <button class="tab-btn" data-tab="admin-tab" id="tab-btn-admin" style="display: none;"><i class="fa-solid fa-user-gear"></i> จัดการพนักงาน</button>
@@ -328,46 +327,6 @@
                                     </tr>
                                 </tbody>
                             </table>
-                        </div>
-                    </div>
-
-                    <!-- CUSTOMER TAB -->
-                    <div class="tab-pane" id="customer-tab">
-                        <div class="grab-manager-header">
-                            <div class="grab-title-desc">
-                                <h3><i class="fa-solid fa-desktop text-primary"></i> หน้าจอลูกค้า (Customer Board)</h3>
-                                <p>สำหรับเปิดแสดงข้อมูลเมนูเครื่องดื่มคงเหลือและให้ลูกค้าตรวจสอบยอดค้างโปร/ยอดค้างชำระ</p>
-                            </div>
-                        </div>
-
-                        <div class="customer-layout" style="margin-top: 1.5rem;">
-                            <!-- Left panel: Stock status -->
-                            <div class="customer-stock-card card glass-card">
-                                <div class="card-header">
-                                    <h2><i class="fa-solid fa-boxes-stacked text-primary"></i> 🥤 เมนูเครื่องดื่มคงเหลือวันนี้</h2>
-                                </div>
-                                <div class="card-body">
-                                    <div class="beverages-grid" id="customer-beverages-container" style="grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));">
-                                        <!-- Loaded dynamically -->
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Right panel: Search promo -->
-                            <div class="customer-search-card card glass-card">
-                                <div class="card-header">
-                                    <h2><i class="fa-solid fa-magnifying-glass text-secondary"></i> 🔍 ตรวจสอบยอดค้างโปร & ยอดค้างจ่าย</h2>
-                                </div>
-                                <div class="card-body">
-                                    <div class="search-box-wrapper" style="display: flex; gap: 0.75rem; margin-bottom: 1.5rem;">
-                                        <input type="text" id="customer-search-input" placeholder="พิมพ์ชื่อเล่น / เบอร์โต๊ะ เพื่อค้นหา..." style="flex: 1; padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border-glass); background: rgba(255, 255, 255, 0.85); color: var(--color-text); font-family: var(--font-body); font-size: 0.95rem; outline: none;">
-                                        <button class="btn btn-secondary" id="btn-customer-search" style="padding: 0 1.5rem; height: 42px;"><i class="fa-solid fa-magnifying-glass"></i> ค้นหา</button>
-                                    </div>
-                                    <div id="customer-search-results">
-                                        <div class="text-center text-muted py-4">พิมพ์ชื่อเล่นหรือเลขโต๊ะของคุณด้านบนเพื่อตรวจสอบรายการค้างดื่ม/ค้างจ่ายเงิน</div>
-                                    </div>
-                                </div>
-                            </div>
                         </div>
                     </div>
 
@@ -661,37 +620,93 @@
 
     <!-- LOGIN SCREEN -->
     <div id="login-container" class="login-container">
-        <div class="login-card glass-card">
-            <div class="login-logo">
-                <i class="fa-solid fa-glass-water login-brand-icon"></i>
-                <h2>BaanPhuan</h2>
-                <p>บ้านเพื่อน - POS & Inventory System</p>
+        <div class="customer-public-layout">
+            <!-- Customer View (Left Column) -->
+            <div class="customer-main-content">
+                <header class="app-header" style="border-bottom: 1px solid var(--border-glass); margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center;">
+                    <div class="header-logo">
+                        <div class="neon-icon"><i class="fa-solid fa-glass-water"></i></div>
+                        <div class="brand-info">
+                            <h1>BaanPhuan</h1>
+                            <p>บ้านเพื่อน - ตรวจสอบเครื่องดื่ม & ยอดค้างโปรโมชั่นสำหรับลูกค้า</p>
+                        </div>
+                    </div>
+                </header>
+
+                <!-- BANNER DECORATION -->
+                <div class="app-banner" style="background-image: linear-gradient(180deg, rgba(240, 244, 249, 0.2) 0%, rgba(240, 244, 249, 0.95) 100%), url('assets/blue_white_banner.jpg'); margin-bottom: 2rem;">
+                    <div class="banner-content">
+                        <h2 style="color: #0f172a; font-weight: 700;">ยินดีต้อนรับสู่บ้านเพื่อน 🥤</h2>
+                        <p class="promo-badge" style="background: linear-gradient(135deg, rgba(29, 78, 216, 0.85), rgba(2, 132, 199, 0.85)); box-shadow: 0 0 15px rgba(29, 78, 216, 0.2);"><i class="fa-solid fa-star-half-stroke"></i> น้ำขวดละ 80 บาท | 4 ขวด 300 บาท | 7 ขวด 500 บาท</p>
+                    </div>
+                </div>
+
+                <div class="customer-layout">
+                    <!-- Left panel: Stock status -->
+                    <div class="customer-stock-card card glass-card">
+                        <div class="card-header">
+                            <h2><i class="fa-solid fa-boxes-stacked text-primary"></i> 🥤 เมนูเครื่องดื่มคงเหลือวันนี้</h2>
+                        </div>
+                        <div class="card-body">
+                            <div class="beverages-grid" id="customer-beverages-container" style="grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));">
+                                <!-- Loaded dynamically -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right panel: Search promo -->
+                    <div class="customer-search-card card glass-card">
+                        <div class="card-header">
+                            <h2><i class="fa-solid fa-magnifying-glass text-secondary"></i> 🔍 ตรวจสอบยอดค้างโปร & ยอดค้างจ่าย</h2>
+                        </div>
+                        <div class="card-body">
+                            <div class="search-box-wrapper" style="display: flex; gap: 0.75rem; margin-bottom: 1.5rem;">
+                                <input type="text" id="customer-search-input" placeholder="พิมพ์ชื่อเล่น / เบอร์โต๊ะ เพื่อค้นหา..." style="flex: 1; padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border-glass); background: rgba(255, 255, 255, 0.85); color: var(--color-text); font-family: var(--font-body); font-size: 0.95rem; outline: none;">
+                                <button class="btn btn-secondary" id="btn-customer-search" style="padding: 0 1.5rem; height: 42px;"><i class="fa-solid fa-magnifying-glass"></i> ค้นหา</button>
+                            </div>
+                            <div id="customer-search-results">
+                                <div class="text-center text-muted py-4">พิมพ์ชื่อเล่นหรือเลขโต๊ะของคุณด้านบนเพื่อตรวจสอบรายการค้างดื่ม/ค้างจ่ายเงิน</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-             <form id="login-form">
-                 <div class="form-group" style="margin-bottom: 1.25rem; display: flex; flex-direction: column; gap: 0.5rem;">
-                     <label for="login-username" style="font-size: 0.85rem; font-weight: 500; color: var(--color-text-muted); display: flex; align-items: center; gap: 0.4rem;"><i class="fa-solid fa-user"></i> ชื่อผู้ใช้งาน / พนักงาน</label>
-                     <input type="text" id="login-username" placeholder="ระบุชื่อผู้ใช้งาน..." required style="width: 100%; padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border-glass); background: rgba(255, 255, 255, 0.85); color: var(--color-text); font-family: var(--font-body); font-size: 0.9rem; outline: none;">
-                 </div>
-                 
-                 <div class="form-group" style="margin-bottom: 1.5rem; display: flex; flex-direction: column; gap: 0.5rem;">
-                     <label for="login-pin" style="font-size: 0.85rem; font-weight: 500; color: var(--color-text-muted); display: flex; align-items: center; gap: 0.4rem;"><i class="fa-solid fa-lock"></i> รหัสผ่าน PIN (4-6 หลัก)</label>
-                     <input type="password" id="login-pin" inputmode="numeric" pattern="[0-9]*" maxlength="6" placeholder="กรอกรหัส PIN..." required style="width: 100%; padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border-glass); background: rgba(255, 255, 255, 0.85); color: var(--color-text); font-family: var(--font-body); font-size: 0.9rem; outline: none; letter-spacing: 0.5rem; text-align: center;">
-                 </div>
 
-                 <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.75rem; justify-content: center; font-size: 1rem; margin-bottom: 1rem;">
-                     <i class="fa-solid fa-right-to-bracket"></i> เข้าสู่ระบบ
-                 </button>
+            <!-- Login Sidebar (Right Column) -->
+            <div class="login-sidebar">
+                <div class="login-card glass-card">
+                    <div class="login-logo">
+                        <i class="fa-solid fa-glass-water login-brand-icon"></i>
+                        <h2>BaanPhuan</h2>
+                        <p>บ้านเพื่อน - POS & Inventory System</p>
+                    </div>
+                    <form id="login-form">
+                        <div class="form-group" style="margin-bottom: 1.25rem; display: flex; flex-direction: column; gap: 0.5rem;">
+                            <label for="login-username" style="font-size: 0.85rem; font-weight: 500; color: var(--color-text-muted); display: flex; align-items: center; gap: 0.4rem;"><i class="fa-solid fa-user"></i> ชื่อผู้ใช้งาน / พนักงาน</label>
+                            <input type="text" id="login-username" placeholder="ระบุชื่อผู้ใช้งาน..." required style="width: 100%; padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border-glass); background: rgba(255, 255, 255, 0.85); color: var(--color-text); font-family: var(--font-body); font-size: 0.9rem; outline: none;">
+                        </div>
+                        
+                        <div class="form-group" style="margin-bottom: 1.5rem; display: flex; flex-direction: column; gap: 0.5rem;">
+                            <label for="login-pin" style="font-size: 0.85rem; font-weight: 500; color: var(--color-text-muted); display: flex; align-items: center; gap: 0.4rem;"><i class="fa-solid fa-lock"></i> รหัสผ่าน PIN (4-6 หลัก)</label>
+                            <input type="password" id="login-pin" inputmode="numeric" pattern="[0-9]*" maxlength="6" placeholder="กรอกรหัส PIN..." required style="width: 100%; padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border-glass); background: rgba(255, 255, 255, 0.85); color: var(--color-text); font-family: var(--font-body); font-size: 0.9rem; outline: none; letter-spacing: 0.5rem; text-align: center;">
+                        </div>
 
-                 <div style="text-align: center;">
-                     <button type="button" class="btn btn-outline btn-sm" id="btn-login-pull-sheet" style="width: 100%; justify-content: center; gap: 0.5rem;">
-                         <i class="fa-solid fa-cloud-arrow-down"></i> ดึงข้อมูลจากคลาวด์ (ซิงค์รหัสใหม่)
-                     </button>
-                 </div>
+                        <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.75rem; justify-content: center; font-size: 1rem; margin-bottom: 1rem;">
+                            <i class="fa-solid fa-right-to-bracket"></i> เข้าสู่ระบบ
+                        </button>
 
-                 <div id="login-error-msg" class="login-error-msg" style="display: none; margin-top: 1.25rem;">
-                     <i class="fa-solid fa-circle-exclamation"></i> รหัสผ่านไม่ถูกต้อง กรุณาลองใหม่
-                 </div>
-             </form>
+                        <div style="text-align: center;">
+                            <button type="button" class="btn btn-outline btn-sm" id="btn-login-pull-sheet" style="width: 100%; justify-content: center; gap: 0.5rem;">
+                                <i class="fa-solid fa-cloud-arrow-down"></i> ดึงข้อมูลจากคลาวด์ (ซิงค์รหัสใหม่)
+                            </button>
+                        </div>
+
+                        <div id="login-error-msg" class="login-error-msg" style="display: none; margin-top: 1.25rem;">
+                            <i class="fa-solid fa-circle-exclamation"></i> รหัสผ่านไม่ถูกต้อง กรุณาลองใหม่
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
 
