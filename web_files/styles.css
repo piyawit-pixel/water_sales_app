@@ -1951,15 +1951,15 @@ select:focus {
 .login-container {
     position: fixed;
     top: 0; left: 0; right: 0; bottom: 0;
-    background: radial-gradient(circle at 15% 50%, rgba(29, 78, 216, 0.08), transparent 45%),
-                radial-gradient(circle at 85% 30%, rgba(2, 132, 199, 0.08), transparent 45%),
-                #f4f6fa;
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
+    background: radial-gradient(circle at 10% 20%, rgba(29, 78, 216, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(139, 92, 246, 0.15) 0%, transparent 45%),
+                #080c14;
     z-index: 9999;
-    padding: 1.5rem;
-    overflow-y: auto;
+    padding: 1.25rem;
+    overflow: hidden; /* Lock screen, no scrollbars */
+    display: flex;
+    align-items: center;
+    justify-content: center;
     transition: opacity 0.4s ease, visibility 0.4s ease;
 }
 
@@ -2752,29 +2752,330 @@ body.admin-active .main-content {
 /* CUSTOMER PUBLIC CONTAINER IN LOGIN SCREEN */
 .customer-public-layout {
     width: 100%;
-    max-width: 1400px;
-    margin: 0 auto;
+    max-width: 1550px;
+    height: 100%;
+    max-height: 850px; /* Lock height for tablet viewports */
     display: grid;
-    grid-template-columns: 1fr 380px;
-    gap: 2rem;
-    align-items: start;
-    padding: 1rem 0;
+    grid-template-columns: 1fr 350px;
+    gap: 1.5rem;
+    align-items: stretch;
+    box-sizing: border-box;
 }
 
 .customer-main-content {
-    flex: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    justify-content: space-between;
 }
 
+.login-container .app-header {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+    padding-bottom: 0.5rem;
+    margin-bottom: 0.5rem !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+.login-container .brand-info h1 {
+    font-size: 1.4rem;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    background: linear-gradient(to right, #3b82f6, #a78bfa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.login-container .brand-info p {
+    font-size: 0.75rem;
+    color: #94a3b8;
+}
+
+.login-container .app-banner {
+    background-image: linear-gradient(180deg, rgba(8, 12, 20, 0.1) 0%, rgba(8, 12, 20, 0.9) 100%), url('assets/blue_white_banner.jpg') !important;
+    margin-bottom: 0.75rem !important;
+    padding: 1rem !important;
+    border-radius: var(--radius-md) !important;
+    height: 60px !important;
+    display: flex;
+    align-items: center;
+    border: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.login-container .app-banner h2 {
+    display: none; /* Hide header inside banner to save height */
+}
+
+.login-container .promo-badge {
+    margin: 0 !important;
+    font-size: 0.8rem !important;
+    padding: 0.35rem 0.85rem !important;
+}
+
+.login-container .customer-layout {
+    flex: 1;
+    margin-bottom: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    height: calc(100% - 150px);
+}
+
+.login-container .customer-stock-card {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.login-container .customer-stock-card .card-header {
+    border-bottom: none !important;
+    padding: 0 0 0.5rem 0 !important;
+}
+
+.login-container .customer-stock-card .card-header h2 {
+    font-size: 1rem;
+    color: #f1f5f9;
+}
+
+.login-container .customer-stock-card .card-body {
+    padding: 0 !important;
+    flex: 1;
+    height: 100%;
+}
+
+/* 14 Drinks grid fits screen: 5 cols x 3 rows */
+.login-container .beverages-grid {
+    display: grid !important;
+    grid-template-columns: repeat(5, 1fr) !important;
+    grid-template-rows: repeat(3, 1fr) !important;
+    gap: 0.65rem !important;
+    height: 100%;
+}
+
+.login-container .customer-drink-card {
+    background: rgba(17, 24, 39, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: var(--radius-md);
+    padding: 0.65rem 0.75rem; /* slightly more compact padding to fit screen height */
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+    height: 100%; /* fill grid cell */
+    box-sizing: border-box;
+}
+
+.login-container .customer-drink-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; width: 4px; height: 100%;
+    background: var(--drink-color, #3b82f6);
+}
+
+.login-container .customer-drink-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3), 0 0 15px var(--drink-glow, rgba(59, 130, 246, 0.15));
+    background: rgba(30, 41, 59, 0.85);
+}
+
+.login-container .customer-drink-card.out-of-stock {
+    opacity: 0.35;
+    background: rgba(15, 23, 42, 0.5);
+    border-color: rgba(255, 255, 255, 0.02);
+}
+
+.login-container .customer-drink-card-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    color: #fff;
+    flex-shrink: 0;
+}
+
+.login-container .customer-drink-card-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.login-container .customer-drink-card-info h4 {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #f8fafc;
+    margin: 0 0 0.1rem 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.login-container .customer-drink-card-info p {
+    font-size: 0.7rem;
+    color: #94a3b8;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Hide capColor inside kiosk to save height */
+.login-container .customer-drink-card-info div {
+    display: none;
+}
+
+/* Badge values */
+.login-container .customer-drink-stock-badge {
+    position: absolute;
+    top: 0.4rem; right: 0.4rem;
+    font-size: 0.65rem;
+    font-weight: 800;
+    padding: 0.1rem 0.35rem;
+    border-radius: 4px;
+}
+
+.login-container .customer-drink-stock-badge.in-stock {
+    background: rgba(16, 185, 129, 0.15);
+    color: #34d399;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.login-container .customer-drink-stock-badge.low-stock {
+    background: rgba(245, 158, 11, 0.15);
+    color: #fbbf24;
+    border: 1px solid rgba(245, 158, 11, 0.2);
+    animation: kioskPulse 1.5s infinite;
+}
+
+.login-container .customer-drink-stock-badge.out-of-stock {
+    background: rgba(239, 68, 68, 0.15);
+    color: #f87171;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+/* Login Sidebar (Right Column) */
 .login-sidebar {
-    position: sticky;
-    top: 1rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100%;
+}
+
+.login-container .login-card {
+    background: rgba(15, 23, 42, 0.8) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: var(--radius-lg) !important;
+    padding: 1.5rem !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4) !important;
+    backdrop-filter: blur(10px);
+    width: 100%;
+    box-sizing: border-box;
+    animation: loginFadeIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.login-container .login-logo h2 {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #f8fafc;
+}
+
+.login-container .login-logo p {
+    font-size: 0.75rem;
+    color: #64748b;
+}
+
+.login-container .login-brand-icon {
+    font-size: 2.2rem;
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    width: 60px;
+    height: 60px;
+    background-color: rgba(59, 130, 246, 0.08) !important;
+}
+
+/* Inputs and Buttons under login container override */
+.login-container .form-group label {
+    font-size: 0.75rem !important;
+    color: #94a3b8 !important;
+}
+
+.login-container .form-group input {
+    background: rgba(30, 41, 59, 0.8) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    color: #f8fafc !important;
+    padding: 0.6rem 0.75rem !important;
+    font-size: 0.85rem !important;
+}
+
+.login-container .form-group input:focus {
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.25) !important;
+}
+
+.login-container #login-pin {
+    letter-spacing: 0.5rem;
+    text-align: center;
+    font-size: 1rem;
+}
+
+.login-container .btn-primary {
+    background: linear-gradient(135deg, #3b82f6, #2563eb) !important;
+    border: none !important;
+    box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3) !important;
+    font-size: 0.9rem !important;
+    padding: 0.65rem !important;
+}
+
+.login-container .btn-primary:hover {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8) !important;
+}
+
+.login-container .btn-outline {
+    border-color: rgba(255, 255, 255, 0.08) !important;
+    color: #94a3b8 !important;
+    padding: 0.5rem !important;
+    font-size: 0.75rem !important;
+}
+
+.login-container .btn-outline:hover {
+    color: #f8fafc !important;
+    background: rgba(255, 255, 255, 0.03) !important;
+    border-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+/* Animations */
+@keyframes kioskPulse {
+    0% { opacity: 0.6; }
+    50% { opacity: 1; }
+    100% { opacity: 0.6; }
 }
 
 @media (max-width: 1024px) {
+    .login-container {
+        overflow-y: auto;
+        align-items: flex-start;
+    }
     .customer-public-layout {
         grid-template-columns: 1fr;
+        height: auto;
+        max-height: none;
+    }
+    .login-container .beverages-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        grid-template-rows: auto !important;
+        height: auto !important;
     }
     .login-sidebar {
+        height: auto;
         position: relative;
         top: 0;
     }

@@ -3157,6 +3157,7 @@ function renderCustomerView() {
         
         const card = document.createElement('div');
         card.className = `customer-drink-card ${cardStatusClass}`;
+        card.style = `--drink-color: ${drink.color}; --drink-glow: rgba(${drink.colorRgb}, 0.25);`;
         
         card.innerHTML = `
             <div class="customer-drink-card-icon" style="background: rgba(${drink.colorRgb}, 0.1); color: ${drink.color};">
