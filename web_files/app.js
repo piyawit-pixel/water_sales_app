@@ -2315,6 +2315,8 @@ function switchTab(tabId) {
             renderOrders();
         } else if (tabId === 'promo-tab') {
             renderPromoTab();
+        } else if (tabId === 'customer-tab') {
+            renderCustomerView();
         } else if (tabId === 'stock-tab') {
             renderStock();
         } else if (tabId === 'summary-tab') {
