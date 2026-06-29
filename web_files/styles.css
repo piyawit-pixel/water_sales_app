@@ -1951,15 +1951,15 @@ select:focus {
 .login-container {
     position: fixed;
     top: 0; left: 0; right: 0; bottom: 0;
-    background: radial-gradient(circle at 10% 20%, rgba(29, 78, 216, 0.15) 0%, transparent 40%),
-                radial-gradient(circle at 90% 80%, rgba(139, 92, 246, 0.15) 0%, transparent 45%),
-                #080c14;
-    z-index: 9999;
-    padding: 1.25rem;
-    overflow: hidden; /* Lock screen, no scrollbars */
+    background: radial-gradient(circle at 15% 50%, rgba(29, 78, 216, 0.08), transparent 45%),
+                radial-gradient(circle at 85% 30%, rgba(2, 132, 199, 0.08), transparent 45%),
+                #f4f6fa;
     display: flex;
     align-items: center;
     justify-content: center;
+    z-index: 9999;
+    padding: 1.5rem;
+    overflow-y: auto;
     transition: opacity 0.4s ease, visibility 0.4s ease;
 }
 
@@ -2754,10 +2754,10 @@ body.admin-active .main-content {
     width: 100%;
     max-width: 1550px;
     height: 100%;
-    max-height: 850px; /* Lock height for tablet viewports */
+    max-height: 800px; /* Lock height to fit on screen */
     display: grid;
-    grid-template-columns: 1fr 350px;
-    gap: 1.5rem;
+    grid-template-columns: 1fr 400px;
+    gap: 2rem;
     align-items: stretch;
     box-sizing: border-box;
 }
@@ -2770,7 +2770,7 @@ body.admin-active .main-content {
 }
 
 .login-container .app-header {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-bottom: 1px solid var(--border-glass) !important;
     padding-bottom: 0.5rem;
     margin-bottom: 0.5rem !important;
     background: transparent !important;
@@ -2780,26 +2780,22 @@ body.admin-active .main-content {
 .login-container .brand-info h1 {
     font-size: 1.4rem;
     font-weight: 800;
-    letter-spacing: 0.5px;
-    background: linear-gradient(to right, #3b82f6, #a78bfa);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: var(--color-text);
 }
 
 .login-container .brand-info p {
     font-size: 0.75rem;
-    color: #94a3b8;
+    color: var(--color-text-muted);
 }
 
 .login-container .app-banner {
-    background-image: linear-gradient(180deg, rgba(8, 12, 20, 0.1) 0%, rgba(8, 12, 20, 0.9) 100%), url('assets/blue_white_banner.jpg') !important;
+    background-image: linear-gradient(180deg, rgba(240, 244, 249, 0.2) 0%, rgba(240, 244, 249, 0.95) 100%), url('assets/blue_white_banner.jpg') !important;
     margin-bottom: 0.75rem !important;
     padding: 1rem !important;
     border-radius: var(--radius-md) !important;
     height: 60px !important;
     display: flex;
     align-items: center;
-    border: 1px solid rgba(255, 255, 255, 0.04);
 }
 
 .login-container .app-banner h2 {
@@ -2836,8 +2832,8 @@ body.admin-active .main-content {
 }
 
 .login-container .customer-stock-card .card-header h2 {
-    font-size: 1rem;
-    color: #f1f5f9;
+    font-size: 1.05rem;
+    color: var(--color-text);
 }
 
 .login-container .customer-stock-card .card-body {
@@ -2856,18 +2852,19 @@ body.admin-active .main-content {
 }
 
 .login-container .customer-drink-card {
-    background: rgba(17, 24, 39, 0.7);
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
     border-radius: var(--radius-md);
-    padding: 0.65rem 0.75rem; /* slightly more compact padding to fit screen height */
+    padding: 0.65rem 0.75rem;
     display: flex;
     align-items: center;
     gap: 0.75rem;
     position: relative;
     overflow: hidden;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
-    height: 100%; /* fill grid cell */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+    height: 100%;
     box-sizing: border-box;
 }
 
@@ -2880,26 +2877,25 @@ body.admin-active .main-content {
 
 .login-container .customer-drink-card:hover {
     transform: translateY(-2px);
-    border-color: rgba(255, 255, 255, 0.15);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3), 0 0 15px var(--drink-glow, rgba(59, 130, 246, 0.15));
-    background: rgba(30, 41, 59, 0.85);
+    border-color: var(--drink-color);
+    box-shadow: 0 8px 16px rgba(29, 78, 216, 0.05), 0 0 15px var(--drink-glow);
+    background: #ffffff;
 }
 
 .login-container .customer-drink-card.out-of-stock {
-    opacity: 0.35;
-    background: rgba(15, 23, 42, 0.5);
-    border-color: rgba(255, 255, 255, 0.02);
+    opacity: 0.5;
+    background: rgba(241, 245, 249, 0.5);
+    border-color: rgba(255, 255, 255, 0.3);
 }
 
 .login-container .customer-drink-card-icon {
-    width: 42px;
-    height: 42px;
+    width: 40px;
+    height: 40px;
     border-radius: var(--radius-sm);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.4rem;
-    color: #fff;
+    font-size: 1.3rem;
     flex-shrink: 0;
 }
 
@@ -2911,7 +2907,7 @@ body.admin-active .main-content {
 .login-container .customer-drink-card-info h4 {
     font-size: 0.85rem;
     font-weight: 700;
-    color: #f8fafc;
+    color: var(--color-text);
     margin: 0 0 0.1rem 0;
     white-space: nowrap;
     overflow: hidden;
@@ -2920,7 +2916,7 @@ body.admin-active .main-content {
 
 .login-container .customer-drink-card-info p {
     font-size: 0.7rem;
-    color: #94a3b8;
+    color: var(--color-text-muted);
     margin: 0;
     white-space: nowrap;
     overflow: hidden;
@@ -2943,21 +2939,21 @@ body.admin-active .main-content {
 }
 
 .login-container .customer-drink-stock-badge.in-stock {
-    background: rgba(16, 185, 129, 0.15);
-    color: #34d399;
-    border: 1px solid rgba(16, 185, 129, 0.2);
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--color-success);
+    border: 1px solid rgba(16, 185, 129, 0.15);
 }
 
 .login-container .customer-drink-stock-badge.low-stock {
-    background: rgba(245, 158, 11, 0.15);
-    color: #fbbf24;
-    border: 1px solid rgba(245, 158, 11, 0.2);
+    background: rgba(245, 158, 11, 0.1);
+    color: var(--color-warning);
+    border: 1px solid rgba(245, 158, 11, 0.15);
     animation: kioskPulse 1.5s infinite;
 }
 
 .login-container .customer-drink-stock-badge.out-of-stock {
     background: rgba(239, 68, 68, 0.15);
-    color: #f87171;
+    color: var(--color-danger);
     border: 1px solid rgba(239, 68, 68, 0.2);
 }
 
@@ -2969,90 +2965,6 @@ body.admin-active .main-content {
     height: 100%;
 }
 
-.login-container .login-card {
-    background: rgba(15, 23, 42, 0.8) !important;
-    border: 1px solid rgba(255, 255, 255, 0.08) !important;
-    border-radius: var(--radius-lg) !important;
-    padding: 1.5rem !important;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4) !important;
-    backdrop-filter: blur(10px);
-    width: 100%;
-    box-sizing: border-box;
-    animation: loginFadeIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-.login-container .login-logo h2 {
-    font-size: 1.25rem;
-    font-weight: 800;
-    color: #f8fafc;
-}
-
-.login-container .login-logo p {
-    font-size: 0.75rem;
-    color: #64748b;
-}
-
-.login-container .login-brand-icon {
-    font-size: 2.2rem;
-    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    width: 60px;
-    height: 60px;
-    background-color: rgba(59, 130, 246, 0.08) !important;
-}
-
-/* Inputs and Buttons under login container override */
-.login-container .form-group label {
-    font-size: 0.75rem !important;
-    color: #94a3b8 !important;
-}
-
-.login-container .form-group input {
-    background: rgba(30, 41, 59, 0.8) !important;
-    border: 1px solid rgba(255, 255, 255, 0.08) !important;
-    color: #f8fafc !important;
-    padding: 0.6rem 0.75rem !important;
-    font-size: 0.85rem !important;
-}
-
-.login-container .form-group input:focus {
-    border-color: #3b82f6 !important;
-    box-shadow: 0 0 10px rgba(59, 130, 246, 0.25) !important;
-}
-
-.login-container #login-pin {
-    letter-spacing: 0.5rem;
-    text-align: center;
-    font-size: 1rem;
-}
-
-.login-container .btn-primary {
-    background: linear-gradient(135deg, #3b82f6, #2563eb) !important;
-    border: none !important;
-    box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3) !important;
-    font-size: 0.9rem !important;
-    padding: 0.65rem !important;
-}
-
-.login-container .btn-primary:hover {
-    background: linear-gradient(135deg, #2563eb, #1d4ed8) !important;
-}
-
-.login-container .btn-outline {
-    border-color: rgba(255, 255, 255, 0.08) !important;
-    color: #94a3b8 !important;
-    padding: 0.5rem !important;
-    font-size: 0.75rem !important;
-}
-
-.login-container .btn-outline:hover {
-    color: #f8fafc !important;
-    background: rgba(255, 255, 255, 0.03) !important;
-    border-color: rgba(255, 255, 255, 0.15) !important;
-}
-
-/* Animations */
 @keyframes kioskPulse {
     0% { opacity: 0.6; }
     50% { opacity: 1; }
@@ -3062,7 +2974,6 @@ body.admin-active .main-content {
 @media (max-width: 1024px) {
     .login-container {
         overflow-y: auto;
-        align-items: flex-start;
     }
     .customer-public-layout {
         grid-template-columns: 1fr;
@@ -3078,6 +2989,7 @@ body.admin-active .main-content {
         height: auto;
         position: relative;
         top: 0;
+        margin-top: 1.5rem;
     }
 }
 
