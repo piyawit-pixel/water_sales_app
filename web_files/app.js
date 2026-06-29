@@ -1989,16 +1989,39 @@ function renderAnalytics() {
         .sort((a, b) => b.qty - a.qty);
         
     const popularContainer = document.getElementById('popular-drinks-list');
+    if (!popularContainer) return;
     
     const maxQty = sortedPopular.length > 0 ? sortedPopular[0].qty : 0;
+    const totalQtyPeriod = sortedPopular.reduce((sum, item) => sum + item.qty, 0);
     
-    if (maxQty === 0) {
+    if (maxQty === 0 || totalQtyPeriod === 0) {
         popularContainer.innerHTML = `<div class="text-muted text-center py-4">ยังไม่มีข้อมูลยอดขายช่วงนี้</div>`;
         return;
     }
     
-    popularContainer.innerHTML = sortedPopular.map((item, idx) => {
+    let bannerHtml = '';
+    if (sortedPopular.length > 0 && sortedPopular[0].qty > 0) {
+        const topSeller = sortedPopular[0];
+        const drink = DRINKS.find(d => d.id === topSeller.id);
+        const drinkColor = drink ? drink.color : '#f59e0b';
+        bannerHtml = `
+            <div class="top-seller-banner" style="display: flex; align-items: center; gap: 0.75rem; background: rgba(245, 158, 11, 0.05); border: 1px dashed rgba(245, 158, 11, 0.35); border-radius: var(--radius-sm); padding: 0.75rem 1.25rem; margin-bottom: 1.25rem; animation: loginFadeIn 0.5s ease-out;">
+                <div style="font-size: 1.8rem; color: #f59e0b;"><i class="fa-solid fa-crown"></i></div>
+                <div>
+                    <div style="font-size: 0.75rem; color: var(--color-text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">สินค้าขายดีอันดับ 1 ในช่วงนี้</div>
+                    <div style="font-size: 1.05rem; font-weight: 800; color: var(--color-text);">${topSeller.nameTH} <span style="color: ${drinkColor}; font-weight: 800;">(ขายได้ ${topSeller.qty} ขวด)</span></div>
+                </div>
+            </div>
+        `;
+    }
+    
+    popularContainer.innerHTML = bannerHtml + sortedPopular.map((item, idx) => {
+        const drink = DRINKS.find(d => d.id === item.id);
+        const drinkColor = drink ? drink.color : 'var(--color-primary)';
+        const drinkColorRgb = drink ? drink.colorRgb : '29, 78, 216';
         const percentage = maxQty > 0 ? (item.qty / maxQty) * 100 : 0;
+        const sharePercentage = totalQtyPeriod > 0 ? (item.qty / totalQtyPeriod) * 100 : 0;
+        
         return `
             <div class="ranking-item">
                 <div class="ranking-drink-info">
@@ -2006,9 +2029,9 @@ function renderAnalytics() {
                     <span class="ranking-name">${item.nameTH}</span>
                 </div>
                 <div class="ranking-bar-wrapper">
-                    <div class="ranking-bar" style="width: ${percentage}%"></div>
+                    <div class="ranking-bar" style="width: ${percentage}%; background: ${drinkColor}; box-shadow: 0 0 8px rgba(${drinkColorRgb}, 0.5);"></div>
                 </div>
-                <span class="ranking-qty text-primary">${item.qty} ขวด</span>
+                <span class="ranking-qty" style="color: ${drinkColor}; font-weight: 700;">${item.qty} ขวด <span style="font-size: 0.8rem; color: var(--color-text-muted); font-weight: 500;">(${sharePercentage.toFixed(1)}%)</span></span>
             </div>
         `;
     }).join('');
