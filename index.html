@@ -14,7 +14,7 @@
     <link rel="stylesheet" href="styles.css?v=19.0">
 </head>
 <body>
-    <div class="app-container">
+    <div class="app-container" id="app-container">
         <!-- TOP NAVBAR -->
         <header class="app-header">
             <div class="header-logo">
@@ -188,6 +188,8 @@
                 <nav class="tab-navigation">
                     <button class="tab-btn active" data-tab="tables-tab"><i class="fa-solid fa-chair"></i> จัดการโต๊ะ</button>
                     <button class="tab-btn" data-tab="orders-tab"><i class="fa-solid fa-receipt"></i> บันทึกออเดอร์</button>
+                    <button class="tab-btn" data-tab="promo-tab" id="tab-btn-promo"><i class="fa-solid fa-hourglass-half"></i> ค้างโปร/ค้างจ่าย</button>
+                    <button class="tab-btn" data-tab="customer-tab" id="tab-btn-customer"><i class="fa-solid fa-desktop"></i> หน้าจอลูกค้า</button>
                     <button class="tab-btn" data-tab="stock-tab"><i class="fa-solid fa-boxes-stacked"></i> สต็อกน้ำ</button>
                     <button class="tab-btn" data-tab="summary-tab"><i class="fa-solid fa-chart-line"></i> สรุปยอดขาย</button>
                     <button class="tab-btn" data-tab="admin-tab" id="tab-btn-admin" style="display: none;"><i class="fa-solid fa-user-gear"></i> จัดการพนักงาน</button>
@@ -274,6 +276,96 @@
                             </div>
                             <div class="orders-cards-grid" id="orders-list">
                                 <!-- Order cards load dynamically -->
+                            </div>
+                    </div>
+
+                    <!-- PROMO TAB -->
+                    <div class="tab-pane" id="promo-tab">
+                        <div class="grab-manager-header">
+                            <div class="grab-title-desc">
+                                <h3><i class="fa-solid fa-hourglass-half text-primary"></i> รายการค้างโปรโมชั่น & ค้างชำระ</h3>
+                                <p>ตรวจสอบรายชื่อลูกค้าที่ยังไม่ครบโปรโมชั่น (ฝากน้ำค้างไว้) หรือค้างชำระเงิน</p>
+                            </div>
+                        </div>
+
+                        <!-- Filter and Search -->
+                        <div class="filter-bar" style="margin-bottom: 1.5rem;">
+                            <div class="filter-group">
+                                <label for="filter-promo-status"><i class="fa-solid fa-filter"></i> ตัวกรองสถานะ</label>
+                                <select id="filter-promo-status">
+                                    <option value="all" selected>ทั้งหมด (ค้างโปร & ค้างจ่าย)</option>
+                                    <option value="pending_promo">⏳ ค้างโปรโมชั่น (ยังไม่ครบโปร)</option>
+                                    <option value="unpaid">❌ ค้างชำระเงิน (ยังไม่จ่าย)</option>
+                                </select>
+                            </div>
+                            <div class="filter-group search-group" style="flex: 1;">
+                                <label for="search-promo-customer"><i class="fa-solid fa-magnifying-glass"></i> ค้นหาชื่อลูกค้า</label>
+                                <input type="text" id="search-promo-customer" placeholder="ค้นหาชื่อพนักงาน/ชื่อลูกค้า/โต๊ะ...">
+                            </div>
+                        </div>
+
+                        <!-- Table list of pending promo / unpaid -->
+                        <div class="table-responsive">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>วันที่/เวลา</th>
+                                        <th>ลูกค้า / โต๊ะ</th>
+                                        <th>รายการน้ำ</th>
+                                        <th style="text-align: center;">จำนวน (ขวด)</th>
+                                        <th style="text-align: right;">ราคาเต็ม</th>
+                                        <th style="text-align: right;">จ่ายแล้ว</th>
+                                        <th style="text-align: right;">ค้างจ่าย</th>
+                                        <th style="text-align: center;">สถานะ</th>
+                                        <th style="text-align: center;">จัดการ</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="promo-list-container">
+                                    <!-- Loaded dynamically -->
+                                    <tr>
+                                        <td colspan="9" class="text-center text-muted">กำลังโหลดรายการค้างโปรโมชั่น...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- CUSTOMER TAB -->
+                    <div class="tab-pane" id="customer-tab">
+                        <div class="grab-manager-header">
+                            <div class="grab-title-desc">
+                                <h3><i class="fa-solid fa-desktop text-primary"></i> หน้าจอลูกค้า (Customer Board)</h3>
+                                <p>สำหรับเปิดแสดงข้อมูลเมนูเครื่องดื่มคงเหลือและให้ลูกค้าตรวจสอบยอดค้างโปร/ยอดค้างชำระ</p>
+                            </div>
+                        </div>
+
+                        <div class="customer-layout" style="margin-top: 1.5rem;">
+                            <!-- Left panel: Stock status -->
+                            <div class="customer-stock-card card glass-card">
+                                <div class="card-header">
+                                    <h2><i class="fa-solid fa-boxes-stacked text-primary"></i> 🥤 เมนูเครื่องดื่มคงเหลือวันนี้</h2>
+                                </div>
+                                <div class="card-body">
+                                    <div class="beverages-grid" id="customer-beverages-container" style="grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));">
+                                        <!-- Loaded dynamically -->
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Right panel: Search promo -->
+                            <div class="customer-search-card card glass-card">
+                                <div class="card-header">
+                                    <h2><i class="fa-solid fa-magnifying-glass text-secondary"></i> 🔍 ตรวจสอบยอดค้างโปร & ยอดค้างจ่าย</h2>
+                                </div>
+                                <div class="card-body">
+                                    <div class="search-box-wrapper" style="display: flex; gap: 0.75rem; margin-bottom: 1.5rem;">
+                                        <input type="text" id="customer-search-input" placeholder="พิมพ์ชื่อเล่น / เบอร์โต๊ะ เพื่อค้นหา..." style="flex: 1; padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border-glass); background: rgba(255, 255, 255, 0.85); color: var(--color-text); font-family: var(--font-body); font-size: 0.95rem; outline: none;">
+                                        <button class="btn btn-secondary" id="btn-customer-search" style="padding: 0 1.5rem; height: 42px;"><i class="fa-solid fa-magnifying-glass"></i> ค้นหา</button>
+                                    </div>
+                                    <div id="customer-search-results">
+                                        <div class="text-center text-muted py-4">พิมพ์ชื่อเล่นหรือเลขโต๊ะของคุณด้านบนเพื่อตรวจสอบรายการค้างดื่ม/ค้างจ่ายเงิน</div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
