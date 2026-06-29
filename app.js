@@ -1,19 +1,18 @@
-// DRINK DATABASE
 const DRINKS = [
     { id: 'oishi', nameTH: 'โออิชิ', nameEN: 'Oishi', category: 'tea', color: '#8FA87B', colorRgb: '143, 168, 123', icon: 'fa-leaf', capColor: 'น้ำเงิน' },
     { id: 'grape', nameTH: 'องุ่นเคียวโฮ', nameEN: 'Kyoho Grape', category: 'fruit', color: '#A28AA8', colorRgb: '162, 138, 168', icon: 'fa-wine-glass', capColor: 'ขาว' },
     { id: 'bitter', nameTH: 'เดิมขม', nameEN: 'Original Bitter', category: 'dark', color: '#7E8578', colorRgb: '126, 133, 120', icon: 'fa-mug-hot', capColor: 'ดำ' },
     { id: 'sweet', nameTH: 'เดิมหวาน', nameEN: 'Original Sweet', category: 'amber', color: '#DDB87B', colorRgb: '221, 184, 123', icon: 'fa-cookie', capColor: 'แดง' },
     { id: 'honey-lemon', nameTH: 'น้ำผึ้งมะนาว', nameEN: 'Honey Lemon', category: 'yellow', color: '#E0C068', colorRgb: '224, 192, 104', icon: 'fa-lemon', capColor: 'ม่วง' },
-    { id: 'blueberry', nameTH: 'บลูเบอร์รี่', nameEN: 'Blueberry', category: 'fruit', color: '#7B94B8', colorRgb: '123, 148, 184', icon: 'fa-seedling', capColor: 'ฟ้า' },
-    { id: 'yogurt', nameTH: 'โยเกิร์ต', nameEN: 'Yogurt', category: 'yogurt', color: '#D2A0A8', colorRgb: '210, 160, 168', icon: 'fa-cheese', capColor: 'เหลือง' },
+    { id: 'blueberry', nameTH: 'บลูเบอร์รี่', nameEN: 'Blueberry', category: 'fruit', color: '#7B94B8', colorRgb: '123, 148, 184', icon: 'fa-droplet', capColor: 'ฟ้า' },
+    { id: 'yogurt', nameTH: 'โยเกิร์ต', nameEN: 'Yogurt', category: 'yogurt', color: '#D2A0A8', colorRgb: '210, 160, 168', icon: 'fa-glass-water', capColor: 'เหลือง' },
     { id: 'strawberry-yogurt', nameTH: 'โยเกิร์ตสตอเบอรี่', nameEN: 'Strawberry Yogurt', category: 'yogurt', color: '#D48A92', colorRgb: '212, 138, 146', icon: 'fa-ice-cream', capColor: 'ชมพู' },
-    { id: 'strawberry', nameTH: 'สตอเบอรี่', nameEN: 'Strawberry', category: 'fruit', color: '#D96B6B', colorRgb: '217, 107, 107', icon: 'fa-apple-whole', capColor: 'ฟ้า' },
+    { id: 'strawberry', nameTH: 'สตอเบอรี่', nameEN: 'Strawberry', category: 'fruit', color: '#D96B6B', colorRgb: '217, 107, 107', icon: 'fa-heart', capColor: 'ฟ้า' },
     { id: 'apple', nameTH: 'แอปเปิ้ล', nameEN: 'Apple', category: 'fruit', color: '#CE7B7B', colorRgb: '206, 123, 123', icon: 'fa-apple-whole', capColor: 'เหลือง' },
-    { id: 'greentea', nameTH: 'ชาเขียว', nameEN: 'Green Tea', category: 'tea', color: '#7CA682', colorRgb: '124, 166, 130', icon: 'fa-mug-hot', capColor: 'แดง' },
-    { id: 'taro', nameTH: 'เผือก', nameEN: 'Taro', category: 'yogurt', color: '#B0A2C7', colorRgb: '176, 162, 199', icon: 'fa-egg', capColor: 'ม่วง' },
+    { id: 'greentea', nameTH: 'ชาเขียว', nameEN: 'Green Tea', category: 'tea', color: '#7CA682', colorRgb: '124, 166, 130', icon: 'fa-leaf', capColor: 'แดง' },
+    { id: 'taro', nameTH: 'เผือก', nameEN: 'Taro', category: 'yogurt', color: '#B0A2C7', colorRgb: '176, 162, 199', icon: 'fa-cube', capColor: 'ม่วง' },
     { id: 'cocoa', nameTH: 'โกโก้', nameEN: 'Cocoa', category: 'cocoa', color: '#9C7C60', colorRgb: '156, 124, 96', icon: 'fa-mug-hot', capColor: 'แดง' },
-    { id: 'watermelon', nameTH: 'แตงโม', nameEN: 'Watermelon', category: 'fruit', color: '#DF8A8E', colorRgb: '223, 138, 142', icon: 'fa-lemon', capColor: 'ดำ' }
+    { id: 'watermelon', nameTH: 'แตงโม', nameEN: 'Watermelon', category: 'fruit', color: '#DF8A8E', colorRgb: '223, 138, 142', icon: 'fa-glass-water', capColor: 'ดำ' }
 ];
 
 const PRICE_PER_BOTTLE = 80;
