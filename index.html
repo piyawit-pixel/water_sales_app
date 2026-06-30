@@ -562,19 +562,25 @@
                     </div>
                 </div>
 
-                <!-- GOOGLE SHEETS SYNC SECTION -->
+                <!-- SUPABASE SYNC SECTION -->
                 <div class="sheets-sync-section" style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px dashed var(--border-glass);">
-                    <h3 style="font-size: 1.1rem; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; font-family: var(--font-heading); color: var(--color-primary);"><i class="fa-solid fa-cloud-arrow-up"></i> ซิงค์ข้อมูลกับ Google Sheets</h3>
-                    <p class="text-muted" style="font-size: 0.8rem; margin-bottom: 1rem;">เชื่อมต่อข้อมูลผ่าน Google Apps Script เพื่อแบ่งปันยอดขายและบิลสั่งซื้อไปใช้ร่วมกันบนอุปกรณ์อื่นๆ (เช่น มือถือหรือแท็บเล็ต) ได้พร้อมกันแบบเรียลไทม์</p>
+                    <h3 style="font-size: 1.1rem; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; font-family: var(--font-heading); color: var(--color-primary);"><i class="fa-solid fa-database"></i> ซิงค์ข้อมูลกับ Supabase</h3>
+                    <p class="text-muted" style="font-size: 0.8rem; margin-bottom: 1rem;">เชื่อมต่อข้อมูลกับ Supabase Database เพื่อแบ่งปันยอดขายและบิลสั่งซื้อไปใช้ร่วมกันบนอุปกรณ์อื่นๆ ได้พร้อมกันแบบเรียลไทม์และมีประสิทธิภาพสูง</p>
                     
-                    <div class="form-group" style="margin-bottom: 1rem; display: flex; flex-direction: column; gap: 0.5rem;">
-                        <label for="sheet-url-input" style="font-size: 0.85rem; color: var(--color-text); font-weight: 500;"><i class="fa-solid fa-globe text-primary"></i> Google Apps Script Web App URL</label>
-                        <input type="text" id="sheet-url-input" placeholder="วางลิงก์ Web App URL ที่นี่..." style="width: 100%; padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border-glass); background: rgba(255, 255, 255, 0.85); color: var(--color-text); font-family: var(--font-body); font-size: 0.9rem; outline: none; transition: border var(--transition-fast);">
+                    <div class="form-row" style="display: flex; gap: 0.75rem; margin-bottom: 1rem; flex-wrap: wrap;">
+                        <div class="form-group" style="flex: 1; min-width: 200px; display: flex; flex-direction: column; gap: 0.5rem;">
+                            <label for="supabase-url-input" style="font-size: 0.85rem; color: var(--color-text); font-weight: 500;"><i class="fa-solid fa-globe text-primary"></i> Supabase URL</label>
+                            <input type="text" id="supabase-url-input" placeholder="https://your-project.supabase.co" style="width: 100%; padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border-glass); background: rgba(255, 255, 255, 0.85); color: var(--color-text); font-family: var(--font-body); font-size: 0.9rem; outline: none; transition: border var(--transition-fast);">
+                        </div>
+                        <div class="form-group" style="flex: 1; min-width: 200px; display: flex; flex-direction: column; gap: 0.5rem;">
+                            <label for="supabase-key-input" style="font-size: 0.85rem; color: var(--color-text); font-weight: 500;"><i class="fa-solid fa-key text-primary"></i> Supabase Anon Key</label>
+                            <input type="password" id="supabase-key-input" placeholder="วาง public anon key ที่นี่..." style="width: 100%; padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border-glass); background: rgba(255, 255, 255, 0.85); color: var(--color-text); font-family: var(--font-body); font-size: 0.9rem; outline: none; transition: border var(--transition-fast);">
+                        </div>
                     </div>
                     
                     <div class="sheets-actions-wrapper" style="display: flex; gap: 0.75rem; margin-bottom: 1rem;">
-                        <button class="btn btn-primary" id="btn-pull-sheet" style="flex: 1;"><i class="fa-solid fa-cloud-arrow-down"></i> ดึงจากชีต 📥</button>
-                        <button class="btn btn-secondary" id="btn-push-sheet" style="flex: 1;"><i class="fa-solid fa-cloud-arrow-up"></i> บันทึกไปชีต 📤</button>
+                        <button class="btn btn-primary" id="btn-pull-sheet" style="flex: 1;"><i class="fa-solid fa-cloud-arrow-down"></i> ดึงจากคลาวด์ 📥</button>
+                        <button class="btn btn-secondary" id="btn-push-sheet" style="flex: 1;"><i class="fa-solid fa-cloud-arrow-up"></i> บันทึกไปคลาวด์ 📤</button>
                     </div>
                     
                     <div style="display: flex; align-items: flex-start; gap: 0.5rem;">

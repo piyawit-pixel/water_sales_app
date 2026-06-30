@@ -41,7 +41,8 @@ let state = {
     cart: {}, // drinkId -> quantity
     searchQuery: '',
     tab: 'tables-tab',
-    sheetUrl: '',
+    supabaseUrl: '',
+    supabaseKey: '',
     autoSync: false,
     stock: {}, // drinkId -> quantity
     users: []
@@ -113,19 +114,21 @@ function init() {
         }
     });
     
-    // Load Google Sheets configurations (default URL and auto-sync enabled by default)
-    const defaultUrl = 'https://script.google.com/macros/s/AKfycbz84s4EmEOUcmxKbxnR9Pfbf3evnqldYgAQ2qmsuEjo9TdJ30K8Bb1nGQvfKoO2b76u/exec';
-    state.sheetUrl = localStorage.getItem('juice_bar_sheet_url') || defaultUrl;
+    // Load Supabase configurations
+    state.supabaseUrl = localStorage.getItem('juice_bar_supabase_url') || '';
+    state.supabaseKey = localStorage.getItem('juice_bar_supabase_key') || '';
     
     const savedAutoSync = localStorage.getItem('juice_bar_auto_sync');
     state.autoSync = savedAutoSync !== null ? savedAutoSync === 'true' : true;
     
-    // Ensure default config is stored in localStorage
-    localStorage.setItem('juice_bar_sheet_url', state.sheetUrl);
+    // Ensure config is stored in localStorage
+    localStorage.setItem('juice_bar_supabase_url', state.supabaseUrl);
+    localStorage.setItem('juice_bar_supabase_key', state.supabaseKey);
     localStorage.setItem('juice_bar_auto_sync', state.autoSync ? 'true' : 'false');
     
-    // Populate Google Sheets UI inputs & staff name
-    document.getElementById('sheet-url-input').value = state.sheetUrl;
+    // Populate Supabase UI inputs & staff name
+    document.getElementById('supabase-url-input').value = state.supabaseUrl;
+    document.getElementById('supabase-key-input').value = state.supabaseKey;
     document.getElementById('auto-sync-checkbox').checked = state.autoSync;
     document.getElementById('staff-name').value = localStorage.getItem('juice_bar_last_staff') || '';
     
@@ -152,15 +155,15 @@ function init() {
     renderAnalytics();
     renderAdminUsersList();
     
-    // Auto-pull from sheet on startup if URL is configured
-    if (state.sheetUrl) {
-        pullFromSheets(true);
+    // Auto-pull from Supabase on startup if configured
+    if (state.supabaseUrl && state.supabaseKey) {
+        pullFromSupabase(true);
     }
 
-    // Periodic background sync every 60 seconds (only if autoSync is enabled and URL exists, and not editing)
+    // Periodic background sync every 60 seconds (only if autoSync is enabled and credentials exist, and not editing)
     setInterval(() => {
-        if (state.sheetUrl && state.autoSync && !state.editingOrderId) {
-            pullFromSheets(true).catch(err => console.warn("Background sync failed:", err));
+        if (state.supabaseUrl && state.supabaseKey && state.autoSync && !state.editingOrderId) {
+            pullFromSupabase(true).catch(err => console.warn("Background sync failed:", err));
         }
     }, 60000);
 }
@@ -228,8 +231,8 @@ function saveToLocalStorage(skipSync = false) {
         searchCustomerStatus();
     }
     
-    if (!skipSync && state.autoSync && state.sheetUrl) {
-        pushToSheets(true);
+    if (!skipSync && state.autoSync && state.supabaseUrl && state.supabaseKey) {
+        pushToSupabase(true);
     }
 }
 
@@ -237,8 +240,8 @@ function saveToLocalStorage(skipSync = false) {
 function saveUsersToLocalStorage(skipSync = false) {
     localStorage.setItem('juice_bar_users', JSON.stringify(state.users));
     
-    if (!skipSync && state.autoSync && state.sheetUrl) {
-        pushToSheets(true);
+    if (!skipSync && state.autoSync && state.supabaseUrl && state.supabaseKey) {
+        pushToSupabase(true);
     }
 }
 
@@ -532,10 +535,15 @@ function setupEventListeners() {
 
     document.getElementById('btn-clear-all-data').addEventListener('click', clearAllSystemData);
 
-    // Google Sheets Sync Event Listeners
-    document.getElementById('sheet-url-input').addEventListener('input', (e) => {
-        state.sheetUrl = e.target.value.trim();
-        localStorage.setItem('juice_bar_sheet_url', state.sheetUrl);
+    // Supabase Sync Event Listeners
+    document.getElementById('supabase-url-input').addEventListener('input', (e) => {
+        state.supabaseUrl = e.target.value.trim();
+        localStorage.setItem('juice_bar_supabase_url', state.supabaseUrl);
+    });
+
+    document.getElementById('supabase-key-input').addEventListener('input', (e) => {
+        state.supabaseKey = e.target.value.trim();
+        localStorage.setItem('juice_bar_supabase_key', state.supabaseKey);
     });
 
     document.getElementById('auto-sync-checkbox').addEventListener('change', (e) => {
@@ -543,8 +551,8 @@ function setupEventListeners() {
         localStorage.setItem('juice_bar_auto_sync', state.autoSync ? 'true' : 'false');
     });
 
-    document.getElementById('btn-pull-sheet').addEventListener('click', () => pullFromSheets(false));
-    document.getElementById('btn-push-sheet').addEventListener('click', () => pushToSheets(false));
+    document.getElementById('btn-pull-sheet').addEventListener('click', () => pullFromSupabase(false));
+    document.getElementById('btn-push-sheet').addEventListener('click', () => pushToSupabase(false));
 
     // Summary/Analytics Date Filters
     const summaryFilterDate = document.getElementById('summary-filter-date');
@@ -593,25 +601,34 @@ function setupEventListeners() {
     const btnLoginPullSheet = document.getElementById('btn-login-pull-sheet');
     if (btnLoginPullSheet) {
         btnLoginPullSheet.addEventListener('click', async () => {
-            let url = state.sheetUrl || '';
-            const newUrl = prompt("ระบุ Google Apps Script Web App URL:", url);
-            if (newUrl === null) return; // User cancelled
-            
-            const trimmedUrl = newUrl.trim();
-            if (!trimmedUrl) {
-                alert("กรุณาระบุ URL ที่ถูกต้อง");
-                return;
+            if (!state.supabaseUrl || !state.supabaseKey) {
+                let url = state.supabaseUrl || '';
+                const newUrl = prompt("ระบุ Supabase Project URL (เช่น https://xxxx.supabase.co):", url);
+                if (newUrl === null) return; // User cancelled
+                
+                let key = state.supabaseKey || '';
+                const newKey = prompt("ระบุ Supabase Anon Key:", key);
+                if (newKey === null) return; // User cancelled
+                
+                const trimmedUrl = newUrl.trim();
+                const trimmedKey = newKey.trim();
+                if (!trimmedUrl || !trimmedKey) {
+                    alert("กรุณาระบุข้อมูลที่ถูกต้อง");
+                    return;
+                }
+                
+                state.supabaseUrl = trimmedUrl;
+                state.supabaseKey = trimmedKey;
+                localStorage.setItem('juice_bar_supabase_url', state.supabaseUrl);
+                localStorage.setItem('juice_bar_supabase_key', state.supabaseKey);
             }
-            
-            state.sheetUrl = trimmedUrl;
-            saveToLocalStorage(true);
             
             const originalText = btnLoginPullSheet.innerHTML;
             btnLoginPullSheet.disabled = true;
             btnLoginPullSheet.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> กำลังซิงค์ข้อมูล...';
             
             try {
-                await pullFromSheets(true);
+                await pullFromSupabase(true);
                 const userSummary = state.users.map(u => `${u.username} (${u.pin ? u.pin.length : 0} หลัก)`).join(", ");
                 alert("ซิงค์ข้อมูลผู้ใช้งานและยอดขายสำเร็จ!\n\nบัญชีพนักงานที่โหลดได้:\n" + userSummary);
             } catch(e) {
@@ -2105,33 +2122,36 @@ function clearAllSystemData() {
     }
 }
 
-// GOOGLE SHEETS SYNC MODULE
-async function pullFromSheets(isSilent = false) {
-    if (!state.sheetUrl) {
-        if (!isSilent) alert("กรุณาระบุ Google Apps Script Web App URL ก่อนดึงข้อมูล");
+// SUPABASE SYNC MODULE
+async function pullFromSupabase(isSilent = false) {
+    if (!state.supabaseUrl || !state.supabaseKey) {
+        if (!isSilent) alert("กรุณาระบุ Supabase URL และ Anon Key ก่อนดึงข้อมูล");
         return;
     }
     
     const pullBtn = document.getElementById('btn-pull-sheet');
-    const originalText = pullBtn.innerHTML;
+    const originalText = pullBtn ? pullBtn.innerHTML : '';
     
-    if (!isSilent) {
+    if (!isSilent && pullBtn) {
         pullBtn.disabled = true;
         pullBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> กำลังดึงข้อมูล...';
     }
     
     try {
-        const syncUrl = state.sheetUrl + (state.sheetUrl.includes('?') ? '&' : '?') + '_t=' + Date.now();
+        const syncUrl = `${state.supabaseUrl}/rest/v1/app_state?id=eq.current_state`;
         const response = await fetch(syncUrl, {
             headers: {
+                'apikey': state.supabaseKey,
+                'Authorization': `Bearer ${state.supabaseKey}`,
                 'Cache-Control': 'no-cache',
                 'Pragma': 'no-cache'
             }
         });
         if (!response.ok) throw new Error("HTTP Error: " + response.status);
         
-        const data = await response.json();
-        if (data && (data.orders || data.grabPickups || data.stock || data.users)) {
+        const dataList = await response.json();
+        if (dataList && dataList.length > 0 && dataList[0].data) {
+            const data = dataList[0].data;
             state.orders = data.orders || [];
             state.grabPickups = data.grabPickups || [];
             state.stock = data.stock || {};
@@ -2162,77 +2182,82 @@ async function pullFromSheets(isSilent = false) {
             renderAnalytics();
             
             if (!isSilent) {
-                alert("ดึงข้อมูลจาก Google Sheets สำเร็จเรียบร้อยแล้ว!");
+                alert("ดึงข้อมูลจาก Supabase สำเร็จเรียบร้อยแล้ว!");
             } else {
-                console.log("Auto-pulled from Google Sheets successfully.");
+                console.log("Auto-pulled from Supabase successfully.");
             }
         } else {
-            throw new Error("ไม่พบข้อมูล หรือรูปแบบข้อมูลในชีตไม่ถูกต้อง");
+            throw new Error("ไม่พบข้อมูล หรือรูปแบบข้อมูลใน Supabase ไม่ถูกต้อง (กรุณาตรวจสอบว่ามีข้อมูล id = 'current_state' ในตาราง app_state หรือไม่)");
         }
     } catch (err) {
-        console.error("Failed to pull from Google Sheets:", err);
+        console.error("Failed to pull from Supabase:", err);
         if (!isSilent) {
-            alert("ดึงข้อมูลล้มเหลว: " + err.message + "\n\nกรุณาตรวจสอบว่า:\n1. ลิงก์ URL ถูกต้อง\n2. ตั้งค่า Deploy ใน Apps Script เป็นแบบ 'Anyone' (ทุกคน)\n3. บัญชีที่ใช้เปิดสิทธิ์เข้าถึงสาธารณะเรียบร้อยแล้ว");
+            alert("ดึงข้อมูลล้มเหลว: " + err.message + "\n\nกรุณาตรวจสอบว่า:\n1. URL และ Anon Key ถูกต้อง\n2. สร้างตาราง app_state ใน Supabase แล้ว\n3. ปิด RLS หรือตั้งค่า Policy สำหรับอ่านข้อมูลแล้ว");
         }
         throw err;
     } finally {
-        if (!isSilent) {
+        if (!isSilent && pullBtn) {
             pullBtn.disabled = false;
             pullBtn.innerHTML = originalText;
         }
     }
 }
 
-async function pushToSheets(isAuto = false) {
-    if (!state.sheetUrl) {
-        if (!isAuto) alert("กรุณาระบุ Google Apps Script Web App URL ก่อนบันทึกข้อมูล");
+async function pushToSupabase(isAuto = false) {
+    if (!state.supabaseUrl || !state.supabaseKey) {
+        if (!isAuto) alert("กรุณาระบุ Supabase URL และ Anon Key ก่อนบันทึกข้อมูล");
         return;
     }
     
     const pushBtn = document.getElementById('btn-push-sheet');
-    const originalText = pushBtn.innerHTML;
+    const originalText = pushBtn ? pushBtn.innerHTML : '';
     
-    if (!isAuto) {
+    if (!isAuto && pushBtn) {
         pushBtn.disabled = true;
         pushBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> กำลังบันทึก...';
     }
     
     try {
+        const syncUrl = `${state.supabaseUrl}/rest/v1/app_state`;
         const payloadObj = {
-            action: 'save',
+            id: 'current_state',
             data: {
                 orders: state.orders,
                 grabPickups: state.grabPickups,
                 stock: state.stock,
                 users: state.users
-            }
+            },
+            updated_at: new Date().toISOString()
         };
         
-        // Use POST method to bypass URL length limitation
-        const response = await fetch(state.sheetUrl, {
+        const response = await fetch(syncUrl, {
             method: 'POST',
-            mode: 'cors',
+            headers: {
+                'apikey': state.supabaseKey,
+                'Authorization': `Bearer ${state.supabaseKey}`,
+                'Content-Type': 'application/json',
+                'Prefer': 'resolution=merge-duplicates'
+            },
             body: JSON.stringify(payloadObj)
         });
-        if (!response.ok) throw new Error("HTTP Error: " + response.status);
         
-        const result = await response.json();
-        if (result && result.status === 'success') {
-            if (!isAuto) {
-                alert("บันทึกข้อมูลลง Google Sheets สำเร็จเรียบร้อยแล้ว!");
-            } else {
-                console.log("Auto-synced to Google Sheets.");
-            }
+        if (!response.ok) {
+            const errText = await response.text();
+            throw new Error(`HTTP Error: ${response.status} - ${errText}`);
+        }
+        
+        if (!isAuto) {
+            alert("บันทึกข้อมูลลง Supabase สำเร็จเรียบร้อยแล้ว!");
         } else {
-            throw new Error(result ? result.message : "ระบบฝั่งชีตตอบรับล้มเหลว");
+            console.log("Auto-synced to Supabase.");
         }
     } catch (err) {
-        console.error("Failed to push to Google Sheets:", err);
+        console.error("Failed to push to Supabase:", err);
         if (!isAuto) {
-            alert("บันทึกข้อมูลลงชีตล้มเหลว: " + err.message);
+            alert("บันทึกข้อมูลลง Supabase ล้มเหลว: " + err.message);
         }
     } finally {
-        if (!isAuto) {
+        if (!isAuto && pushBtn) {
             pushBtn.disabled = false;
             pushBtn.innerHTML = originalText;
         }
