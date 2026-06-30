@@ -48,6 +48,10 @@ let state = {
     users: []
 };
 
+// SUPABASE CLIENT & REALTIME SYNC VARIABLES
+let supabaseClient = null;
+let supabaseSubscription = null;
+
 // LOAD INITIAL STATE FROM LOCAL STORAGE
 function init() {
     // Initialize users list
@@ -155,6 +159,9 @@ function init() {
     renderAnalytics();
     renderAdminUsersList();
     
+    // Initialize Supabase Client & Realtime Sync
+    initSupabaseClient();
+
     // Auto-pull from Supabase on startup if configured
     if (state.supabaseUrl && state.supabaseKey) {
         pullFromSupabase(true);
@@ -539,11 +546,13 @@ function setupEventListeners() {
     document.getElementById('supabase-url-input').addEventListener('input', (e) => {
         state.supabaseUrl = e.target.value.trim();
         localStorage.setItem('juice_bar_supabase_url', state.supabaseUrl);
+        initSupabaseClient();
     });
 
     document.getElementById('supabase-key-input').addEventListener('input', (e) => {
         state.supabaseKey = e.target.value.trim();
         localStorage.setItem('juice_bar_supabase_key', state.supabaseKey);
+        initSupabaseClient();
     });
 
     document.getElementById('auto-sync-checkbox').addEventListener('change', (e) => {
@@ -621,6 +630,7 @@ function setupEventListeners() {
                 state.supabaseKey = trimmedKey;
                 localStorage.setItem('juice_bar_supabase_url', state.supabaseUrl);
                 localStorage.setItem('juice_bar_supabase_key', state.supabaseKey);
+                initSupabaseClient();
             }
             
             const originalText = btnLoginPullSheet.innerHTML;
@@ -2119,6 +2129,136 @@ function clearAllSystemData() {
         
         document.getElementById('backup-modal').classList.remove('active');
         alert("ล้างข้อมูลทั้งหมดในระบบแล้ว");
+    }
+}
+
+// TOAST NOTIFICATION MODULE
+function showToast(message, duration = 3000) {
+    let toast = document.createElement('div');
+    toast.className = 'supabase-toast';
+    toast.innerHTML = `<i class="fa-solid fa-bolt text-primary" style="color: var(--color-primary) !important;"></i> <span>${message}</span>`;
+    
+    Object.assign(toast.style, {
+        position: 'fixed',
+        bottom: '20px',
+        right: '20px',
+        background: 'rgba(15, 23, 42, 0.95)',
+        color: '#f8fafc',
+        padding: '0.75rem 1.25rem',
+        borderRadius: '12px',
+        boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 0 10px rgba(99, 102, 241, 0.2)',
+        border: '1px solid rgba(255, 255, 255, 0.1)',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '0.5rem',
+        fontFamily: "'Prompt', sans-serif",
+        fontSize: '0.85rem',
+        zIndex: '9999',
+        transform: 'translateY(50px)',
+        opacity: '0',
+        transition: 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease'
+    });
+    
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.style.transform = 'translateY(0)';
+        toast.style.opacity = '1';
+    }, 50);
+    
+    setTimeout(() => {
+        toast.style.transform = 'translateY(20px)';
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 300);
+    }, duration);
+}
+
+// SUPABASE CLIENT & REALTIME MODULE
+function initSupabaseClient() {
+    if (state.supabaseUrl && state.supabaseKey && window.supabase) {
+        try {
+            supabaseClient = window.supabase.createClient(state.supabaseUrl, state.supabaseKey);
+            setupSupabaseRealtime();
+        } catch (e) {
+            console.error("Failed to initialize Supabase client:", e);
+        }
+    }
+}
+
+function setupSupabaseRealtime() {
+    if (!supabaseClient) return;
+    
+    if (supabaseSubscription) {
+        supabaseSubscription.unsubscribe();
+    }
+    
+    try {
+        supabaseSubscription = supabaseClient
+            .channel('public:app_state')
+            .on('postgres_changes', {
+                event: '*',
+                schema: 'public',
+                table: 'app_state',
+                filter: 'id=eq.current_state'
+            }, (payload) => {
+                console.log("Realtime change received:", payload);
+                const newData = payload.new?.data;
+                
+                if (newData) {
+                    if (state.editingOrderId) {
+                        console.log("Ignore realtime update because we are editing an order.");
+                        return;
+                    }
+                    
+                    const localStr = JSON.stringify({
+                        orders: state.orders,
+                        grabPickups: state.grabPickups,
+                        stock: state.stock,
+                        users: state.users
+                    });
+                    const remoteStr = JSON.stringify({
+                        orders: newData.orders || [],
+                        grabPickups: newData.grabPickups || [],
+                        stock: newData.stock || {},
+                        users: newData.users || []
+                    });
+                    
+                    if (localStr !== remoteStr) {
+                        console.log("Applying realtime update to local state.");
+                        state.orders = newData.orders || [];
+                        state.grabPickups = newData.grabPickups || [];
+                        state.stock = newData.stock || {};
+                        
+                        if (newData.users && Array.isArray(newData.users) && newData.users.length > 0) {
+                            state.users = newData.users;
+                            localStorage.setItem('juice_bar_users', JSON.stringify(state.users));
+                            renderLoginUserDropdown();
+                            renderAdminUsersList();
+                        }
+                        
+                        DRINKS.forEach(drink => {
+                            if (state.stock[drink.id] === undefined) {
+                                state.stock[drink.id] = 20;
+                            }
+                        });
+                        
+                        saveToLocalStorage(true);
+                        
+                        renderTables();
+                        renderOrders();
+                        renderGrabLogs();
+                        renderStock();
+                        renderAnalytics();
+                        
+                        showToast("ซิงค์ข้อมูลล่าสุดจากร้านแล้ว ⚡");
+                    }
+                }
+            })
+            .subscribe((status) => {
+                console.log("Realtime subscription status:", status);
+            });
+    } catch (e) {
+        console.error("Failed to establish realtime subscription:", e);
     }
 }
 

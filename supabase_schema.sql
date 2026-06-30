@@ -182,3 +182,18 @@ CREATE TRIGGER trigger_sync_state_to_tables
 AFTER INSERT OR UPDATE ON app_state
 FOR EACH ROW
 EXECUTE FUNCTION sync_state_to_tables();
+
+-- 9. Enable Realtime for the app_state table (safeguarded)
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM pg_publication WHERE pubname = 'supabase_realtime'
+  ) THEN
+    BEGIN
+      ALTER PUBLICATION supabase_realtime ADD TABLE app_state;
+    EXCEPTION WHEN OTHERS THEN
+      -- Already added or other minor issues, ignore
+      NULL;
+    END;
+  END IF;
+END $$;
