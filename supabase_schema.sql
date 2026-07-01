@@ -60,8 +60,7 @@ CREATE TABLE IF NOT EXISTS grab_pickups (
 CREATE TABLE IF NOT EXISTS stock (
   drink_id TEXT PRIMARY KEY,
   quantity INTEGER,
-  synced_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
-  FOREIGN KEY (drink_id) REFERENCES drinks(drink_id) ON DELETE CASCADE
+  synced_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
 -- 6. Create structured table for Users (Human-readable & Queryable)
