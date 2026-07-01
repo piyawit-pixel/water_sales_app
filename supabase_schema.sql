@@ -60,7 +60,8 @@ CREATE TABLE IF NOT EXISTS grab_pickups (
 CREATE TABLE IF NOT EXISTS stock (
   drink_id TEXT PRIMARY KEY,
   quantity INTEGER,
-  synced_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+  synced_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+  FOREIGN KEY (drink_id) REFERENCES drinks(drink_id) ON DELETE CASCADE
 );
 
 -- 6. Create structured table for Users (Human-readable & Queryable)
@@ -181,11 +182,13 @@ BEGIN
   -- D. Sync Stock (with foreign key to drinks)
   TRUNCATE TABLE stock;
   IF jsonb_typeof(stock_json) = 'object' THEN
-    FOR drink_key, drink_val IN SELECT * FROM jsonb_each_text(stock_json) LOOP
-      INSERT INTO stock (drink_id, quantity)
-      VALUES (drink_key, drink_val)
-      ON CONFLICT (drink_id) DO UPDATE SET quantity = EXCLUDED.quantity;
-    END LOOP;
+    INSERT INTO stock (drink_id, quantity)
+    SELECT 
+      regexp_replace(key, '_(old|new)$', '') as base_drink_id,
+      SUM(value::integer) as total_quantity
+    FROM jsonb_each_text(stock_json)
+    GROUP BY base_drink_id
+    ON CONFLICT (drink_id) DO UPDATE SET quantity = EXCLUDED.quantity;
   END IF;
 
   -- E. Sync Users
