@@ -1991,10 +1991,38 @@ function handleGrabManualSubmit(e) {
         return;
     }
     
-    // Deduct items from stock
-    for (const drinkId in items) {
-        const qty = items[drinkId] || 0;
-        state.stock[drinkId] = Math.max(0, (state.stock[drinkId] || 0) - qty);
+    // Deduct items from stock (splitting between old and new batches)
+    let itemsWithBatch = {};
+    for (const baseDrinkId in items) {
+        let qtyToDeduct = items[baseDrinkId];
+        
+        const oldKey = baseDrinkId + '_old';
+        const newKey = baseDrinkId + '_new';
+        
+        const qtyOld = state.stock[oldKey] !== undefined ? state.stock[oldKey] : 20;
+        const qtyNew = state.stock[newKey] !== undefined ? state.stock[newKey] : 0;
+        
+        // Deduct from old batch first
+        if (qtyOld > 0) {
+            const deductOld = Math.min(qtyOld, qtyToDeduct);
+            state.stock[oldKey] = qtyOld - deductOld;
+            itemsWithBatch[oldKey] = deductOld;
+            qtyToDeduct -= deductOld;
+        }
+        
+        // If there's still quantity to deduct, deduct from new batch
+        if (qtyToDeduct > 0) {
+            const deductNew = Math.min(qtyNew, qtyToDeduct);
+            state.stock[newKey] = Math.max(0, qtyNew - deductNew);
+            itemsWithBatch[newKey] = (itemsWithBatch[newKey] || 0) + deductNew;
+            qtyToDeduct -= deductNew;
+            
+            // If still remaining (insufficient stock overall), log the remainder as new batch
+            if (qtyToDeduct > 0) {
+                itemsWithBatch[newKey] = (itemsWithBatch[newKey] || 0) + qtyToDeduct;
+                state.stock[newKey] = 0;
+            }
+        }
     }
 
     const record = {
@@ -2002,7 +2030,7 @@ function handleGrabManualSubmit(e) {
         driverName: driverName,
         customerName: customerName,
         orderId: null, // manual log has no orderId linked
-        items: items,
+        items: itemsWithBatch,
         timestamp: timestampVal ? new Date(timestampVal).toISOString() : new Date().toISOString()
     };
     
@@ -2118,8 +2146,9 @@ function renderAnalytics() {
             // Accumulate popularity (only for filtered dates)
             if (order.items) {
                 Object.keys(order.items).forEach(drinkId => {
-                    if (popTracker.hasOwnProperty(drinkId)) {
-                        popTracker[drinkId] += order.items[drinkId];
+                    const baseDrinkId = drinkId.replace(/_(old|new)$/, '');
+                    if (popTracker.hasOwnProperty(baseDrinkId)) {
+                        popTracker[baseDrinkId] += order.items[drinkId];
                     }
                 });
             }
@@ -2138,8 +2167,9 @@ function renderAnalytics() {
             
             if (matchesFilter) {
                 Object.keys(grab.items).forEach(drinkId => {
-                    if (popTracker.hasOwnProperty(drinkId)) {
-                        popTracker[drinkId] += grab.items[drinkId];
+                    const baseDrinkId = drinkId.replace(/_(old|new)$/, '');
+                    if (popTracker.hasOwnProperty(baseDrinkId)) {
+                        popTracker[baseDrinkId] += grab.items[drinkId];
                     }
                 });
             }
