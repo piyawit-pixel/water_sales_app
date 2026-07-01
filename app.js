@@ -47,6 +47,84 @@ function getBatchSuffix(drinkId) {
     return '';
 }
 
+function normalizeLegacyStateData(targetState) {
+    if (!targetState) return false;
+    if (!targetState.stock || typeof targetState.stock !== 'object') targetState.stock = {};
+    if (!targetState.stockDates || typeof targetState.stockDates !== 'object') targetState.stockDates = {};
+
+    let modified = false;
+
+    DRINKS.forEach(drink => {
+        const legacyKey = drink.id;
+        const oldKey = `${drink.id}_old`;
+        const newKey = `${drink.id}_new`;
+
+        if (targetState.stock[legacyKey] !== undefined && targetState.stock[oldKey] === undefined) {
+            targetState.stock[oldKey] = targetState.stock[legacyKey];
+            targetState.stock[newKey] = targetState.stock[newKey] || 0;
+            delete targetState.stock[legacyKey];
+            modified = true;
+        }
+
+        if (targetState.stock[oldKey] === undefined) {
+            targetState.stock[oldKey] = 20;
+            modified = true;
+        }
+        if (targetState.stock[newKey] === undefined) {
+            targetState.stock[newKey] = 0;
+            modified = true;
+        }
+
+        if (targetState.stockDates[oldKey] === undefined) {
+            targetState.stockDates[oldKey] = '';
+            modified = true;
+        }
+        if (targetState.stockDates[newKey] === undefined) {
+            targetState.stockDates[newKey] = '';
+            modified = true;
+        }
+    });
+
+    function migrateItemsArray(itemsArray) {
+        if (!Array.isArray(itemsArray)) return false;
+        let migratedAny = false;
+
+        itemsArray.forEach(item => {
+            if (!item || typeof item !== 'object' || !item.items) return;
+            const migratedItems = {};
+            let neededMigration = false;
+
+            for (const key in item.items) {
+                if (!key.endsWith('_old') && !key.endsWith('_new')) {
+                    const drink = DRINKS.find(d => d.id === key);
+                    if (drink) {
+                        migratedItems[`${key}_old`] = item.items[key];
+                        neededMigration = true;
+                        continue;
+                    }
+                }
+                migratedItems[key] = item.items[key];
+            }
+
+            if (neededMigration) {
+                item.items = migratedItems;
+                migratedAny = true;
+            }
+        });
+
+        return migratedAny;
+    }
+
+    if (migrateItemsArray(targetState.orders)) {
+        modified = true;
+    }
+    if (migrateItemsArray(targetState.grabPickups)) {
+        modified = true;
+    }
+
+    return modified;
+}
+
 function getSelectedBatch(drinkId) {
     if (!state.selectedBatch) state.selectedBatch = {};
     const oldQty = getAvailableStock(drinkId + '_old');
@@ -137,6 +215,7 @@ function init() {
             state.grabPickups = parsed.grabPickups || [];
             state.stock = parsed.stock || {};
             state.stockDates = parsed.stockDates || {};
+            normalizeLegacyStateData(state);
         } catch (e) {
             console.error("Error parsing saved state", e);
         }
@@ -2538,6 +2617,8 @@ async function pullFromSupabase(isSilent = false) {
             state.stock = data.stock || {};
             state.stockDates = data.stockDates || {};
             
+            normalizeLegacyStateData(state);
+            
             // Sync users if present
             if (data.users && Array.isArray(data.users) && data.users.length > 0) {
                 state.users = data.users;
@@ -2545,23 +2626,6 @@ async function pullFromSupabase(isSilent = false) {
                 renderLoginUserDropdown();
                 renderAdminUsersList();
             }
-            
-            // Ensure all drinks in database have a stock quantity (default to 20 if not set)
-            DRINKS.forEach(drink => {
-                if (state.stock[drink.id + '_old'] === undefined) {
-                    state.stock[drink.id + '_old'] = 20;
-                }
-                if (state.stock[drink.id + '_new'] === undefined) {
-                    state.stock[drink.id + '_new'] = 0;
-                }
-                if (!state.stockDates) state.stockDates = {};
-                if (state.stockDates[drink.id + '_old'] === undefined) {
-                    state.stockDates[drink.id + '_old'] = '';
-                }
-                if (state.stockDates[drink.id + '_new'] === undefined) {
-                    state.stockDates[drink.id + '_new'] = '';
-                }
-            });
             
             // Save to LocalStorage skipping the auto-push sync loop
             saveToLocalStorage(true);

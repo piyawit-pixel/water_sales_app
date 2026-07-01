@@ -25,6 +25,25 @@ CREATE TABLE IF NOT EXISTS drinks (
   synced_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
+-- Seed default drinks menu to support foreign key constraint
+INSERT INTO drinks (drink_id, name, price, is_available)
+VALUES 
+  ('oishi', 'โออิชิ', 80, true),
+  ('grape', 'องุ่นเคียวโฮ', 80, true),
+  ('bitter', 'เดิมขม', 80, true),
+  ('sweet', 'เดิมหวาน', 80, true),
+  ('honey-lemon', 'น้ำผึ้งมะนาว', 80, true),
+  ('blueberry', 'บลูเบอร์รี่', 80, true),
+  ('yogurt', 'โยเกิร์ต', 80, true),
+  ('strawberry-yogurt', 'โยเกิร์ตสตอเบอรี่', 80, true),
+  ('strawberry', 'สตอเบอรี่', 80, true),
+  ('apple', 'แอปเปิ้ล', 80, true),
+  ('greentea', 'ชาเขียว', 80, true),
+  ('taro', 'เผือก', 80, true),
+  ('cocoa', 'โกโก้', 80, true),
+  ('watermelon', 'แตงโม', 80, true)
+ON CONFLICT (drink_id) DO NOTHING;
+
 -- 3. Create structured table for Orders (Human-readable & Queryable)
 CREATE TABLE IF NOT EXISTS orders (
   id TEXT PRIMARY KEY,
@@ -162,8 +181,8 @@ BEGIN
   END IF;
 
   -- C. Sync Drinks Menu (NEW)
-  TRUNCATE TABLE drinks;
   IF jsonb_typeof(drinks_json) = 'array' THEN
+    TRUNCATE TABLE drinks;
     INSERT INTO drinks (drink_id, name, price, description, is_available)
     SELECT 
       (val->>'drinkId')::text,
