@@ -125,6 +125,75 @@ function normalizeLegacyStateData(targetState) {
     return modified;
 }
 
+async function fetchStructuredStockTableFromSupabase() {
+    if (!state.supabaseUrl || !state.supabaseKey) return null;
+
+    try {
+        const url = `${state.supabaseUrl}/rest/v1/stock?select=drink_id,quantity`;
+        const response = await fetch(url, {
+            headers: {
+                apikey: state.supabaseKey,
+                Authorization: `Bearer ${state.supabaseKey}`,
+                'Accept': 'application/json',
+                'Cache-Control': 'no-cache',
+                'Pragma': 'no-cache'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`Stock table fetch failed: ${response.status}`);
+        }
+
+        const rows = await response.json();
+        return Array.isArray(rows) ? rows : null;
+    } catch (err) {
+        console.warn("Could not fetch structured stock table from Supabase:", err);
+        return null;
+    }
+}
+
+function mergeStructuredStockRows(rows, currentStock = {}) {
+    if (!Array.isArray(rows)) return currentStock;
+
+    const mergedStock = { ...currentStock };
+    const baseQuantities = {};
+
+    rows.forEach(row => {
+        const drinkId = String(row.drink_id || '').trim();
+        const quantity = Number(row.quantity) || 0;
+        if (!drinkId) return;
+
+        if (drinkId.endsWith('_old') || drinkId.endsWith('_new')) {
+            mergedStock[drinkId] = quantity;
+            const baseId = drinkId.replace(/_(old|new)$/, '');
+            baseQuantities[baseId] = (baseQuantities[baseId] || 0) + quantity;
+        } else {
+            baseQuantities[drinkId] = quantity;
+        }
+    });
+
+    DRINKS.forEach(drink => {
+        const oldKey = `${drink.id}_old`;
+        const newKey = `${drink.id}_new`;
+
+        if (mergedStock[oldKey] === undefined && mergedStock[newKey] === undefined) {
+            if (baseQuantities[drink.id] !== undefined) {
+                mergedStock[oldKey] = baseQuantities[drink.id];
+            } else if (currentStock[oldKey] !== undefined) {
+                mergedStock[oldKey] = currentStock[oldKey];
+            } else {
+                mergedStock[oldKey] = 20;
+            }
+            mergedStock[newKey] = currentStock[newKey] !== undefined ? currentStock[newKey] : 0;
+        } else {
+            if (mergedStock[oldKey] === undefined) mergedStock[oldKey] = currentStock[oldKey] !== undefined ? currentStock[oldKey] : 0;
+            if (mergedStock[newKey] === undefined) mergedStock[newKey] = currentStock[newKey] !== undefined ? currentStock[newKey] : 0;
+        }
+    });
+
+    return mergedStock;
+}
+
 function getSelectedBatch(drinkId) {
     if (!state.selectedBatch) state.selectedBatch = {};
     const oldQty = getAvailableStock(drinkId + '_old');
@@ -2618,6 +2687,12 @@ async function pullFromSupabase(isSilent = false) {
             state.stockDates = data.stockDates || {};
             
             normalizeLegacyStateData(state);
+
+            const structuredRows = await fetchStructuredStockTableFromSupabase();
+            if (structuredRows && structuredRows.length > 0) {
+                state.stock = mergeStructuredStockRows(structuredRows, state.stock);
+                normalizeLegacyStateData(state);
+            }
             
             // Sync users if present
             if (data.users && Array.isArray(data.users) && data.users.length > 0) {
