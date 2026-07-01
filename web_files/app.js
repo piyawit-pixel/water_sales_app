@@ -351,8 +351,16 @@ function saveToLocalStorage(skipSync = false) {
         stockDates: state.stockDates
     }));
     
-    // Refresh customer view and search results dynamically
+    // Refresh all UI views to keep them in-sync
+    renderTables();
+    renderOrders();
+    renderGrabLogs();
+    renderStock();
+    renderAnalytics();
+    renderDrinkGrid();
+    renderPromoTab();
     renderCustomerView();
+    
     const searchInput = document.getElementById('customer-search-input');
     if (searchInput && searchInput.value.trim()) {
         searchCustomerStatus();
