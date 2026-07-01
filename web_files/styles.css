@@ -2993,4 +2993,54 @@ body.admin-active .main-content {
     }
 }
 
+/* BATCH SELECTOR STYLES */
+.batch-selector-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    margin-top: 0.5rem;
+    width: 100%;
+    z-index: 5;
+}
+
+.batch-pill-btn {
+    background: rgba(255, 255, 255, 0.45);
+    border: 1px solid var(--border-glass);
+    border-radius: var(--radius-sm);
+    padding: 0.25rem 0.5rem;
+    font-size: 0.72rem;
+    font-weight: 500;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    text-align: left;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.2s ease;
+    user-select: none;
+    outline: none;
+    width: 100%;
+}
+
+.batch-pill-btn:hover {
+    background: rgba(255, 255, 255, 0.85);
+    color: var(--color-text);
+}
+
+.batch-pill-btn.selected {
+    background: rgba(var(--bev-color-rgb), 0.15);
+    border-color: var(--bev-color);
+    color: var(--color-text);
+    font-weight: bold;
+    box-shadow: 0 0 5px rgba(var(--bev-color-rgb), 0.2);
+}
+
+.batch-pill-btn.disabled-pill {
+    opacity: 0.35;
+    cursor: not-allowed;
+    pointer-events: none;
+    background: rgba(0, 0, 0, 0.05);
+}
+
+
 

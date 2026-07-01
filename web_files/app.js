@@ -33,19 +33,55 @@ const DEFAULT_USERS = [
     { username: 'พนักงาน', pin: '1234', role: 'staff' }
 ];
 
+// HELPER TO GET DRINK AND BATCH INFORMATION
+function getDrinkById(drinkId) {
+    if (!drinkId) return null;
+    const baseId = drinkId.replace(/_(old|new)$/, '');
+    return DRINKS.find(d => d.id === baseId);
+}
+
+function getBatchSuffix(drinkId) {
+    if (!drinkId) return '';
+    if (drinkId.endsWith('_old')) return ' (เก่า)';
+    if (drinkId.endsWith('_new')) return ' (ใหม่)';
+    return '';
+}
+
+function getSelectedBatch(drinkId) {
+    if (!state.selectedBatch) state.selectedBatch = {};
+    const oldQty = getAvailableStock(drinkId + '_old');
+    const newQty = getAvailableStock(drinkId + '_new');
+    
+    if (!state.selectedBatch[drinkId]) {
+        state.selectedBatch[drinkId] = (oldQty > 0) ? 'old' : 'new';
+    } else if (state.selectedBatch[drinkId] === 'old' && oldQty === 0 && newQty > 0) {
+        state.selectedBatch[drinkId] = 'new';
+    } else if (state.selectedBatch[drinkId] === 'new' && newQty === 0 && oldQty > 0) {
+        state.selectedBatch[drinkId] = 'old';
+    }
+    return state.selectedBatch[drinkId];
+}
+
 // STATE MANAGEMENT
 let state = {
     orders: [],
     grabPickups: [],
     editingOrderId: null,
-    cart: {}, // drinkId -> quantity
+    cart: {}, // drinkId_batch -> quantity
+    selectedBatch: {}, // drinkId -> 'old' | 'new'
+    stockDates: {}, // drinkId_batch -> 'YYYY-MM-DD'
     searchQuery: '',
     tab: 'tables-tab',
-    sheetUrl: '',
+    supabaseUrl: '',
+    supabaseKey: '',
     autoSync: false,
-    stock: {}, // drinkId -> quantity
+    stock: {}, // drinkId_batch -> quantity
     users: []
 };
+
+// SUPABASE CLIENT & REALTIME SYNC VARIABLES
+let supabaseClient = null;
+let supabaseSubscription = null;
 
 // LOAD INITIAL STATE FROM LOCAL STORAGE
 function init() {
@@ -101,31 +137,121 @@ function init() {
             state.orders = parsed.orders || [];
             state.grabPickups = parsed.grabPickups || [];
             state.stock = parsed.stock || {};
+            state.stockDates = parsed.stockDates || {};
         } catch (e) {
             console.error("Error parsing saved state", e);
         }
     }
     
-    // Ensure all drinks in database have a stock quantity (default to 20 if not set)
-    DRINKS.forEach(drink => {
-        if (state.stock[drink.id] === undefined) {
-            state.stock[drink.id] = 20;
+    // DEFINE LEGACY DATA MIGRATION FUNCTION
+    function migrateLegacyData() {
+        let modified = false;
+
+        // 1. Migrate stock keys (e.g. 'oishi' -> 'oishi_old')
+        DRINKS.forEach(drink => {
+            if (state.stock[drink.id] !== undefined) {
+                state.stock[drink.id + '_old'] = state.stock[drink.id];
+                state.stock[drink.id + '_new'] = 0;
+                delete state.stock[drink.id];
+                modified = true;
+            }
+        });
+
+        // 2. Migrate order item keys
+        if (state.orders && Array.isArray(state.orders)) {
+            state.orders.forEach(order => {
+                if (order.items) {
+                    const migratedItems = {};
+                    let orderMigrated = false;
+                    for (const key in order.items) {
+                        if (!key.endsWith('_old') && !key.endsWith('_new')) {
+                            const drink = DRINKS.find(d => d.id === key);
+                            if (drink) {
+                                migratedItems[key + '_old'] = order.items[key];
+                                orderMigrated = true;
+                            }
+                        } else {
+                            migratedItems[key] = order.items[key];
+                        }
+                    }
+                    if (orderMigrated) {
+                        order.items = migratedItems;
+                        modified = true;
+                    }
+                }
+            });
         }
-    });
+
+        // 3. Migrate grab pickups items keys
+        if (state.grabPickups && Array.isArray(state.grabPickups)) {
+            state.grabPickups.forEach(grab => {
+                if (grab.items) {
+                    const migratedItems = {};
+                    let grabMigrated = false;
+                    for (const key in grab.items) {
+                        if (!key.endsWith('_old') && !key.endsWith('_new')) {
+                            const drink = DRINKS.find(d => d.id === key);
+                            if (drink) {
+                                migratedItems[key + '_old'] = grab.items[key];
+                                grabMigrated = true;
+                            }
+                        } else {
+                            migratedItems[key] = grab.items[key];
+                        }
+                    }
+                    if (grabMigrated) {
+                        grab.items = migratedItems;
+                        modified = true;
+                    }
+                }
+            });
+        }
+
+        // 4. Ensure all batch keys are initialized
+        DRINKS.forEach(drink => {
+            if (state.stock[drink.id + '_old'] === undefined) {
+                state.stock[drink.id + '_old'] = 20;
+                modified = true;
+            }
+            if (state.stock[drink.id + '_new'] === undefined) {
+                state.stock[drink.id + '_new'] = 0;
+                modified = true;
+            }
+            
+            if (!state.stockDates) state.stockDates = {};
+            if (state.stockDates[drink.id + '_old'] === undefined) {
+                state.stockDates[drink.id + '_old'] = '';
+                modified = true;
+            }
+            if (state.stockDates[drink.id + '_new'] === undefined) {
+                state.stockDates[drink.id + '_new'] = '';
+                modified = true;
+            }
+        });
+
+        if (modified) {
+            console.log("Legacy data successfully migrated to batch-specific keys.");
+            saveToLocalStorage(true);
+        }
+    }
+
+    migrateLegacyData();
     
-    // Load Google Sheets configurations (default URL and auto-sync enabled by default)
-    const defaultUrl = 'https://script.google.com/macros/s/AKfycbz84s4EmEOUcmxKbxnR9Pfbf3evnqldYgAQ2qmsuEjo9TdJ30K8Bb1nGQvfKoO2b76u/exec';
-    state.sheetUrl = localStorage.getItem('juice_bar_sheet_url') || defaultUrl;
+    // Load Supabase configurations
+    state.supabaseUrl = localStorage.getItem('juice_bar_supabase_url') || '';
+    state.supabaseKey = localStorage.getItem('juice_bar_supabase_key') || '';
     
     const savedAutoSync = localStorage.getItem('juice_bar_auto_sync');
     state.autoSync = savedAutoSync !== null ? savedAutoSync === 'true' : true;
     
-    // Ensure default config is stored in localStorage
-    localStorage.setItem('juice_bar_sheet_url', state.sheetUrl);
+    // Ensure config is stored in localStorage
+    localStorage.setItem('juice_bar_supabase_url', state.supabaseUrl);
+    localStorage.setItem('juice_bar_supabase_key', state.supabaseKey);
     localStorage.setItem('juice_bar_auto_sync', state.autoSync ? 'true' : 'false');
     
-    // Populate Google Sheets UI inputs & staff name
-    document.getElementById('sheet-url-input').value = state.sheetUrl;
+    // Populate Supabase UI inputs & staff name
+    document.getElementById('supabase-url-input').value = state.supabaseUrl;
+    document.getElementById('supabase-key-input').value = state.supabaseKey;
     document.getElementById('auto-sync-checkbox').checked = state.autoSync;
     document.getElementById('staff-name').value = localStorage.getItem('juice_bar_last_staff') || '';
     
@@ -152,15 +278,18 @@ function init() {
     renderAnalytics();
     renderAdminUsersList();
     
-    // Auto-pull from sheet on startup if URL is configured
-    if (state.sheetUrl) {
-        pullFromSheets(true);
+    // Initialize Supabase Client & Realtime Sync
+    initSupabaseClient();
+
+    // Auto-pull from Supabase on startup if configured
+    if (state.supabaseUrl && state.supabaseKey) {
+        pullFromSupabase(true);
     }
 
-    // Periodic background sync every 60 seconds (only if autoSync is enabled and URL exists, and not editing)
+    // Periodic background sync every 60 seconds (only if autoSync is enabled and credentials exist, and not editing)
     setInterval(() => {
-        if (state.sheetUrl && state.autoSync && !state.editingOrderId) {
-            pullFromSheets(true).catch(err => console.warn("Background sync failed:", err));
+        if (state.supabaseUrl && state.supabaseKey && state.autoSync && !state.editingOrderId) {
+            pullFromSupabase(true).catch(err => console.warn("Background sync failed:", err));
         }
     }, 60000);
 }
@@ -218,7 +347,8 @@ function saveToLocalStorage(skipSync = false) {
     localStorage.setItem('juice_bar_tracker_state', JSON.stringify({
         orders: state.orders,
         grabPickups: state.grabPickups,
-        stock: state.stock
+        stock: state.stock,
+        stockDates: state.stockDates
     }));
     
     // Refresh customer view and search results dynamically
@@ -228,8 +358,8 @@ function saveToLocalStorage(skipSync = false) {
         searchCustomerStatus();
     }
     
-    if (!skipSync && state.autoSync && state.sheetUrl) {
-        pushToSheets(true);
+    if (!skipSync && state.autoSync && state.supabaseUrl && state.supabaseKey) {
+        pushToSupabase(true);
     }
 }
 
@@ -237,8 +367,8 @@ function saveToLocalStorage(skipSync = false) {
 function saveUsersToLocalStorage(skipSync = false) {
     localStorage.setItem('juice_bar_users', JSON.stringify(state.users));
     
-    if (!skipSync && state.autoSync && state.sheetUrl) {
-        pushToSheets(true);
+    if (!skipSync && state.autoSync && state.supabaseUrl && state.supabaseKey) {
+        pushToSupabase(true);
     }
 }
 
@@ -532,10 +662,17 @@ function setupEventListeners() {
 
     document.getElementById('btn-clear-all-data').addEventListener('click', clearAllSystemData);
 
-    // Google Sheets Sync Event Listeners
-    document.getElementById('sheet-url-input').addEventListener('input', (e) => {
-        state.sheetUrl = e.target.value.trim();
-        localStorage.setItem('juice_bar_sheet_url', state.sheetUrl);
+    // Supabase Sync Event Listeners
+    document.getElementById('supabase-url-input').addEventListener('input', (e) => {
+        state.supabaseUrl = e.target.value.trim();
+        localStorage.setItem('juice_bar_supabase_url', state.supabaseUrl);
+        initSupabaseClient();
+    });
+
+    document.getElementById('supabase-key-input').addEventListener('input', (e) => {
+        state.supabaseKey = e.target.value.trim();
+        localStorage.setItem('juice_bar_supabase_key', state.supabaseKey);
+        initSupabaseClient();
     });
 
     document.getElementById('auto-sync-checkbox').addEventListener('change', (e) => {
@@ -543,8 +680,8 @@ function setupEventListeners() {
         localStorage.setItem('juice_bar_auto_sync', state.autoSync ? 'true' : 'false');
     });
 
-    document.getElementById('btn-pull-sheet').addEventListener('click', () => pullFromSheets(false));
-    document.getElementById('btn-push-sheet').addEventListener('click', () => pushToSheets(false));
+    document.getElementById('btn-pull-sheet').addEventListener('click', () => pullFromSupabase(false));
+    document.getElementById('btn-push-sheet').addEventListener('click', () => pushToSupabase(false));
 
     // Summary/Analytics Date Filters
     const summaryFilterDate = document.getElementById('summary-filter-date');
@@ -593,25 +730,35 @@ function setupEventListeners() {
     const btnLoginPullSheet = document.getElementById('btn-login-pull-sheet');
     if (btnLoginPullSheet) {
         btnLoginPullSheet.addEventListener('click', async () => {
-            let url = state.sheetUrl || '';
-            const newUrl = prompt("ระบุ Google Apps Script Web App URL:", url);
-            if (newUrl === null) return; // User cancelled
-            
-            const trimmedUrl = newUrl.trim();
-            if (!trimmedUrl) {
-                alert("กรุณาระบุ URL ที่ถูกต้อง");
-                return;
+            if (!state.supabaseUrl || !state.supabaseKey) {
+                let url = state.supabaseUrl || '';
+                const newUrl = prompt("ระบุ Supabase Project URL (เช่น https://xxxx.supabase.co):", url);
+                if (newUrl === null) return; // User cancelled
+                
+                let key = state.supabaseKey || '';
+                const newKey = prompt("ระบุ Supabase Anon Key:", key);
+                if (newKey === null) return; // User cancelled
+                
+                const trimmedUrl = newUrl.trim();
+                const trimmedKey = newKey.trim();
+                if (!trimmedUrl || !trimmedKey) {
+                    alert("กรุณาระบุข้อมูลที่ถูกต้อง");
+                    return;
+                }
+                
+                state.supabaseUrl = trimmedUrl;
+                state.supabaseKey = trimmedKey;
+                localStorage.setItem('juice_bar_supabase_url', state.supabaseUrl);
+                localStorage.setItem('juice_bar_supabase_key', state.supabaseKey);
+                initSupabaseClient();
             }
-            
-            state.sheetUrl = trimmedUrl;
-            saveToLocalStorage(true);
             
             const originalText = btnLoginPullSheet.innerHTML;
             btnLoginPullSheet.disabled = true;
             btnLoginPullSheet.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> กำลังซิงค์ข้อมูล...';
             
             try {
-                await pullFromSheets(true);
+                await pullFromSupabase(true);
                 const userSummary = state.users.map(u => `${u.username} (${u.pin ? u.pin.length : 0} หลัก)`).join(", ");
                 alert("ซิงค์ข้อมูลผู้ใช้งานและยอดขายสำเร็จ!\n\nบัญชีพนักงานที่โหลดได้:\n" + userSummary);
             } catch(e) {
@@ -857,7 +1004,8 @@ function checkCustomerPreviousOrders(custName) {
 
 // GET AVAILABLE STOCK (Accounting for order edit session)
 function getAvailableStock(drinkId) {
-    const stockQty = state.stock[drinkId] !== undefined ? state.stock[drinkId] : 20;
+    const defaultQty = drinkId.endsWith('_new') ? 0 : 20;
+    const stockQty = state.stock[drinkId] !== undefined ? state.stock[drinkId] : defaultQty;
     
     // If we are currently editing an order, the items in that order should be considered "available" to be re-ordered
     if (state.editingOrderId) {
@@ -884,30 +1032,65 @@ function renderDrinkGrid() {
     }
     
     filteredDrinks.forEach(drink => {
-        const qtyInCart = state.cart[drink.id] || 0;
+        const qtyInCart = (state.cart[drink.id + '_old'] || 0) + (state.cart[drink.id + '_new'] || 0);
         const activeClass = qtyInCart > 0 ? 'active' : '';
         
-        const available = getAvailableStock(drink.id);
-        const remaining = Math.max(0, available - qtyInCart);
+        const qtyOld = getAvailableStock(drink.id + '_old');
+        const qtyNew = getAvailableStock(drink.id + '_new');
+        const dateOld = state.stockDates[drink.id + '_old'] || '';
+        const dateNew = state.stockDates[drink.id + '_new'] || '';
+        
+        const totalAvailable = qtyOld + qtyNew;
+        const totalRemaining = Math.max(0, totalAvailable - qtyInCart);
+        
+        const selectedBatch = getSelectedBatch(drink.id);
+        const availableForBatch = getAvailableStock(drink.id + '_' + selectedBatch);
+        const inCartForBatch = state.cart[drink.id + '_' + selectedBatch] || 0;
+        const remainingForBatch = Math.max(0, availableForBatch - inCartForBatch);
         
         let stockLabel = '';
         let cardStatusClass = '';
         
-        if (available === 0) {
-            stockLabel = `<span class="bev-stock text-danger" style="font-size: 0.75rem; font-weight: bold; display: block; margin-top: 0.15rem;">❌ หมด</span>`;
+        if (totalAvailable === 0) {
+            stockLabel = `<span class="bev-stock text-danger" style="font-size: 0.75rem; font-weight: bold; display: block; margin-top: 0.15rem;">❌ หมดชั่วคราว</span>`;
             cardStatusClass = 'out-of-stock';
-        } else if (remaining === 0) {
+        } else if (totalRemaining === 0) {
             stockLabel = `<span class="bev-stock text-danger" style="font-size: 0.75rem; font-weight: bold; display: block; margin-top: 0.15rem;">❌ เต็มสต็อกแล้ว</span>`;
-        } else if (available <= 5) {
-            stockLabel = `<span class="bev-stock text-warning" style="font-size: 0.75rem; font-weight: bold; display: block; margin-top: 0.15rem;">⚠️ เหลือ ${available}</span>`;
+        } else if (totalAvailable <= 5) {
+            stockLabel = `<span class="bev-stock text-warning" style="font-size: 0.75rem; font-weight: bold; display: block; margin-top: 0.15rem;">⚠️ เหลือรวม ${totalAvailable}</span>`;
         } else {
-            stockLabel = `<span class="bev-stock text-muted" style="font-size: 0.75rem; display: block; margin-top: 0.15rem;">สต็อก: ${available}</span>`;
+            stockLabel = `<span class="bev-stock text-muted" style="font-size: 0.75rem; display: block; margin-top: 0.15rem;">สต็อกรวม: ${totalAvailable}</span>`;
         }
+
+        const formatDateForDisplay = (dateStr) => {
+            if (!dateStr) return '';
+            const parts = dateStr.split('-');
+            if (parts.length === 3) {
+                return `${parts[2]}/${parts[1]}`;
+            }
+            return dateStr;
+        };
+        
+        const labelOld = formatDateForDisplay(dateOld);
+        const labelNew = formatDateForDisplay(dateNew);
 
         const card = document.createElement('div');
         card.className = `bev-card ${activeClass} ${cardStatusClass}`;
         card.setAttribute('style', `--bev-color: ${drink.color}; --bev-color-rgb: ${drink.colorRgb};`);
         
+        const batchSelectorHTML = `
+            <div class="batch-selector-container" style="display: flex; flex-direction: column; gap: 0.3rem; margin-top: 0.5rem; width: 100%;" onclick="event.stopPropagation();">
+                <button type="button" class="batch-pill-btn ${selectedBatch === 'old' ? 'selected' : ''} ${qtyOld === 0 ? 'disabled-pill' : ''}" style="--bev-color: ${drink.color}; --bev-color-rgb: ${drink.colorRgb};" ${qtyOld === 0 ? 'disabled' : ''} data-batch="old">
+                    <span>ล็อตเก่า ${labelOld ? `(${labelOld})` : ''}</span>
+                    <strong>${qtyOld}</strong>
+                </button>
+                <button type="button" class="batch-pill-btn ${selectedBatch === 'new' ? 'selected' : ''} ${qtyNew === 0 ? 'disabled-pill' : ''}" style="--bev-color: ${drink.color}; --bev-color-rgb: ${drink.colorRgb};" ${qtyNew === 0 ? 'disabled' : ''} data-batch="new">
+                    <span>ล็อตใหม่ ${labelNew ? `(${labelNew})` : ''}</span>
+                    <strong>${qtyNew}</strong>
+                </button>
+            </div>
+        `;
+
         card.innerHTML = `
             ${qtyInCart > 0 ? `<span class="badge-qty">${qtyInCart}</span>` : ''}
             <div class="bev-icon"><i class="fa-solid ${drink.icon}"></i></div>
@@ -919,35 +1102,65 @@ function renderDrinkGrid() {
                     ฝา${drink.capColor}
                 </span>
                 ${stockLabel}
+                ${batchSelectorHTML}
             </div>
-            <div class="bev-controls">
+            <div class="bev-controls" style="margin-top: 0.5rem;">
                 <button type="button" class="bev-btn minus-btn" title="ลดจำนวน" ${qtyInCart === 0 ? 'disabled' : ''}><i class="fa-solid fa-minus"></i></button>
-                <button type="button" class="bev-btn plus-btn" title="เพิ่มจำนวน" ${remaining === 0 ? 'disabled' : ''}><i class="fa-solid fa-plus"></i></button>
+                <button type="button" class="bev-btn plus-btn" title="เพิ่มจำนวน" ${remainingForBatch === 0 ? 'disabled' : ''}><i class="fa-solid fa-plus"></i></button>
             </div>
         `;
         
         // Handle increment/decrement clicks
         card.querySelector('.plus-btn').addEventListener('click', (e) => {
             e.stopPropagation();
-            changeCartQty(drink.id, 1);
+            const batch = getSelectedBatch(drink.id);
+            changeCartQty(drink.id + '_' + batch, 1);
         });
         
         card.querySelector('.minus-btn').addEventListener('click', (e) => {
             e.stopPropagation();
-            changeCartQty(drink.id, -1);
+            const batch = getSelectedBatch(drink.id);
+            const keyCurrent = drink.id + '_' + batch;
+            const keyOther = drink.id + '_' + (batch === 'old' ? 'new' : 'old');
+            
+            if (state.cart[keyCurrent] > 0) {
+                changeCartQty(keyCurrent, -1);
+            } else if (state.cart[keyOther] > 0) {
+                changeCartQty(keyOther, -1);
+            }
         });
         
-        // Clicking card anywhere else adds 1
+        // Clicking card anywhere else adds 1 to selected batch
         card.addEventListener('click', () => {
-            if (available === 0) {
+            if (totalAvailable === 0) {
                 alert("ขออภัย! สินค้านี้หมดชั่วคราว");
                 return;
             }
-            if (remaining === 0) {
-                alert("ขออภัย! สินค้าในสต็อกไม่เพียงพอ");
+            const batch = getSelectedBatch(drink.id);
+            const cartKey = drink.id + '_' + batch;
+            const availableForBatch = getAvailableStock(cartKey);
+            const inCartForBatch = state.cart[cartKey] || 0;
+            const remainingForBatch = Math.max(0, availableForBatch - inCartForBatch);
+            
+            if (availableForBatch === 0) {
+                alert("ขออภัย! ล็อตนี้หมดแล้ว กรุณาเลือกสลับล็อตในการ์ดด้านบน");
                 return;
             }
-            changeCartQty(drink.id, 1);
+            if (remainingForBatch === 0) {
+                alert("ขออภัย! สินค้าในล็อตนี้ไม่เพียงพอ");
+                return;
+            }
+            changeCartQty(cartKey, 1);
+        });
+
+        // Add event listener to batch buttons
+        card.querySelectorAll('.batch-pill-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const batch = btn.getAttribute('data-batch');
+                state.selectedBatch[drink.id] = batch;
+                renderDrinkGrid();
+            });
         });
         
         grid.appendChild(card);
@@ -955,19 +1168,19 @@ function renderDrinkGrid() {
 }
 
 // CHANGE CART QUANTITY
-function changeCartQty(drinkId, delta) {
-    const currentQty = state.cart[drinkId] || 0;
+function changeCartQty(cartKey, delta) {
+    const currentQty = state.cart[cartKey] || 0;
     const newQty = currentQty + delta;
     
     if (newQty <= 0) {
-        delete state.cart[drinkId];
+        delete state.cart[cartKey];
     } else {
-        const available = getAvailableStock(drinkId);
+        const available = getAvailableStock(cartKey);
         if (newQty > available) {
             alert("ขออภัย! สินค้าในสต็อกไม่เพียงพอ");
             return;
         }
-        state.cart[drinkId] = newQty;
+        state.cart[cartKey] = newQty;
     }
     
     renderCart();
@@ -996,7 +1209,8 @@ function renderCart() {
     const currentPricePerBottle = isGrab ? 67.90 : 80;
 
     cartKeys.forEach(drinkId => {
-        const drink = DRINKS.find(d => d.id === drinkId);
+        const drink = getDrinkById(drinkId);
+        const batchSuffix = getBatchSuffix(drinkId);
         const qty = state.cart[drinkId];
         totalQty += qty;
         
@@ -1006,7 +1220,7 @@ function renderCart() {
             <div class="cart-item-info">
                 <div class="cart-item-bullet" style="background-color: ${drink.color};"></div>
                 <div>
-                    <span class="cart-item-name">${drink.nameTH}</span>
+                    <span class="cart-item-name">${drink.nameTH}${batchSuffix}</span>
                     <span class="bev-name-en">${drink.nameEN} <span style="color: var(--color-primary); font-size: 0.75rem;">(ฝา${drink.capColor})</span></span>
                 </div>
             </div>
@@ -1437,11 +1651,12 @@ function renderOrders() {
         // Generate drink badges
         let drinkBadgesHTML = '';
         Object.keys(order.items).forEach(drinkId => {
-            const drink = DRINKS.find(d => d.id === drinkId);
+            const drink = getDrinkById(drinkId);
             if (drink) {
+                const batchSuffix = getBatchSuffix(drinkId);
                 drinkBadgesHTML += `
                     <div class="order-item-badge" style="--bev-color: ${drink.color};" title="ฝาสี${drink.capColor}">
-                        <span>${drink.nameTH} <span style="font-size: 0.7rem; opacity: 0.75; font-weight: normal;">(${drink.capColor})</span></span>
+                        <span>${drink.nameTH}${batchSuffix} <span style="font-size: 0.7rem; opacity: 0.75; font-weight: normal;">(${drink.capColor})</span></span>
                         <span class="order-item-qty">x${order.items[drinkId]}</span>
                     </div>
                 `;
@@ -1573,11 +1788,12 @@ function renderGrabLogs() {
         // Generate item pills
         let itemPillsHTML = '';
         Object.keys(g.items).forEach(drinkId => {
-            const drink = DRINKS.find(d => d.id === drinkId);
+            const drink = getDrinkById(drinkId);
             if (drink) {
+                const batchSuffix = getBatchSuffix(drinkId);
                 itemPillsHTML += `
                     <span class="grab-item-pill" style="border-left: 3px solid ${drink.color};">
-                        ${drink.nameTH} x${g.items[drinkId]}
+                        ${drink.nameTH}${batchSuffix} x${g.items[drinkId]}
                     </span>
                 `;
             }
@@ -1648,11 +1864,12 @@ function printGrabSlip(grabId) {
     let itemsHTML = '';
     let totalQty = 0;
     Object.keys(grab.items).forEach(drinkId => {
-        const drink = DRINKS.find(d => d.id === drinkId);
+        const drink = getDrinkById(drinkId);
         if (drink) {
+            const batchSuffix = getBatchSuffix(drinkId);
             const qty = grab.items[drinkId];
             totalQty += qty;
-            itemsHTML += `<tr><td style="padding:5px 0;">${drink.nameTH} (${drink.nameEN})</td><td style="text-align:right;">${qty} ขวด</td></tr>`;
+            itemsHTML += `<tr><td style="padding:5px 0;">${drink.nameTH}${batchSuffix} (${drink.nameEN})</td><td style="text-align:right;">${qty} ขวด</td></tr>`;
         }
     });
     
@@ -1979,10 +2196,11 @@ function renderAnalytics() {
     // 2. RENDER BEVERAGES SALES SUMMARY
     const sortedPopular = Object.keys(popTracker)
         .map(id => {
-            const drink = DRINKS.find(d => d.id === id);
+            const drink = getDrinkById(id);
+            const batchSuffix = getBatchSuffix(id);
             return {
                 id: id,
-                nameTH: drink ? drink.nameTH : id,
+                nameTH: drink ? `${drink.nameTH}${batchSuffix}` : id,
                 qty: popTracker[id]
             };
         })
@@ -2002,7 +2220,7 @@ function renderAnalytics() {
     let bannerHtml = '';
     if (sortedPopular.length > 0 && sortedPopular[0].qty > 0) {
         const topSeller = sortedPopular[0];
-        const drink = DRINKS.find(d => d.id === topSeller.id);
+        const drink = getDrinkById(topSeller.id);
         const drinkColor = drink ? drink.color : '#f59e0b';
         bannerHtml = `
             <div class="top-seller-banner" style="display: flex; align-items: center; gap: 0.75rem; background: rgba(245, 158, 11, 0.05); border: 1px dashed rgba(245, 158, 11, 0.35); border-radius: var(--radius-sm); padding: 0.75rem 1.25rem; margin-bottom: 1.25rem; animation: loginFadeIn 0.5s ease-out;">
@@ -2016,7 +2234,7 @@ function renderAnalytics() {
     }
     
     popularContainer.innerHTML = bannerHtml + sortedPopular.map((item, idx) => {
-        const drink = DRINKS.find(d => d.id === item.id);
+        const drink = getDrinkById(item.id);
         const drinkColor = drink ? drink.color : 'var(--color-primary)';
         const drinkColorRgb = drink ? drink.colorRgb : '29, 78, 216';
         const percentage = maxQty > 0 ? (item.qty / maxQty) * 100 : 0;
@@ -2105,36 +2323,183 @@ function clearAllSystemData() {
     }
 }
 
-// GOOGLE SHEETS SYNC MODULE
-async function pullFromSheets(isSilent = false) {
-    if (!state.sheetUrl) {
-        if (!isSilent) alert("กรุณาระบุ Google Apps Script Web App URL ก่อนดึงข้อมูล");
+// TOAST NOTIFICATION MODULE
+function showToast(message, duration = 3000) {
+    let toast = document.createElement('div');
+    toast.className = 'supabase-toast';
+    toast.innerHTML = `<i class="fa-solid fa-bolt text-primary" style="color: var(--color-primary) !important;"></i> <span>${message}</span>`;
+    
+    Object.assign(toast.style, {
+        position: 'fixed',
+        bottom: '20px',
+        right: '20px',
+        background: 'rgba(15, 23, 42, 0.95)',
+        color: '#f8fafc',
+        padding: '0.75rem 1.25rem',
+        borderRadius: '12px',
+        boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 0 10px rgba(99, 102, 241, 0.2)',
+        border: '1px solid rgba(255, 255, 255, 0.1)',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '0.5rem',
+        fontFamily: "'Prompt', sans-serif",
+        fontSize: '0.85rem',
+        zIndex: '9999',
+        transform: 'translateY(50px)',
+        opacity: '0',
+        transition: 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease'
+    });
+    
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.style.transform = 'translateY(0)';
+        toast.style.opacity = '1';
+    }, 50);
+    
+    setTimeout(() => {
+        toast.style.transform = 'translateY(20px)';
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 300);
+    }, duration);
+}
+
+// SUPABASE CLIENT & REALTIME MODULE
+function initSupabaseClient() {
+    if (state.supabaseUrl && state.supabaseKey && window.supabase) {
+        try {
+            supabaseClient = window.supabase.createClient(state.supabaseUrl, state.supabaseKey);
+            setupSupabaseRealtime();
+        } catch (e) {
+            console.error("Failed to initialize Supabase client:", e);
+        }
+    }
+}
+
+function setupSupabaseRealtime() {
+    if (!supabaseClient) return;
+    
+    if (supabaseSubscription) {
+        supabaseSubscription.unsubscribe();
+    }
+    
+    try {
+        supabaseSubscription = supabaseClient
+            .channel('public:app_state')
+            .on('postgres_changes', {
+                event: '*',
+                schema: 'public',
+                table: 'app_state',
+                filter: 'id=eq.current_state'
+            }, (payload) => {
+                console.log("Realtime change received:", payload);
+                const newData = payload.new?.data;
+                
+                if (newData) {
+                    if (state.editingOrderId) {
+                        console.log("Ignore realtime update because we are editing an order.");
+                        return;
+                    }
+                    
+                    const localStr = JSON.stringify({
+                        orders: state.orders,
+                        grabPickups: state.grabPickups,
+                        stock: state.stock,
+                        stockDates: state.stockDates || {},
+                        users: state.users
+                    });
+                    const remoteStr = JSON.stringify({
+                        orders: newData.orders || [],
+                        grabPickups: newData.grabPickups || [],
+                        stock: newData.stock || {},
+                        stockDates: newData.stockDates || {},
+                        users: newData.users || []
+                    });
+                    
+                    if (localStr !== remoteStr) {
+                        console.log("Applying realtime update to local state.");
+                        state.orders = newData.orders || [];
+                        state.grabPickups = newData.grabPickups || [];
+                        state.stock = newData.stock || {};
+                        state.stockDates = newData.stockDates || {};
+                        
+                        if (newData.users && Array.isArray(newData.users) && newData.users.length > 0) {
+                            state.users = newData.users;
+                            localStorage.setItem('juice_bar_users', JSON.stringify(state.users));
+                            renderLoginUserDropdown();
+                            renderAdminUsersList();
+                        }
+                        
+                        DRINKS.forEach(drink => {
+                            if (state.stock[drink.id + '_old'] === undefined) {
+                                state.stock[drink.id + '_old'] = 20;
+                            }
+                            if (state.stock[drink.id + '_new'] === undefined) {
+                                state.stock[drink.id + '_new'] = 0;
+                            }
+                            if (!state.stockDates) state.stockDates = {};
+                            if (state.stockDates[drink.id + '_old'] === undefined) {
+                                state.stockDates[drink.id + '_old'] = '';
+                            }
+                            if (state.stockDates[drink.id + '_new'] === undefined) {
+                                state.stockDates[drink.id + '_new'] = '';
+                            }
+                        });
+                        
+                        saveToLocalStorage(true);
+                        
+                        renderTables();
+                        renderOrders();
+                        renderGrabLogs();
+                        renderStock();
+                        renderAnalytics();
+                        
+                        showToast("ซิงค์ข้อมูลล่าสุดจากร้านแล้ว ⚡");
+                    }
+                }
+            })
+            .subscribe((status) => {
+                console.log("Realtime subscription status:", status);
+            });
+    } catch (e) {
+        console.error("Failed to establish realtime subscription:", e);
+    }
+}
+
+// SUPABASE SYNC MODULE
+async function pullFromSupabase(isSilent = false) {
+    if (!state.supabaseUrl || !state.supabaseKey) {
+        if (!isSilent) alert("กรุณาระบุ Supabase URL และ Anon Key ก่อนดึงข้อมูล");
         return;
     }
     
     const pullBtn = document.getElementById('btn-pull-sheet');
-    const originalText = pullBtn.innerHTML;
+    const originalText = pullBtn ? pullBtn.innerHTML : '';
     
-    if (!isSilent) {
+    if (!isSilent && pullBtn) {
         pullBtn.disabled = true;
         pullBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> กำลังดึงข้อมูล...';
     }
     
     try {
-        const syncUrl = state.sheetUrl + (state.sheetUrl.includes('?') ? '&' : '?') + '_t=' + Date.now();
+        const syncUrl = `${state.supabaseUrl}/rest/v1/app_state?id=eq.current_state`;
         const response = await fetch(syncUrl, {
             headers: {
+                'apikey': state.supabaseKey,
+                'Authorization': `Bearer ${state.supabaseKey}`,
                 'Cache-Control': 'no-cache',
                 'Pragma': 'no-cache'
             }
         });
         if (!response.ok) throw new Error("HTTP Error: " + response.status);
         
-        const data = await response.json();
-        if (data && (data.orders || data.grabPickups || data.stock || data.users)) {
+        const dataList = await response.json();
+        if (dataList && dataList.length > 0 && dataList[0].data) {
+            const data = dataList[0].data;
             state.orders = data.orders || [];
             state.grabPickups = data.grabPickups || [];
             state.stock = data.stock || {};
+            state.stockDates = data.stockDates || {};
             
             // Sync users if present
             if (data.users && Array.isArray(data.users) && data.users.length > 0) {
@@ -2146,8 +2511,18 @@ async function pullFromSheets(isSilent = false) {
             
             // Ensure all drinks in database have a stock quantity (default to 20 if not set)
             DRINKS.forEach(drink => {
-                if (state.stock[drink.id] === undefined) {
-                    state.stock[drink.id] = 20;
+                if (state.stock[drink.id + '_old'] === undefined) {
+                    state.stock[drink.id + '_old'] = 20;
+                }
+                if (state.stock[drink.id + '_new'] === undefined) {
+                    state.stock[drink.id + '_new'] = 0;
+                }
+                if (!state.stockDates) state.stockDates = {};
+                if (state.stockDates[drink.id + '_old'] === undefined) {
+                    state.stockDates[drink.id + '_old'] = '';
+                }
+                if (state.stockDates[drink.id + '_new'] === undefined) {
+                    state.stockDates[drink.id + '_new'] = '';
                 }
             });
             
@@ -2162,77 +2537,83 @@ async function pullFromSheets(isSilent = false) {
             renderAnalytics();
             
             if (!isSilent) {
-                alert("ดึงข้อมูลจาก Google Sheets สำเร็จเรียบร้อยแล้ว!");
+                alert("ดึงข้อมูลจาก Supabase สำเร็จเรียบร้อยแล้ว!");
             } else {
-                console.log("Auto-pulled from Google Sheets successfully.");
+                console.log("Auto-pulled from Supabase successfully.");
             }
         } else {
-            throw new Error("ไม่พบข้อมูล หรือรูปแบบข้อมูลในชีตไม่ถูกต้อง");
+            throw new Error("ไม่พบข้อมูล หรือรูปแบบข้อมูลใน Supabase ไม่ถูกต้อง (กรุณาตรวจสอบว่ามีข้อมูล id = 'current_state' ในตาราง app_state หรือไม่)");
         }
     } catch (err) {
-        console.error("Failed to pull from Google Sheets:", err);
+        console.error("Failed to pull from Supabase:", err);
         if (!isSilent) {
-            alert("ดึงข้อมูลล้มเหลว: " + err.message + "\n\nกรุณาตรวจสอบว่า:\n1. ลิงก์ URL ถูกต้อง\n2. ตั้งค่า Deploy ใน Apps Script เป็นแบบ 'Anyone' (ทุกคน)\n3. บัญชีที่ใช้เปิดสิทธิ์เข้าถึงสาธารณะเรียบร้อยแล้ว");
+            alert("ดึงข้อมูลล้มเหลว: " + err.message + "\n\nกรุณาตรวจสอบว่า:\n1. URL และ Anon Key ถูกต้อง\n2. สร้างตาราง app_state ใน Supabase แล้ว\n3. ปิด RLS หรือตั้งค่า Policy สำหรับอ่านข้อมูลแล้ว");
         }
         throw err;
     } finally {
-        if (!isSilent) {
+        if (!isSilent && pullBtn) {
             pullBtn.disabled = false;
             pullBtn.innerHTML = originalText;
         }
     }
 }
 
-async function pushToSheets(isAuto = false) {
-    if (!state.sheetUrl) {
-        if (!isAuto) alert("กรุณาระบุ Google Apps Script Web App URL ก่อนบันทึกข้อมูล");
+async function pushToSupabase(isAuto = false) {
+    if (!state.supabaseUrl || !state.supabaseKey) {
+        if (!isAuto) alert("กรุณาระบุ Supabase URL และ Anon Key ก่อนบันทึกข้อมูล");
         return;
     }
     
     const pushBtn = document.getElementById('btn-push-sheet');
-    const originalText = pushBtn.innerHTML;
+    const originalText = pushBtn ? pushBtn.innerHTML : '';
     
-    if (!isAuto) {
+    if (!isAuto && pushBtn) {
         pushBtn.disabled = true;
         pushBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> กำลังบันทึก...';
     }
     
     try {
+        const syncUrl = `${state.supabaseUrl}/rest/v1/app_state`;
         const payloadObj = {
-            action: 'save',
+            id: 'current_state',
             data: {
                 orders: state.orders,
                 grabPickups: state.grabPickups,
                 stock: state.stock,
+                stockDates: state.stockDates || {},
                 users: state.users
-            }
+            },
+            updated_at: new Date().toISOString()
         };
         
-        // Use POST method to bypass URL length limitation
-        const response = await fetch(state.sheetUrl, {
+        const response = await fetch(syncUrl, {
             method: 'POST',
-            mode: 'cors',
+            headers: {
+                'apikey': state.supabaseKey,
+                'Authorization': `Bearer ${state.supabaseKey}`,
+                'Content-Type': 'application/json',
+                'Prefer': 'resolution=merge-duplicates'
+            },
             body: JSON.stringify(payloadObj)
         });
-        if (!response.ok) throw new Error("HTTP Error: " + response.status);
         
-        const result = await response.json();
-        if (result && result.status === 'success') {
-            if (!isAuto) {
-                alert("บันทึกข้อมูลลง Google Sheets สำเร็จเรียบร้อยแล้ว!");
-            } else {
-                console.log("Auto-synced to Google Sheets.");
-            }
+        if (!response.ok) {
+            const errText = await response.text();
+            throw new Error(`HTTP Error: ${response.status} - ${errText}`);
+        }
+        
+        if (!isAuto) {
+            alert("บันทึกข้อมูลลง Supabase สำเร็จเรียบร้อยแล้ว!");
         } else {
-            throw new Error(result ? result.message : "ระบบฝั่งชีตตอบรับล้มเหลว");
+            console.log("Auto-synced to Supabase.");
         }
     } catch (err) {
-        console.error("Failed to push to Google Sheets:", err);
+        console.error("Failed to push to Supabase:", err);
         if (!isAuto) {
-            alert("บันทึกข้อมูลลงชีตล้มเหลว: " + err.message);
+            alert("บันทึกข้อมูลลง Supabase ล้มเหลว: " + err.message);
         }
     } finally {
-        if (!isAuto) {
+        if (!isAuto && pushBtn) {
             pushBtn.disabled = false;
             pushBtn.innerHTML = originalText;
         }
@@ -2247,15 +2628,28 @@ function renderStock() {
     listContainer.innerHTML = '';
     
     DRINKS.forEach(drink => {
-        const qty = state.stock[drink.id] !== undefined ? state.stock[drink.id] : 20;
+        const qtyOld = state.stock[drink.id + '_old'] !== undefined ? state.stock[drink.id + '_old'] : 20;
+        const qtyNew = state.stock[drink.id + '_new'] !== undefined ? state.stock[drink.id + '_new'] : 0;
         
-        let statusBadge = '';
-        if (qty === 0) {
-            statusBadge = '<span class="badge badge-danger">❌ หมด</span>';
-        } else if (qty <= 5) {
-            statusBadge = '<span class="badge badge-warning">⚠️ ใกล้หมด</span>';
+        const dateOld = state.stockDates[drink.id + '_old'] || '';
+        const dateNew = state.stockDates[drink.id + '_new'] || '';
+        
+        let statusBadgeOld = '';
+        if (qtyOld === 0) {
+            statusBadgeOld = '<span class="badge badge-danger">❌ หมด</span>';
+        } else if (qtyOld <= 5) {
+            statusBadgeOld = '<span class="badge badge-warning">⚠️ ใกล้หมด</span>';
         } else {
-            statusBadge = '<span class="badge badge-success">ปกติ</span>';
+            statusBadgeOld = '<span class="badge badge-success">ปกติ</span>';
+        }
+        
+        let statusBadgeNew = '';
+        if (qtyNew === 0) {
+            statusBadgeNew = '<span class="badge badge-danger">❌ หมด</span>';
+        } else if (qtyNew <= 5) {
+            statusBadgeNew = '<span class="badge badge-warning">⚠️ ใกล้หมด</span>';
+        } else {
+            statusBadgeNew = '<span class="badge badge-success">ปกติ</span>';
         }
         
         const row = document.createElement('tr');
@@ -2269,17 +2663,38 @@ function renderStock() {
                     </div>
                 </div>
             </td>
-            <td style="text-align: center;">
-                <span id="stock-val-display-${drink.id}" style="font-size: 1.1rem; font-weight: 700; color: var(--color-text);">${qty}</span>
-            </td>
-            <td style="text-align: center;">${statusBadge}</td>
+            <!-- ล็อตเก่า -->
             <td>
-                <div class="stock-qty-control" style="display: flex; align-items: center; justify-content: center; gap: 0.35rem;">
-                    <button class="btn btn-outline btn-sm" style="padding: 0.25rem 0.5rem;" onclick="adjustStockValue('${drink.id}', -5)">-5</button>
-                    <button class="btn btn-outline btn-sm" style="padding: 0.25rem 0.5rem;" onclick="adjustStockValue('${drink.id}', -1)">-1</button>
-                    <input type="number" id="stock-input-${drink.id}" value="${qty}" min="0" style="width: 55px; text-align: center; font-weight: bold; background: rgba(255, 255, 255, 0.85); border: 1px solid var(--border-glass); color: var(--color-text); padding: 0.25rem 0.4rem; border-radius: var(--radius-sm);" onchange="updateStockFromInput('${drink.id}', this.value)">
-                    <button class="btn btn-outline btn-sm" style="padding: 0.25rem 0.5rem;" onclick="adjustStockValue('${drink.id}', 1)">+1</button>
-                    <button class="btn btn-outline btn-sm" style="padding: 0.25rem 0.5rem;" onclick="adjustStockValue('${drink.id}', 5)">+5</button>
+                <div style="display: flex; flex-direction: column; gap: 0.45rem; align-items: center; background: rgba(29, 78, 216, 0.02); padding: 0.5rem; border-radius: var(--radius-sm); border: 1px solid rgba(29, 78, 216, 0.06);">
+                    <div class="stock-qty-control" style="display: flex; align-items: center; justify-content: center; gap: 0.25rem;">
+                        <button class="btn btn-outline btn-sm" style="padding: 0.15rem 0.35rem; font-size: 0.75rem;" onclick="adjustStockValue('${drink.id}_old', -5)">-5</button>
+                        <button class="btn btn-outline btn-sm" style="padding: 0.15rem 0.35rem; font-size: 0.75rem;" onclick="adjustStockValue('${drink.id}_old', -1)">-1</button>
+                        <input type="number" id="stock-input-${drink.id}-old" value="${qtyOld}" min="0" style="width: 45px; text-align: center; font-weight: bold; background: rgba(255, 255, 255, 0.85); border: 1px solid var(--border-glass); color: var(--color-text); padding: 0.15rem 0.25rem; border-radius: var(--radius-sm); font-size: 0.85rem;" onchange="updateStockFromInput('${drink.id}_old', this.value)">
+                        <button class="btn btn-outline btn-sm" style="padding: 0.15rem 0.35rem; font-size: 0.75rem;" onclick="adjustStockValue('${drink.id}_old', 1)">+1</button>
+                        <button class="btn btn-outline btn-sm" style="padding: 0.15rem 0.35rem; font-size: 0.75rem;" onclick="adjustStockValue('${drink.id}_old', 5)">+5</button>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 0.3rem; width: 100%; justify-content: center;">
+                        <input type="date" id="stock-date-${drink.id}-old" value="${dateOld}" style="padding: 0.15rem 0.25rem; font-size: 0.75rem; border-radius: 4px; border: 1px solid var(--border-glass); background: #fff; width: 110px;" onchange="updateStockDate('${drink.id}_old', this.value)">
+                        <button class="btn btn-danger btn-sm" style="padding: 0.15rem 0.35rem; font-size: 0.7rem; border-radius: 4px;" onclick="clearStock('${drink.id}_old')" title="ตัดน้ำเสียทั้งหมด (เคลียร์เป็น 0)">ตัดเสีย</button>
+                    </div>
+                    <div style="margin-top: 0.1rem;">${statusBadgeOld}</div>
+                </div>
+            </td>
+            <!-- ล็อตใหม่ -->
+            <td>
+                <div style="display: flex; flex-direction: column; gap: 0.45rem; align-items: center; background: rgba(2, 132, 199, 0.02); padding: 0.5rem; border-radius: var(--radius-sm); border: 1px solid rgba(2, 132, 199, 0.06);">
+                    <div class="stock-qty-control" style="display: flex; align-items: center; justify-content: center; gap: 0.25rem;">
+                        <button class="btn btn-outline btn-sm" style="padding: 0.15rem 0.35rem; font-size: 0.75rem;" onclick="adjustStockValue('${drink.id}_new', -5)">-5</button>
+                        <button class="btn btn-outline btn-sm" style="padding: 0.15rem 0.35rem; font-size: 0.75rem;" onclick="adjustStockValue('${drink.id}_new', -1)">-1</button>
+                        <input type="number" id="stock-input-${drink.id}-new" value="${qtyNew}" min="0" style="width: 45px; text-align: center; font-weight: bold; background: rgba(255, 255, 255, 0.85); border: 1px solid var(--border-glass); color: var(--color-text); padding: 0.15rem 0.25rem; border-radius: var(--radius-sm); font-size: 0.85rem;" onchange="updateStockFromInput('${drink.id}_new', this.value)">
+                        <button class="btn btn-outline btn-sm" style="padding: 0.15rem 0.35rem; font-size: 0.75rem;" onclick="adjustStockValue('${drink.id}_new', 1)">+1</button>
+                        <button class="btn btn-outline btn-sm" style="padding: 0.15rem 0.35rem; font-size: 0.75rem;" onclick="adjustStockValue('${drink.id}_new', 5)">+5</button>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 0.3rem; width: 100%; justify-content: center;">
+                        <input type="date" id="stock-date-${drink.id}-new" value="${dateNew}" style="padding: 0.15rem 0.25rem; font-size: 0.75rem; border-radius: 4px; border: 1px solid var(--border-glass); background: #fff; width: 110px;" onchange="updateStockDate('${drink.id}_new', this.value)">
+                        <button class="btn btn-danger btn-sm" style="padding: 0.15rem 0.35rem; font-size: 0.7rem; border-radius: 4px;" onclick="clearStock('${drink.id}_new')" title="ตัดน้ำเสียทั้งหมด (เคลียร์เป็น 0)">ตัดเสีย</button>
+                    </div>
+                    <div style="margin-top: 0.1rem;">${statusBadgeNew}</div>
                 </div>
             </td>
         `;
@@ -2288,10 +2703,11 @@ function renderStock() {
 }
 
 // ADJUST STOCK BY DELTA
-function adjustStockValue(drinkId, delta) {
-    const currentVal = state.stock[drinkId] !== undefined ? state.stock[drinkId] : 20;
+function adjustStockValue(batchKey, delta) {
+    const defaultQty = batchKey.endsWith('_new') ? 0 : 20;
+    const currentVal = state.stock[batchKey] !== undefined ? state.stock[batchKey] : defaultQty;
     const newVal = Math.max(0, currentVal + delta);
-    state.stock[drinkId] = newVal;
+    state.stock[batchKey] = newVal;
     
     saveToLocalStorage();
     renderStock();
@@ -2299,13 +2715,33 @@ function adjustStockValue(drinkId, delta) {
 }
 
 // UPDATE STOCK DIRECTLY FROM INPUT
-function updateStockFromInput(drinkId, value) {
+function updateStockFromInput(batchKey, value) {
     const newVal = Math.max(0, parseInt(value) || 0);
-    state.stock[drinkId] = newVal;
+    state.stock[batchKey] = newVal;
     
     saveToLocalStorage();
     renderStock();
     renderDrinkGrid();
+}
+
+// UPDATE STOCK DATE
+function updateStockDate(batchKey, dateValue) {
+    if (!state.stockDates) state.stockDates = {};
+    state.stockDates[batchKey] = dateValue;
+    saveToLocalStorage();
+}
+
+// CLEAR STOCK TO 0 (ตัดเสีย)
+function clearStock(batchKey) {
+    const drink = getDrinkById(batchKey);
+    const suffix = getBatchSuffix(batchKey);
+    const drinkName = drink ? `${drink.nameTH}${suffix}` : batchKey;
+    if (confirm(`คุณแน่ใจหรือไม่ที่จะปรับสต็อกของ "${drinkName}" ให้เป็น 0 (ตัดน้ำเสียทั้งหมด)?`)) {
+        state.stock[batchKey] = 0;
+        saveToLocalStorage();
+        renderStock();
+        renderDrinkGrid();
+    }
 }
 
 // SWITCH TABS
@@ -2547,9 +2983,10 @@ function copyOrderToText(orderId) {
     let itemsText = '';
     const drinkKeys = Object.keys(order.items);
     drinkKeys.forEach(drinkId => {
-        const drink = DRINKS.find(d => d.id === drinkId);
+        const drink = getDrinkById(drinkId);
         if (drink) {
-            itemsText += `• ${drink.nameTH} (${drink.nameEN}) x${order.items[drinkId]} ขวด\n`;
+            const batchSuffix = getBatchSuffix(drinkId);
+            itemsText += `• ${drink.nameTH}${batchSuffix} (${drink.nameEN}) x${order.items[drinkId]} ขวด\n`;
         }
     });
     
@@ -2778,8 +3215,11 @@ function renderTables() {
             let itemsHtml = '';
             if (pendingOrder.items) {
                 for (const drinkId in pendingOrder.items) {
-                    const drink = DRINKS.find(d => d.id === drinkId);
-                    if (drink) itemsHtml += `<div class="table-bill-item"><span>${drink.nameTH}</span><span>x${pendingOrder.items[drinkId]}</span></div>`;
+                    const drink = getDrinkById(drinkId);
+                    if (drink) {
+                        const batchSuffix = getBatchSuffix(drinkId);
+                        itemsHtml += `<div class="table-bill-item"><span>${drink.nameTH}${batchSuffix}</span><span>x${pendingOrder.items[drinkId]}</span></div>`;
+                    }
                 }
             }
             const total = pendingOrder.priceDetails ? pendingOrder.priceDetails.total : 0;
@@ -2833,8 +3273,11 @@ function renderTables() {
             let itemsHtml = '';
             if (paidOrder.items) {
                 for (const drinkId in paidOrder.items) {
-                    const drink = DRINKS.find(d => d.id === drinkId);
-                    if (drink) itemsHtml += `<div class="table-bill-item"><span>${drink.nameTH}</span><span>x${paidOrder.items[drinkId]}</span></div>`;
+                    const drink = getDrinkById(drinkId);
+                    if (drink) {
+                        const batchSuffix = getBatchSuffix(drinkId);
+                        itemsHtml += `<div class="table-bill-item"><span>${drink.nameTH}${batchSuffix}</span><span>x${paidOrder.items[drinkId]}</span></div>`;
+                    }
                 }
             }
             const total = paidOrder.priceDetails ? paidOrder.priceDetails.total : 0;
@@ -2911,11 +3354,12 @@ function renderTables() {
                 
                 let itemsHtml = '';
                 for (const drinkId in order.items) {
-                    const drink = DRINKS.find(d => d.id === drinkId);
+                    const drink = getDrinkById(drinkId);
                     if (drink) {
+                        const batchSuffix = getBatchSuffix(drinkId);
                         itemsHtml += `
                             <div class="table-bill-item">
-                                <span>${drink.nameTH}</span>
+                                <span>${drink.nameTH}${batchSuffix}</span>
                                 <span>x${order.items[drinkId]}</span>
                             </div>
                         `;
@@ -2978,9 +3422,10 @@ function openPayModal(orderId) {
     let itemsHtml = '';
     if (order.items) {
         for (const drinkId in order.items) {
-            const drink = DRINKS.find(d => d.id === drinkId);
+            const drink = getDrinkById(drinkId);
             if (drink) {
-                itemsHtml += `<div class="pay-modal-item"><span>${drink.nameTH}</span><span>x${order.items[drinkId]}</span></div>`;
+                const batchSuffix = getBatchSuffix(drinkId);
+                itemsHtml += `<div class="pay-modal-item"><span>${drink.nameTH}${batchSuffix}</span><span>x${order.items[drinkId]}</span></div>`;
             }
         }
     }
@@ -3163,7 +3608,9 @@ function renderCustomerView() {
     container.innerHTML = '';
     
     DRINKS.forEach(drink => {
-        const available = state.stock[drink.id] !== undefined ? state.stock[drink.id] : 0;
+        const availableOld = state.stock[drink.id + '_old'] !== undefined ? state.stock[drink.id + '_old'] : 20;
+        const availableNew = state.stock[drink.id + '_new'] !== undefined ? state.stock[drink.id + '_new'] : 0;
+        const available = availableOld + availableNew;
         
         let badgeHtml = '';
         let cardStatusClass = '';
@@ -3233,8 +3680,9 @@ function searchCustomerStatus() {
         let itemsText = [];
         for (const drinkId in order.items) {
             const qty = order.items[drinkId];
-            const drink = DRINKS.find(d => d.id === drinkId);
-            const name = drink ? drink.nameTH : drinkId;
+            const drink = getDrinkById(drinkId);
+            const batchSuffix = getBatchSuffix(drinkId);
+            const name = drink ? `${drink.nameTH}${batchSuffix}` : drinkId;
             itemsText.push(`${name} x${qty} ขวด`);
         }
         const itemsHtml = itemsText.join(', ');
@@ -3344,8 +3792,9 @@ function renderPromoTab() {
         for (const drinkId in order.items) {
             const qty = order.items[drinkId];
             totalBottles += qty;
-            const drink = DRINKS.find(d => d.id === drinkId);
-            const name = drink ? drink.nameTH : drinkId;
+            const drink = getDrinkById(drinkId);
+            const batchSuffix = getBatchSuffix(drinkId);
+            const name = drink ? `${drink.nameTH}${batchSuffix}` : drinkId;
             itemsText.push(`${name} x${qty}`);
         }
         const itemsHtml = itemsText.join('<br>');
